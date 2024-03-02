@@ -40,6 +40,7 @@
                       <table id="AllPropertiesTable" class="table table-borderless">
                         <thead>
                           <tr>
+                            <th scope="col">Reference No.</th>
                             <th scope="col">Type</th>
                             <th scope="col">Amount(KES)</th>
                             <th scope="col">Expended To</th>
@@ -50,6 +51,7 @@
                         </thead>
                         <tbody>
                           <tr v-for="expense in expenses" :key="expense.id">
+                            <td>{{expense.ref_no}}</td>
                             <td>{{expense.payment_type}}</td>
                             <td>{{expense.amount_paid}}</td>
                             <td>{{expense.paid_to}}</td>
@@ -130,21 +132,21 @@
           var img = new Image();
           img.src = '/images/ingo-colored-logo.png';
 
-          pdf.addImage(img, 'PNG', 10, 10, 50, 50, { align: "center" })
+          // pdf.addImage(img, 'PNG', 10, 10, 40, 40, { align: "center" });
           pdf.setFont("helvetica");
           pdf.setFontSize(20);
-          pdf.text("Expense Report", 100, 20, { align: "center" });
+          pdf.text("Expense Invoice", 100, 20, { align: "center" });
 
           // Invoice Information
           pdf.setFontSize(12);
-          pdf.text("Reference Number: ", 10, 40);
+          pdf.text("Reference Number: "+this.pmsexpense.ref_no, 10, 40);
           pdf.text("Date: " + new Date(this.pmsexpense['created_at']).toLocaleDateString(), 10, 50);
 
           // Customer Information
           pdf.text("Expended To: "+ this.pmsexpense.paid_to, 10, 70);
           pdf.text("Checked By: "+this.pmsexpense.user.first_name + " "+ this.pmsexpense.user.last_name, 10, 80);
-          pdf.text("Property: "+this.pmsexpense.property.name, 10, 90);
-          pdf.text("Unit: "+this.pmsexpense.unit.unit_number, 10, 100);
+          pdf.text("Remarks: "+this.pmsexpense.payment_type+" by "+this.pmsexpense.paid_to, 10, 90);
+          // pdf.text("Unit: "+this.pmsexpense.unit.unit_number, 10, 100);
 
           // Add a horizontal line
           pdf.line(10, 110, 200, 110);
@@ -158,7 +160,7 @@
           // Table Rows
           // pdf.setFontType("normal");
           pdf.text(this.pmsexpense.property.name+" - "+this.pmsexpense.unit.unit_number, 20, 130);
-          pdf.text(this.pmsexpense.payment_type+" by "+this.pmsexpense.paid_to, 80, 130);
+          pdf.text(this.pmsexpense.payment_type, 80, 130);
           pdf.text("KES "+this.pmsexpense.amount_paid.toFixed(2), 160, 130);
 
 
@@ -166,11 +168,17 @@
           // pdf.setFontType("bold");
           pdf.text("Total: KES " + this.pmsexpense.amount_paid.toFixed(2), 160, 160);
           pdf.text("Balance: KES " + "0.00", 160, 170);
+          pdf.setFontSize(10);
+          pdf.text("Because you are worth it!", 100, 190, { align: "center" });
+         
           // Add content to the PDF
           // pdf.text('Hello, this is a PDF generated with Vue.js!', 10, 10);
+          img.onload = function() {
+          pdf.addImage(img, 'PNG', 10, 10, 40, 40);
 
           // Save the PDF
-          pdf.save(this.pmsexpense.paid_to+'-pdf.pdf');
+          pdf.save('invoice-pdf.pdf');
+          };
               console.log("user", response)
           })
 

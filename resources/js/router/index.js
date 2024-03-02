@@ -1,11 +1,11 @@
 import {  createRouter, createWebHistory  } from 'vue-router';
-import Index from '../views/Index.vue'
-import About from '../views/About.vue'
-import Contact from '../views/Contact.vue'
+// import Index from '../views/Index.vue'
+// import About from '../views/About.vue'
+// import Contact from '../views/Contact.vue'
 // import Properties from '../views/Properties.vue'
 // import Property from '../views/Property.vue'
-import Blogs from '../views/Blogs.vue'
-import Blog from '../views/Blog.vue'
+// import Blogs from '../views/Blogs.vue'
+// import Blog from '../views/Blog.vue'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
@@ -61,13 +61,13 @@ import Profile from '../views/Profile.vue'
 import AllUsers from '../views/users/AllUsers.vue'
 import AddUser from '../views/users/AddUser.vue'
 import ViewUser from '../views/users/ViewUser.vue'
-import OurServices from '../views/OurServices.vue'
-import Service from '../views/Service.vue'
-import SearchResultPage from '../views/SearchResultPage.vue'
-import Projects from '../views/Projects.vue'
+// import OurServices from '../views/OurServices.vue'
+// import Service from '../views/Service.vue'
+// import SearchResultPage from '../views/SearchResultPage.vue'
+// import Projects from '../views/Projects.vue'
 import Roles from '../views/roles/Roles.vue'
 import AddRole from '../views/roles/AddRole.vue'
-import Project from '../views/Project.vue'
+// import Project from '../views/Project.vue'
 import PmsLandlords from '../views/pms/PmsLandlords.vue'
 import PmsTenants from '../views/pms/PmsTenants.vue'
 import PmsExpenses from '../views/pms/PmsExpenses.vue'
@@ -103,81 +103,9 @@ const routes = [
     {
         path:'/',
         name: 'index',
-        component: Index
+        component: Login
     },
-    {
-        path:'/aboutus',
-        name: 'about',
-        component: About
-    },
-    {
-        path:'/contactus',
-        name: 'contact',
-        component: Contact
-    },
-    {
-        path:'/ourservices',
-        name: 'ourservices',
-        component: OurServices
-    },
-    {
-        path:'/ourservices/:id',
-        name: 'view-service',
-        component: Service
-    },
-    {
-        path:'/allproperties',
-        name: 'properties',
-        component : () => import("../views/Properties.vue")
-        // component: Properties
-    },
-    {
-        path:'/rentproperties',
-        name: 'rentproperties',
-        component : () => import("../views/RentProperties.vue")
-        // component: Properties
-    },
-    {
-        path:'/saleproperties',
-        name: 'saleproperties',
-        component : () => import("../views/SaleProperties.vue")
-        // component: Properties
-    },
-    {
-        path:'/categoryproperties/:id',
-        name: 'categoryproperties',
-        component : () => import("../views/CategoryProperties.vue")
-        // component: Properties
-    },
-    {
-        path: '/properties/:id',
-        name: 'view-property',
-        component : () => import("../views/PropertyTest.vue")
-        // component: Property,
 
-    },
-    {
-        path:'/ourblogs',
-        name: 'ourblogs',
-        component: Blogs
-    },
-    {
-        path: '/ourblogs/:id',
-        name: 'view-blog',
-        component: Blog,
-
-    },
-    {
-        path:'/ourprojects',
-        name: 'ourprojects',
-        component: Projects
-    },
-    {
-        path: '/ourprojects/:id',
-        name: 'view-project',
-        component: Project,
-
-    },
     {
         path:'/login',
         name: 'login',
@@ -519,12 +447,6 @@ const routes = [
         // meta: { requiresAuth: true }
          // Add this meta field to indicate that authentication is required
 
-    },
-    {
-        path:'/search-results',
-        name: 'SearchResultPage',
-        component: SearchResultPage,
-        props: true
     },
 
     //pms routes

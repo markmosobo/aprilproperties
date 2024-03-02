@@ -52,7 +52,7 @@ class ListController extends Controller
         $landlords = Landlord::all();
         $units = PmsUnit::all();
         $pmstenants = PmsTenant::with('unit','property')->get();
-        $pmsexpenses = PmsExpense::with('user')->get();
+        $pmsexpenses = PmsExpense::with('user')->latest()->get();
 
         $recentblogs= Blog::with('category')->orderBy('id', 'DESC')->limit(6)->get();
         $homefeaturedproperties = Property::latest()->where('featured',1)->with('type','images')->where('status',1)->limit(6)->get();

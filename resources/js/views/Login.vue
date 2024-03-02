@@ -15,9 +15,9 @@
                     href="#"
                     class="logo d-flex align-items-center w-auto"
                   >
-                    <!-- <img src="@/assets/img/logo.png" alt="" /> -->
-                    <img src="/images/ingo-colored-logo.png" alt="">
-                    <span class="d-none d-lg-block">IPMC</span>
+                    <img src="@/assets/img/logo.png" alt="" />
+                    <!-- <img src="/images/ingo-colored-logo.png" alt=""> -->
+                    <span class="d-none d-lg-block">Apex Properties</span>
                   </a>
                   </router-link>
                 </div>
@@ -90,8 +90,8 @@
                       </div>
                       <div class="col-12">
                         <p class="small mb-0">
-                          Don't have account?
-                          <router-link to="/register"> create Account</router-link>
+                          Forgot your password?
+                          <router-link to="/register"> Reset Password</router-link>
                         </p>
                       </div>
                     </form>

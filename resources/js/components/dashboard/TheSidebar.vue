@@ -16,9 +16,10 @@
           <span>Dashboard</span>
         </a>
         </router-link>
-      </li><!-- End Dashboard Nav -->
+      </li>
+      <!-- End Dashboard Nav -->
 
-      <li v-show="user.role_id == 1" class="nav-item">
+<!--       <li v-show="user.role_id == 1" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Manage Properties</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -108,7 +109,7 @@
             </router-link>
           </li>                       
         </ul>
-      </li><!-- End Components Nav -->
+      </li>
 
       <li v-show="user.role_id == 1" class="nav-item">
         <router-link to="/all-projects" custom v-slot="{ href, navigate, isActive }">
@@ -166,7 +167,7 @@
             </router-link>
           </li>                     
         </ul>
-      </li><!-- End Components Nav --> 
+      </li> -->
 
       <li v-show="user.role_id == 1" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse" href="#">
@@ -198,9 +199,10 @@
             </router-link>
           </li>                          
         </ul>
-      </li><!-- End Components Nav --> 
+      </li>
+      <!-- End Components Nav --> 
 
-      <li v-show="user.role_id == 1" class="nav-item">
+<!--       <li v-show="user.role_id == 1" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#configurations-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Configurations</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -228,7 +230,7 @@
             </router-link>
           </li>                
         </ul>
-      </li><!-- End Components Nav --> 
+      </li> -->
 
       <!-- agents menu-->
       <li v-show="user.role_id == 2" class="nav-item">

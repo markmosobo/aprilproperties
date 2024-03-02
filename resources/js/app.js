@@ -28,13 +28,6 @@ import "@/assets/vendor/php-email-form/validate.js";
 // main js file
 import "@/assets/js/main.js";
 
-//front template
-//css
-import "@/front/css/stylesbd04.css";
-//js
-import "@/front/js/index.bundlebd04.js";
-import "@/front/js/app.js";
-
 
 import {createApp} from 'vue/dist/vue.esm-bundler.js'
 

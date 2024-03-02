@@ -112,7 +112,7 @@ export default {
         {
             axios.get('/api/user/'+this.$route.params.id).then((response) => {
                 this.user = response.data.user
-          console.log("user", this.user)
+                console.log("user", this.user)
             })
         },
       goToUsers()
