@@ -348,6 +348,20 @@
         </ul>
       </li><!-- End Expenses Nav -->
 
+      <li class="nav-item">
+        <router-link to="/statements" custom v-slot="{ href, navigate, isActive }">
+                  <a
+                    :href="href"
+                    :class="{ active: isActive }"
+                    class="nav-link"
+                    @click="navigate"
+                  >
+          <i class="bi bi-grid"></i>
+          <span>Statements</span>
+        </a>
+        </router-link>
+      </li>
+
     </ul>
 
   </aside><!-- End Sidebar-->

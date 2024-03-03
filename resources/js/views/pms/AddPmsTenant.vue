@@ -5,7 +5,7 @@
           <!-- General Form Elements -->
           <form @submit.prevent="">
           <fieldset v-if="step == 1">
-             <h5 class="card-title text-center">Add Tenant</h5>
+             <h5 class="card-title text-center">Personal Information</h5>
  
              <div class="row m-auto p-auto justify-content- g-3 needs-validation" novalidate="" autocomplete="off">
                 <div class="row  mb-3"></div>
@@ -136,7 +136,7 @@
                 </div>
             </div>
           </fieldset>
- 
+
           </form>
  
  
@@ -223,6 +223,12 @@
           this.properties = response.data.lists.pmsproperties;
  
           });
+       },
+       prev() {
+          this.step--;
+       },
+       next() {
+          this.step++;
        },
        submit(){
           axios.post("api/tenants", this.form)

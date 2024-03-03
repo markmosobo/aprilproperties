@@ -25,6 +25,7 @@ use App\Models\PmsProperty;
 use App\Models\PmsUnit;
 use App\Models\PmsTenant;
 use App\Models\PmsExpense;
+use App\Models\PmsStatement;
 
 class ListController extends Controller
 {
@@ -51,6 +52,7 @@ class ListController extends Controller
         $sociallinks = SocialLink::all();
         $landlords = Landlord::all();
         $units = PmsUnit::all();
+        $statements = PmsStatement::with('property', 'tenant')->get();
         $pmstenants = PmsTenant::with('unit','property')->get();
         $pmsexpenses = PmsExpense::with('user')->latest()->get();
 
@@ -102,7 +104,8 @@ class ListController extends Controller
                 'pmsproperties' => $pmsproperties,
                 'units' => $units,
                 'pmstenants' => $pmstenants,
-                'pmsexpenses' => $pmsexpenses
+                'pmsexpenses' => $pmsexpenses,
+                'statements' => $statements
 
                 
             ]

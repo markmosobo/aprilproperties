@@ -79,6 +79,8 @@ import EditPmsTenant from '../views/pms/EditPmsTenant.vue'
 import AddPmsExpense from '../views/pms/AddPmsExpense.vue'
 import EditPmsExpense from '../views/pms/EditPmsExpense.vue'
 import PmsPropertyStatements from '../views/pms/PmsPropertyStatements.vue'
+import PmsStatements from '../views/pms/PmsStatements.vue'
+import ViewStatement from '../views/pms/ViewStatement.vue'
 
 function guardMyroute(to, from, next)
 {
@@ -539,7 +541,19 @@ const routes = [
         name: 'pmspropertystatements',
         component: PmsPropertyStatements,
         beforeEnter : guardMyroute,
-    },               
+    },
+    {
+        path:'/statements',
+        name: 'statements',
+        component: PmsStatements,
+        beforeEnter : guardMyroute,
+    }, 
+    {
+        path:'/viewstatement/:id',
+        name: 'viewstatement',
+        component: ViewStatement,
+        beforeEnter : guardMyroute,
+    },                      
 ];
 
 const router = createRouter({
