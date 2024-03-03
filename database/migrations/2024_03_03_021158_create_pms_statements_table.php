@@ -27,6 +27,8 @@ return new class extends Migration
             ->on('pms_tenants')
             ->onDelete('cascade'); 
             $table->string('details')->nullable(); 
+            $table->string('payment_method')->nullable(); 
+            $table->string('mpesa_code')->nullable(); 
             $table->integer('status')->nullable();
             $table->float('total')->nullable();
             $table->float('paid')->nullable();

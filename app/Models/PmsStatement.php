@@ -20,7 +20,9 @@ class PmsStatement extends Model
         'total',
         'paid',
         'balance',
-        'status'
+        'status',
+        'payment_method',
+        'mpesa_code',
     ];
 
     public function tenant()

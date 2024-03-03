@@ -55,8 +55,10 @@
                           <tr v-for="statement in statements" :key="statement.id">
                             <td>{{format_date(statement.created_at)}}</td>
                             <td>{{statement.ref_no}}</td>
-                            <td v-if="statement.status == 1">Paid</td>
-                            <td v-else>Not Paid</td>
+                            <td>
+                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Paid</span>
+                              <span v-else class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Not Paid</span>
+                            </td>
                             <td>{{statement.details}}</td>
                             <td>{{statement.property.name}}</td>
                             <td>{{formatNumber(statement.total)}}</td>
@@ -70,7 +72,7 @@
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <!-- <a v-if="user.id == 1" @click="navigateTo('/editstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a> -->
-                                  <a @click="settleTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a v-if="statement.status == 0" @click="settleTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   </div>
                               </div>
                             </td>
@@ -119,7 +121,7 @@
             this.$router.push(location)
         },
         settleTenant(id){
-            this.$router.push(location)
+            this.$router.push('/settletenant/'+id)
         },
         formatNumber(value) {
           // Use the toLocaleString method to format the number with commas and decimal places

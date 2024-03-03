@@ -145,7 +145,7 @@
 </template>
 <script>
     import TheMaster from '@/components/dashboard/TheMaster.vue'
-import axios from 'axios';
+    import axios from 'axios';
     // import axios from 'axios';
     import Swal from 'sweetalert2';
     const toast = Swal.mixin({

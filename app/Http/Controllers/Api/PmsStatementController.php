@@ -45,12 +45,12 @@ class PmsStatementController extends Controller
 
     public function single(Request $request, $id)
     {
-        $pmsstatement = PmsStatement::findOrFail($id);
+        $pmsstatement = PmsStatement::with('tenant','property')->where('id', $id)->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'statement' => $pmsstatement
+            'pmsstatement' => $pmsstatement
         ], 200);
     }       
 

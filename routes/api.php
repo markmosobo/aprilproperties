@@ -108,7 +108,7 @@ Route::get('pmsunits/{id}', [PmsUnitController::class, 'units']);
 Route::get('pmsunit/{id}', [PmsUnitController::class, 'single']);
 Route::get('pmstenant/{id}', [PmsTenantController::class, 'single']);
 Route::get('pmsexpense/{id}', [PmsExpenseController::class, 'single']);
-Route::post('pmsstatement/{id}', [PmsStatementController::class, 'single']);
+Route::get('pmsstatement/{id}', [PmsStatementController::class, 'single']);
 
 Route::put('property/{id}', [PropertyController::class, 'update']);
 Route::put('category/{id}', [CategoryController::class, 'update']);
