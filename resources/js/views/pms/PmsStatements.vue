@@ -34,6 +34,7 @@
                             Add Landlord
                           </a>
                       </router-link> -->
+                          <button @click="generatePDF">Generate PDF</button>
             
                       </p>
     
@@ -99,6 +100,7 @@
     import "datatables.net-dt/css/jquery.dataTables.min.css";
     import $ from "jquery";
     import moment from 'moment';
+    import jsPDF from 'jspdf';
 
     const toast = Swal.mixin({
         toast: true,
@@ -113,6 +115,8 @@
       data(){
         return {
           statements: [],
+          collectedTotal: 0,
+          expensesTotal: 0,
           user: []
         }
       },
@@ -121,7 +125,10 @@
             this.$router.push(location)
         },
         settleTenant(id){
-            this.$router.push('/settletenant/'+id)
+            this.$router.push('/settlestatement/'+id)
+        },
+        capitalizeFirstLetter(str) {
+          return str.charAt(0).toUpperCase() + str.slice(1);
         },
         formatNumber(value) {
           // Use the toLocaleString method to format the number with commas and decimal places
@@ -135,10 +142,242 @@
             return moment(String(value)).format('lll')
           }
         },
+        capitalizeFirstLetter(str) {
+          return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        calculateCollectedTotal() {
+          // Sum up the prices of all items
+          this.collectedTotal = this.statements.reduce((acc, item) => acc + item.paid, 0);
+          console.log('collectedTotal', this.collectedTotal)
+        },
+        calculateExpensesTotal() {
+          // Sum up the prices of all items
+          this.expensesTotal = this.expenses.reduce((acc, item) => acc + item.amount_paid, 0);
+          console.log('expensesTotal', this.expensesTotal)
+        },
+        generatePDF() {
+            let pdfName = 'Full Statement';
+            var doc = new jsPDF('landscape');
+            const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
+
+            // Add top-right header
+            const headerText = 'Generated on: ' + new Date().toLocaleString();
+            const headerFontSize = 12;
+            const headerX = doc.internal.pageSize.width - 20; // Adjust the X coordinate
+            const headerY = 10;
+
+            doc.setFontSize(headerFontSize);
+            doc.setTextColor(44, 62, 80);
+            doc.text(headerText, headerX, headerY, { align: 'right' });
+
+            // Add image at the top
+            const imageUrl = '/images/apex-logo.png'; // Replace with the URL of your image
+            const imageWidth = 50; // Adjust the width of the image as needed
+            const imageHeight = 50; // Adjust the height of the image as needed
+            const imageX = (doc.internal.pageSize.width - imageWidth) / 2;
+            const imageY = 20;
+            doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
+
+            // Add title
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80); // Set text color to a dark shade
+            doc.text('STATEMENT SUMMARY', 20, imageY + imageHeight + 10);
+
+            // // Add subtitle with date information
+            // doc.setFontSize(14);
+            // doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
+            // doc.text('Generated on: ' + new Date().toLocaleString(), 20, imageY + imageHeight + 20);
+
+            // Add content headers
+            doc.setFontSize(14);
+            doc.setTextColor(44, 62, 80);
+            doc.text('Full Rent Statement', 20, imageY + imageHeight + 35);
+
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+
+            let headerYPos = imageY + imageHeight + 45;
+            let cellHeight = 10;
+            let cellPadding = 2;
+            let lineHeight = 5;
+            let columnWidths = [60, 40, 70, 30, 30, 30];
+            let columnHeaders = ['Transaction On', 'Status', 'Detail', 'Total', 'Paid', 'Bal'];
+
+            let xPos = 20;
+            doc.setDrawColor(0);
+            doc.setFillColor(255, 255, 255); // Set header background color to white
+
+            for (let i = 0; i < columnWidths.length; i++) {
+                doc.rect(xPos, headerYPos, columnWidths[i], cellHeight, 'F');
+                doc.setTextColor(0); // Set text color to black
+                doc.text(columnHeaders[i], xPos + cellPadding, headerYPos + cellHeight - cellPadding);
+                xPos += columnWidths[i];
+            }
+
+            let currentPage = 1;
+            let currentRow = 0;
+
+            this.statements.forEach((statement, index) => {
+                if (currentRow >= maxRowsPerPage) {
+                    doc.addPage();
+                    headerYPos = 20;
+                    currentRow = 0;
+                    currentPage++;
+                    xPos = 20;
+                    for (let i = 0; i < columnWidths.length; i++) {
+                        doc.rect(xPos, headerYPos, columnWidths[i], cellHeight, 'F');
+                        doc.setTextColor(0); // Set text color to black
+                        doc.text(columnHeaders[i], xPos + cellPadding, headerYPos + cellHeight - cellPadding);
+                        xPos += columnWidths[i];
+                    }
+                    headerYPos += cellHeight;
+                }
+
+                let yPos = headerYPos + (currentRow + 1) * lineHeight;
+                xPos = 20;
+                for (let i = 0; i < columnWidths.length; i++) {
+                    doc.rect(xPos, yPos, columnWidths[i], cellHeight);
+                    switch (i) {
+                        case 0:
+                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 1:
+                            let statusText = statement.status == 1 ? 'Paid' : 'Not Paid';
+                            doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 2:
+                            doc.text(statement.details, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 3:
+                            doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 4:
+                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 5:
+                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                    }
+                    xPos += columnWidths[i];
+                }
+                currentRow++;
+
+            });
+            
+
+// Add subtitle with date information
+            doc.setFontSize(14);
+            doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
+            doc.text('Total Rent Collected: ' + this.formatNumber(this.collectedTotal), 20, imageY + imageHeight + 20);
+            doc.text('Generated on: ' + new Date().toLocaleString(), 20, imageY + imageHeight + 30);
+            doc.text('Total Rent Less: ', 20, imageY + imageHeight + 40);
+            doc.text('Total Expenses: ', 20, imageY + imageHeight + 50);
+            doc.text('Net Remmission: ', 20, imageY + imageHeight + 60);
+            // Add footer
+            doc.setFontSize(10);
+            doc.text('Because You Are Worth', 20, doc.internal.pageSize.height - 10);
+
+
+
+
+
+            // Call the function to add expenses to the PDF with pagination
+            let totalPages = this.addExpensesToPDF(this.expenses, doc);
+            // Save the PDF
+            // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
+            let fileName = 'Full Statement' + '_Total_Pages_' + totalPages + '.pdf';
+
+            doc.save(fileName);
+        },
+        // Function to add expenses to the PDF with pagination
+         addExpensesToPDF(expenses, doc) {
+            // Add content headers for expenses
+            doc.addPage(); // Add a new page for Expenses
+            doc.setFontSize(14);
+            doc.setTextColor(44, 62, 80);
+            doc.text('Full Expenses:', 20, 20);
+
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+
+            // Draw table headers and borders dynamically based on the HTML structure
+            let expenseHeaderYPos = 30;
+            let expenseCellHeight = 10;
+            let expenseCellPadding = 2;
+            let expenseLineHeight = 5;
+            let expenseColumnWidths = [60, 40, 70, 30, 60];
+
+            // Define column headers for Expenses
+            let expenseColumnHeaders = ['Type', 'Amount(KES)', 'Expended To', 'Checked By', 'Checked On'];
+
+            // Draw headers with borders dynamically based on calculated column widths
+            let expenseXPos = 20;
+            doc.setDrawColor(0);
+            doc.setFillColor(255, 255, 255); // Set header background color to white
+
+            for (let i = 0; i < expenseColumnWidths.length; i++) {
+                doc.rect(expenseXPos, expenseHeaderYPos, expenseColumnWidths[i], expenseCellHeight, 'F');
+                doc.setTextColor(0); // Set text color to black
+                doc.text(expenseColumnHeaders[i], expenseXPos + expenseCellPadding, expenseHeaderYPos + expenseCellHeight - expenseCellPadding);
+                expenseXPos += expenseColumnWidths[i];
+            }
+
+            let currentPage = 1;
+            let currentRow = 0;
+            const maxRowsPerPage = 28; // Adjust this value based on the number of rows you want per page
+
+            // Iterate through expenses and add them to the PDF with dynamic borders
+            expenses.forEach((expense, index) => {
+                if (currentRow >= maxRowsPerPage) {
+                    doc.addPage(); // Add a new page if the maximum rows per page is exceeded
+                    expenseHeaderYPos = 20;
+                    currentRow = 0;
+                    currentPage++;
+                    expenseXPos = 20;
+                    // Draw headers for expenses on new page
+                    for (let i = 0; i < expenseColumnWidths.length; i++) {
+                        doc.rect(expenseXPos, expenseHeaderYPos, expenseColumnWidths[i], expenseCellHeight, 'F');
+                        doc.setTextColor(0); // Set text color to black
+                        doc.text(expenseColumnHeaders[i], expenseXPos + expenseCellPadding, expenseHeaderYPos + expenseCellHeight - expenseCellPadding);
+                        expenseXPos += expenseColumnWidths[i];
+                    }
+                    expenseHeaderYPos += expenseCellHeight;
+                }
+
+                let yPos = expenseHeaderYPos + (currentRow + 1) * expenseLineHeight;
+                expenseXPos = 20;
+                // Add expense data
+                for (let i = 0; i < expenseColumnWidths.length; i++) {
+                    doc.rect(expenseXPos, yPos, expenseColumnWidths[i], expenseCellHeight);
+                    switch (i) {
+                        case 0:
+                            doc.text(this.capitalizeFirstLetter(expense.payment_type), expenseXPos + expenseCellPadding, yPos + expenseCellHeight - expenseCellPadding);
+                            break;
+                        case 1:
+                            doc.text(this.formatNumber(expense.amount_paid), expenseXPos + expenseCellPadding, yPos + expenseCellHeight - expenseCellPadding);
+                            break;
+                        case 2:
+                            doc.text(expense.paid_to, expenseXPos + expenseCellPadding, yPos + expenseCellHeight - expenseCellPadding);
+                            break;
+                        case 3:
+                            doc.text(`${expense.user.first_name} ${expense.user.last_name}`, expenseXPos + expenseCellPadding, yPos + expenseCellHeight - expenseCellPadding);
+                            break;
+                        case 4:
+                            doc.text(this.format_date(expense.created_at), expenseXPos + expenseCellPadding, yPos + expenseCellHeight - expenseCellPadding);
+                            break;
+                    }
+                    expenseXPos += expenseColumnWidths[i];
+                }
+                currentRow++;
+            });
+
+            return currentPage; // Return the total number of pages used for expenses
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.statements = response.data.lists.statements;
-             console.log("props", response)
+             this.expenses = response.data.lists.pmsexpenses;
+             console.log("props", this.pmsexpenses)
              setTimeout(() => {
                   $("#AllStatementsTable").DataTable();
               }, 10);
@@ -151,6 +390,8 @@
       },
       mounted(){
         this.loadLists();
+        this.calculateCollectedTotal();
+        // this.calculateExpensesTotal();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
 

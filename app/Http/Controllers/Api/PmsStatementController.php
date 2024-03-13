@@ -29,12 +29,18 @@ class PmsStatementController extends Controller
             
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $pmsstatement = PmsStatement::findOrFail($id);
         if($pmsstatement){
-        $pmsstatement->update($request->all());
-
+        // $pmsstatement->update($request->all());
+        $pmsstatement = PmsStatement::update([
+                'payment_method' => $request->ref_no,
+                'mpesa_code' => $request->mpesa_code,
+                'paid' => $request->paid,
+                'balance' => $request->balance,
+                'status' => 1,
+            ]);
         return response()->json([
             'status' => true,
             'message' => "Statement Updated successfully!",
@@ -52,6 +58,17 @@ class PmsStatementController extends Controller
             'message' => "retrieved",
             'pmsstatement' => $pmsstatement
         ], 200);
-    }       
+    } 
+
+    public function propertyStatements(Request $request, $id)
+    {
+        $pmspropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "retrieved",
+            'pmspropertystatements' => $pmspropertystatements
+        ], 200);
+    }      
 
 }

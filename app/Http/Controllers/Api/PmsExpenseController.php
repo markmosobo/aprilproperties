@@ -63,6 +63,17 @@ class PmsExpenseController extends Controller
             'message' => "retreived",
             'pmsexpense' => $pmsexpense
         ], 200);
-    }       
+    }
+
+    public function propertyExpenses(Request $request, $id)
+    {
+        $pmspropertyexpenses = PmsExpense::with('user','unit','property')->where('pms_property_id', $id)->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "retrieved",
+            'pmspropertyexpenses' => $pmspropertyexpenses
+        ], 200);
+    }        
 
 }

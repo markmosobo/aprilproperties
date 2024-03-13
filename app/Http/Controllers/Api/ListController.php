@@ -52,7 +52,7 @@ class ListController extends Controller
         $sociallinks = SocialLink::all();
         $landlords = Landlord::all();
         $units = PmsUnit::all();
-        $statements = PmsStatement::with('property', 'tenant')->get();
+        $statements = PmsStatement::with('property', 'tenant')->latest()->get();
         $pmstenants = PmsTenant::with('unit','property')->get();
         $pmsexpenses = PmsExpense::with('user')->latest()->get();
 

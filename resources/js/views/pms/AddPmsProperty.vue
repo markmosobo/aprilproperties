@@ -53,17 +53,18 @@
                       <div class="invalid-feedback">Please enter category!</div>
                       </div>
                    </div>                
-<!--                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Media</label>
-                      <div class="col-sm-10">
-                      <Uploader 
-                        server="/api/posts/media/upload"
-                        @change="changeMedia"
-                       />
+                   <div class="col-sm-6">
+                       <label for="validationCustom04" class="form-label">% of Commission*
+                        <p>the percentage to be deducted from the total rent collected</p>
+                       </label>
+                       <div class="col-sm-10">
+                          <input type="text" placeholder="Write in decimal e.g 0.05" v-model="form. commission" id="location" name="location" class="form-control"
+                             required="" />
+                          <div class="invalid-feedback">Please enter location!</div>
                        </div>
-                   </div>  -->                 
-                </div>
-                <div class="row mb-3"></div>
+                    </div>               
+                   </div>
+                   <div class="row mb-3"></div>
                
              </div>
              <!--  button -->

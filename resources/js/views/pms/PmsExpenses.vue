@@ -53,7 +53,7 @@
                           <tr v-for="expense in expenses" :key="expense.id">
                             <td>{{expense.ref_no}}</td>
                             <td>{{expense.payment_type}}</td>
-                            <td>{{expense.amount_paid}}</td>
+                            <td>{{formatNumber(expense.amount_paid)}}</td>
                             <td>{{expense.paid_to}}</td>
                             <td>{{expense.user.first_name}} {{expense.user.last_name}}</td>
                             <td>{{format_date(expense.created_at)}}</td>
@@ -73,7 +73,8 @@
                           </tr>
                         </tbody>
                       </table>
-    
+                      <div><strong>Total Amount Paid: {{ formatNumber(calculateTotal()) }}</strong></div>
+
                     </div>
     
                   </div>
@@ -119,6 +120,19 @@
           if(value){
             return moment(String(value)).format('MMM Do YYYY')
           }
+        },
+        formatNumber(value) {
+          // Use the toLocaleString method to format the number with commas and decimal places
+          return value.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+        },
+        calculateTotal() {
+          // Function to calculate total amount paid
+          this.paidTotal = this.expenses.reduce((total, expense) => total + (expense.amount_paid || 0), 0);
+          console.log("mbichwa", this.paidTotal)
+          return this.expenses.reduce((total, expense) => total + (expense.amount_paid || 0), 0);
         },
         navigateTo(location){
             this.$router.push(location)

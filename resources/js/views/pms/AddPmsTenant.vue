@@ -241,8 +241,8 @@
                 'success'
              )
           })
-          .catch(function (error) {
-             console.log(error);
+          .catch(function () {
+             // console.log(error);
              // Swal.fire(
              //    'error!',
              //    // phone_error + id_error + pass_number,
@@ -250,7 +250,6 @@
              // )
           });
           this.$router.push('/pmstenants')
- 
        }
  
     },

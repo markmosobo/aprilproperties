@@ -37,7 +37,7 @@
                       <button @click.prevent="editStatement()" class="btn btn-dark">Edit</button>
                       </div>
                       <div class="col-sm-6 col-lg-6 text-end">
-                      <button @click="settleTenant()" class="btn btn-primary">Settle</button>
+                      <!-- <button @click="settleTenant()" class="btn btn-primary">Settle</button> -->
                       </div>
                   </div>                                   
                 </div>
@@ -92,7 +92,8 @@
                         <button @click.prevent="cancel()" class="btn btn-dark">Cancel</button>
                         </div>
                         <div class="col-sm-6 col-lg-6 text-end">
-                        <button @click="printReceipt" class="btn btn-primary">Print Receipt</button>
+                        <button @click.prevent="settleTenant()" type="submit" v-if="status == 0" class="btn btn-primary">Settle</button>
+                        <button @click="printReceipt" v-else class="btn btn-primary">Print Receipt</button>
                         </div>
                     </div>
                   </form>
@@ -177,7 +178,7 @@ export default{
       },
       settleTenant()
       {
-
+        this.$router.push('/settlestatement/'+this.$route.params.id)
       },
       formatNumber(value) {
         // Use the toLocaleString method to format the number with commas and decimal places

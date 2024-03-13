@@ -54,7 +54,7 @@
                       <label for="inputPassword" class="form-label">Amount Paid*</label>
                       <div class="col-sm-10">
                         <input
-                            type="text"
+                            type="number"
                             placeholder="Amount Paid"
                             id="title"
                             name="title"
@@ -90,7 +90,7 @@
                       <div class="col-sm-10">
                         <input
                             type="text"
-                            placeholder="Remarks e.g Payment Type"
+                            placeholder="e.g Slashing or Repair Works"
                             id="title"
                             name="title"
                             v-model="form.payment_type"

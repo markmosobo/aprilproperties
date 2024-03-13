@@ -82,6 +82,7 @@ import PmsPropertyStatements from '../views/pms/PmsPropertyStatements.vue'
 import PmsStatements from '../views/pms/PmsStatements.vue'
 import ViewStatement from '../views/pms/ViewStatement.vue'
 import EditStatement from '../views/pms/EditStatement.vue'
+import SettleStatement from '../views/pms/SettleStatement.vue'
 
 function guardMyroute(to, from, next)
 {
@@ -560,7 +561,13 @@ const routes = [
         name: 'editstatement',
         component: EditStatement,
         beforeEnter : guardMyroute,
-    },                          
+    },
+    {
+        path:'/settlestatement/:id',
+        name: 'settlestatement',
+        component: SettleStatement,
+        beforeEnter : guardMyroute,
+    },                              
 ];
 
 const router = createRouter({
