@@ -170,7 +170,7 @@
       async getUnits() {
          try {
            //const propunits = this.units.find(unit => unit.pms_property_id === this.form.pms_property_id);
-           this.propunits = this.units.filter(item => item.pms_property_id === this.form.pms_property_id && item.status === 0);
+           this.propunits = this.units.filter(item => item.pms_property_id === this.form.pms_property_id);
 
            console.log("amoit", this.propunits)
          } catch (error) {

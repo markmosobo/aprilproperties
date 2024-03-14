@@ -20,6 +20,8 @@ class PmsUnitController extends Controller
             'type' => $request->type,
             'deposit' => $request->deposit,
             'monthly_rent' => $request->monthly_rent,
+            'garbage_fee' => $request->garbage_fee,
+            'security_fee' => $request->security_fee,
             'water_meter' => $request->water_meter,
             'electricity_meter' => $request->electricity_meter
         ]);

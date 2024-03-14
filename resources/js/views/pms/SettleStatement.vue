@@ -10,17 +10,17 @@
                   <h5 class="card-title">Statement Details</h5>
 
                   <div class="row">
-                    <div class="col-lg-6 col-md-4 label "><strong>{{name}}</strong></div>
+                    <div class="col-lg-12 col-md-4 label "><strong>{{name}}</strong></div>
                     <!-- <div class="col-lg-9 col-md-8">{{form.first_name}} {{form.last_name}}</div> -->
                   </div>
 
                   <div class="row">
-                    <div class="col-lg-3 col-md-4 label"><strong>0{{phoneNumber}}</strong></div>
+                    <div class="col-lg-12 col-md-4 label"><strong>0{{phoneNumber}}</strong></div>
                     <!-- <div class="col-lg-9 col-md-8">(254) {{form.phone}}</div> -->
                   </div>
 
                   <div class="row">
-                    <div class="col-lg-3 col-md-4 label"><strong>{{tenant}}</strong></div>
+                    <div class="col-lg-12 col-md-4 label"><strong>{{tenant}}</strong></div>
                     <!-- <div class="col-lg-9 col-md-8">{{form.email}}</div> -->
                   </div>
                   <div class="row">
@@ -94,9 +94,9 @@
                         <div class="col-sm-10">
                             <select name="category" v-model="form.payment_method" class="form-select" id="">
                                 <option value="0" disabled>Select Payment</option>
-                                <option value="MPESA" selected>MPESA (Till Number)</option>
-                                <option value="CASH">CASH</option>
-                                <option value="BANK">BANK</option>
+                                <option value="Mpesa" selected>MPESA (Till Number)</option>
+                                <option value="Cash">CASH</option>
+                                <option value="Bank">BANK</option>
 
                             </select>
                           <div class="invalid-feedback">Please enter flight number!</div>
@@ -105,7 +105,7 @@
                     </div>
              
                     <div class="row mb-3"></div>
-                    <div v-if="form.payment_method === 'MPESA'" class="form-group row">
+                    <div v-if="form.payment_method === 'Mpesa'" class="form-group row">
                       <div class="col-sm-12">
                         <label for="inputPassword" class="form-label">Please provide MPESA code</label>
                         <div class="col-sm-10">
@@ -138,8 +138,9 @@
                         <div class="col-sm-6 col-lg-6">
                         <button @click.prevent="cancel()" class="btn btn-dark">Cancel</button>
                         </div>
-                        <div class="col-sm-6 col-lg-6 text-end">
-                        <button @click.prevent="printReceipt()" class="btn btn-primary">Print Receipt</button>
+                       <div class="col-sm-6 col-lg-6 text-end">
+                        <button @click.prevent="settleReceipt" type="submit" v-if="status == 0 && paid>0" class="btn btn-primary">Print Receipt</button>
+                        <button @click="printReceipt" v-else class="btn btn-primary">Print Receipt</button>
                         </div>
                     </div>
                   </form>
@@ -179,6 +180,8 @@ export default{
             paid: '',
             balance: '',
             total: '',
+            isAmountValid: true,
+
             form:
             {
               payment_method: '',
@@ -193,6 +196,27 @@ export default{
     }, 
     methods:
     {
+      settleReceipt() {
+        this.settleTenant();
+        this.$router.push('/statements')
+
+        // Open a new window for printing
+        const printWindow = window.open("", "_blank");
+
+        // Build the content for printing
+        const receiptContent = this.buildReceiptContent();
+
+        // Write the content to the new window
+        printWindow.document.write(receiptContent);
+
+        // Close the document stream
+        printWindow.document.close();
+
+        // Trigger the print dialog
+        printWindow.print();
+      },
+
+
       printReceipt() {
         this.submit();
         this.$router.push('/statements')
@@ -221,7 +245,7 @@ export default{
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>APEX PROPERTIES</title>
+          <title>INGO PROPERTIES</title>
           <style>
             body {
               font-family: monospace;
@@ -245,7 +269,7 @@ export default{
         </head>
         <body>
           <div class="header">
-            <h1>APEX PROPERTIES</h1>
+            <h1>INGO PROPERTIES</h1>
             <p>P.O. BOX 1716-50100 KAKAMEGA Opp. Kenya Power Rd.</p>
             <p>Mob: 0722 844 910</p>
           </div>
@@ -368,13 +392,44 @@ export default{
       {
         this.$router.push('/statements')
       },
+      settleTenant()
+      {
+       let self = this;  // Store the reference to this
+       let payload = {
+          mpesa_code: this.form.mpesa_code,
+          payment_method: this.form.payment_method,
+          paid: this.form.cash+this.paid,
+          balance: this.payableAmount
+       };
+
+       axios.put("/api/pmsstatement/" + this.$route.params.id, payload)
+          .then(function (response) {
+             console.log(response);
+             // self.step = 1;
+             toast.fire(
+                'Success!',
+                'Invoice updated!',
+                'success'
+             );
+          })
+          .catch(function (error) {
+             console.log(error);
+             // Swal.fire(
+             //    'error!',
+             //    // phone_error + id_error + pass_number,
+             //    'error'
+             // )
+          });
+
+       this.$router.push('/statements')        
+      },      
       submit() {
        let self = this;  // Store the reference to this
        let payload = {
           mpesa_code: this.form.mpesa_code,
           payment_method: this.form.payment_method,
           paid: this.form.cash,
-          balance: 100
+          balance: this.payableAmount
        };
 
        axios.put("/api/pmsstatement/" + this.$route.params.id, payload)
@@ -414,7 +469,14 @@ export default{
     },
     computed: {
         payableAmount() {
-        return this.form.cash - this.total; // Multiply inputValue by 2 (change this multiplier as needed)
+          if (this.paid > 0) {
+            return this.balance - this.form.cash;
+          }
+          else
+          {
+             return this.total - this.form.cash; // Multiply inputValue by 2 (change this multiplier as needed)
+          }
+       
         },
     },
 }

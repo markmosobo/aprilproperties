@@ -16,6 +16,8 @@ class PmsUnit extends Model
         'type',
         'deposit',
         'monthly_rent',
+        'garbage_fee',
+        'security_fee',
         'water_meter',
         'electricity_meter',
         'status'

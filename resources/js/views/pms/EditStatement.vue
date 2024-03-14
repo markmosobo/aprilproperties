@@ -95,9 +95,9 @@
                         <div class="col-sm-10">
                             <select name="category" v-model="form.payment_method" class="form-select" id="">
                                 <option value="0" disabled>Select Payment</option>
-                                <option value="MPESA" selected>MPESA (Till Number)</option>
-                                <option value="CASH">CASH</option>
-                                <option value="BANK">BANK</option>
+                                <option value="Mpesa" selected>MPESA (Till Number)</option>
+                                <option value="Cash">CASH</option>
+                                <option value="Bank">BANK</option>
 
                             </select>
                           <div class="invalid-feedback">Please enter flight number!</div>
@@ -106,7 +106,7 @@
                     </div>
              
                     <div class="row mb-3"></div>
-                    <div v-if="form.payment_method === 'MPESA'" class="form-group row">
+                    <div v-if="form.payment_method === 'Mpesa'" class="form-group row">
                       <div class="col-sm-12">
                         <label for="inputPassword" class="form-label">Please provide MPESA code</label>
                         <div class="col-sm-10">

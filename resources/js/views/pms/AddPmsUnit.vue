@@ -85,7 +85,41 @@
                 <div class="row mb-3"></div>
                 <div class="form-group row">
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Electricity Meter No*</label>
+                      <label for="inputPassword" class="form-label">Garbage Collection Fee</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="number"
+                            placeholder="e.g 500"
+                            id="title"
+                            name="title"
+                            v-model="form.garbage_fee"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter title!</div>
+                      </div>
+                   </div>
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Security Fee</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="number"
+                            placeholder="e.g 500"
+                            id="title"
+                            name="title"
+                            v-model="form.security_fee"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter title!</div>
+                      </div>
+                   </div>
+
+                </div>
+                <div class="row mb-3"></div>
+                <div class="form-group row">
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Electricity Meter No</label>
                       <div class="col-sm-10">
                         <input
                             type="number"
@@ -100,7 +134,7 @@
                       </div>
                    </div>
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Water Meter No*</label>
+                      <label for="inputPassword" class="form-label">Water Meter No</label>
                       <div class="col-sm-10">
                         <input
                             type="number"

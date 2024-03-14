@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call(AboutTableSeeder::class);
         $this->call(ContactTableSeeder::class);
         $this->call(SocialLinkTableSeeder::class);
+        $this->call(LandlordTableSeeder::class);
 
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',

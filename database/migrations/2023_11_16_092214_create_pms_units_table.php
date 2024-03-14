@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('type')->nullable();
             $table->integer('deposit')->nullable();
             $table->integer('monthly_rent')->nullable();
+            $table->string('garbage_fee')->nullable();
+            $table->string('security_fee')->nullable();
             $table->string('water_meter')->nullable();
             $table->string('electricity_meter')->nullable();
             $table->integer('status')->default(0);
