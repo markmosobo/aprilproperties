@@ -14,14 +14,45 @@
                           <h6>Filter</h6>
                         </li>
     
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                        <li><a class="dropdown-item" href="#">This Year</a></li>
+                        <li>
+                            <router-link to="/statements/" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            This Month</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link to="/pmsyearstatements" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            This Year</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link to="/pmsallstatements" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            All Time</a>
+                            </router-link>
+                        </li>
+
                       </ul>
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">All Statements <span>| Today</span></h5>
+                      <h5 class="card-title">Full Statement <span>| This Month</span></h5>
                       <p class="card-text">
                    
 <!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
@@ -202,18 +233,17 @@
             const imageY = 20;
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
-            // Add title
-            doc.setFontSize(18);
-            doc.setTextColor(44, 62, 80); // Set text color to a dark shade
-
-            // Calculate the width of the text
-            const titleWidth = doc.getStringUnitWidth('Full Rent Statement') * doc.internal.getFontSize() / doc.internal.scaleFactor;
-
-            // Calculate the X position to center the text
+           // Add title
+            const titleText = (' Full Rent Statement').toUpperCase();
+            const titleFontSize = 18;
+            const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
+            const titleY = imageY + imageHeight + 10;
 
-            // Draw the text at the calculated position
-            doc.text('Full Rent Statement', titleX, imageY + imageHeight + 10);
+            doc.setFontSize(titleFontSize);
+            doc.setTextColor(44, 62, 80); // Set text color to a dark shade
+            doc.text(titleText, titleX, titleY);
+
 
 
             // // Add subtitle with date information

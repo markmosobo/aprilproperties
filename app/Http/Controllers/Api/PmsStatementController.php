@@ -34,6 +34,7 @@ class PmsStatementController extends Controller
                 'paid' => $request->paid,
                 'balance' => $request->balance,
                 'status' => 0,
+                'payment_method' => $request->payment_method,                
             ]);
 
             return response()->json([
@@ -53,8 +54,7 @@ class PmsStatementController extends Controller
             if($request->balance == 0)
             {
                 $pmsstatement->update([
-                    'payment_method' => $request->payment_method,
-                    'mpesa_code' => $request->mpesa_code,
+                    'total' => $request->total,
                     'paid' => $request->paid,
                     'balance' => $request->balance,
                     'status' => 1,
@@ -63,8 +63,7 @@ class PmsStatementController extends Controller
             else
             {
                 $pmsstatement->update([
-                    'payment_method' => $request->payment_method,
-                    'mpesa_code' => $request->mpesa_code,
+                    'total' => $request->total,
                     'paid' => $request->paid,
                     'balance' => $request->balance,
                     'status' => 0,
@@ -75,6 +74,37 @@ class PmsStatementController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => "Statement Updated successfully!",
+                'statement' => $pmsstatement
+            ], 200);
+        }
+    }
+
+        public function settle(Request $request, $id)
+    {
+        $pmsstatement = PmsStatement::findOrFail($id);
+
+        if ($pmsstatement) {
+            if($request->balance == 0)
+            {
+                $pmsstatement->update([
+                    'paid' => $request->paid,
+                    'balance' => $request->balance,
+                    'status' => 1,
+                ]);                
+            }
+            else
+            {
+                $pmsstatement->update([
+                    'paid' => $request->paid,
+                    'balance' => $request->balance,
+                    'status' => 0,
+                ]);
+            }    
+                
+
+            return response()->json([
+                'status' => true,
+                'message' => "Statement Settled successfully!",
                 'statement' => $pmsstatement
             ], 200);
         }

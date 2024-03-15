@@ -70,7 +70,7 @@
 
             <div class="card px-2">
                     <div class="card-body">
-                    <h5 class="card-title">Edit Invoice</h5>
+                    <h5 class="card-title">Edit Statement</h5>
                 
                     <form
                     class="row g-3 needs-validation"
@@ -90,49 +90,22 @@
                       />
                       <div class="col-sm-12">
                         <label for="validationCustom04" class="form-label"
-                          >Please select payment method:</label
+                          >Rate:</label
                         >
-                        <div class="col-sm-10">
-                            <select name="category" v-model="form.payment_method" class="form-select" id="">
-                                <option value="0" disabled>Select Payment</option>
-                                <option value="Mpesa" selected>MPESA (Till Number)</option>
-                                <option value="Cash">CASH</option>
-                                <option value="Bank">BANK</option>
-
-                            </select>
-                          <div class="invalid-feedback">Please enter flight number!</div>
-                        </div>
+                        <input type="number" v-model="form.total" class="form-control" id="inputEmail5">
                       </div>
                     </div>
              
                     <div class="row mb-3"></div>
-                    <div v-if="form.payment_method === 'Mpesa'" class="form-group row">
-                      <div class="col-sm-12">
-                        <label for="inputPassword" class="form-label">Please provide MPESA code</label>
-                        <div class="col-sm-10">
-                          <input
-                            type="decimal"
-                            placeholder="Transaction Code"
-                            v-model="form.mpesa_code"
-                            id="mpesa_code"
-                            name="mpesa_code"
-                            class="form-control"
-                            required=""
-                          />
-                          <div class="invalid-feedback">Please enter address!</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row mb-3"></div>
 
                     <div class="col-md-6">
                     <label for="inputEmail5" class="form-label">Amount Paid</label>
-                    <input type="number" v-model="form.cash" class="form-control" id="inputEmail5">
+                    <input type="number" v-model="form.paid" class="form-control" id="inputEmail5">
                     </div>
                     <div class="col-md-6">
                     <label for="inputPassword5" class="form-label">Balance</label><br>
-                    
                      <h6>{{payableAmount}}</h6>
+
                     </div>        
                     <div class="row mb-3"></div>
                     <div class="col-lg-12 felx mt-4 row">
@@ -211,6 +184,9 @@ export default{
               this.paid = this.statement.paid;
               this.balance = this.statement.balance;
               this.total = this.statement.total;
+              this.form.total = this.statement.total;
+              this.form.balance = this.statement.balance;
+              this.form.paid = this.statement.paid;
               console.log("statement", this.statement)
           })
       },
@@ -224,34 +200,34 @@ export default{
       {
         this.$router.push('/statements')
       },
-       submit(){
-          data = 
-          {
-            mpesa_code: this.form.mpesa_code,
-            payment_method: this.form.payment_method,
-            paid: this.form.cash,
-            balance: payableAmount
-          },
-          axios.put("/api/pmsstatement/"+this.$route.params.id, data)
-          .then(function (response) {
-             console.log(response);
-             // this.step = 1;
-             toast.fire(
-                'Success!',
-                'Invoice updated!',
-                'success'
-             )
-          })
-          .catch(function (error) {
-             console.log(error);
-             // Swal.fire(
-             //    'error!',
-             //    // phone_error + id_error + pass_number,
-             //    'error'
-             // )
-          });
-          this.$router.push('/statements')
-       },
+      submit() {
+          let data = { // Use let to declare the variable
+              total: this.form.total,
+              paid: this.form.paid,
+              balance: this.payableAmount
+          }; // Remove the comma here
+
+          axios.put("/api/pmsstatement/" + this.$route.params.id, data)
+              .then((response) => { // Use arrow function to retain 'this' context
+                  console.log(response);
+                  // this.step = 1;
+                  toast.fire(
+                      'Success!',
+                      'Statement updated!',
+                      'success'
+                  );
+              })
+              .catch((error) => { // Use arrow function to retain 'this' context
+                  console.log(error);
+                  // Swal.fire(
+                  //    'error!',
+                  //    // phone_error + id_error + pass_number,
+                  //    'error'
+                  // )
+              });
+
+          this.$router.push('/statements');
+      },
       formatNumber(value) {
         // Use the toLocaleString method to format the number with commas and decimal places
         return value.toLocaleString('en-US', {
@@ -267,7 +243,7 @@ export default{
     },
     computed: {
         payableAmount() {
-        return this.form.cash - this.total; // Multiply inputValue by 2 (change this multiplier as needed)
+        return this.form.total - this.form.paid; // Multiply inputValue by 2 (change this multiplier as needed)
         },
     },
 }

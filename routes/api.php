@@ -155,6 +155,7 @@ Route::put('pmsunit/{id}', [PmsUnitController::class, 'update']);
 Route::put('pmstenant/{id}', [PmsTenantController::class, 'update']);
 Route::put('pmsexpense/{id}', [PmsExpenseController::class, 'update']);
 Route::put('pmsstatement/{id}', [PmsStatementController::class, 'update']);
+Route::put('pmssettlestatement/{id}', [PmsStatementController::class, 'settle']);
 
 Route::delete('property/{id}', [PropertyController::class, 'destroy']);
 Route::delete('category/{id}', [CategoryController::class, 'destroy']);

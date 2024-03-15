@@ -335,11 +335,11 @@
             </a>
             </router-link>
           </li>
-          <li>
+<!--           <li>
             <a href="icons-remix.html">
               <i class="bi bi-circle"></i><span>Statements</span>
             </a>
-          </li>
+          </li> -->
           <!--<li>
             <a href="icons-boxicons.html">
               <i class="bi bi-circle"></i><span>Boxicons</span>

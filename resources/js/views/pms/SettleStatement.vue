@@ -402,7 +402,7 @@ export default{
           balance: this.payableAmount
        };
 
-       axios.put("/api/pmsstatement/" + this.$route.params.id, payload)
+       axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
           .then(function (response) {
              console.log(response);
              // self.step = 1;
