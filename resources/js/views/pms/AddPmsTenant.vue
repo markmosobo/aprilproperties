@@ -31,7 +31,7 @@
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback">Please enter first name!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -46,7 +46,7 @@
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback">Please enter last name!</div>
                       </div>
                    </div>
  
@@ -72,7 +72,7 @@
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback">Please enter ID number!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -87,7 +87,7 @@
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback">Please enter phone number!</div>
                       </div>
                    </div>
  
@@ -106,7 +106,7 @@
  
                          </select>
  
-                      <div class="invalid-feedback">Please enter category!</div>
+                         <div class="invalid-feedback">Please select a property!</div>
                       </div>
                    </div>  
                    <div class="col-sm-6">
@@ -121,7 +121,7 @@
  
                          </select>
  
-                      <div class="invalid-feedback">Please enter category!</div>
+                         <div class="invalid-feedback">Please select a unit!</div>
                       </div>
                    </div>                     
                 </div>

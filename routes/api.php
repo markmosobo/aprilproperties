@@ -109,8 +109,30 @@ Route::get('pmsunit/{id}', [PmsUnitController::class, 'single']);
 Route::get('pmstenant/{id}', [PmsTenantController::class, 'single']);
 Route::get('pmsexpense/{id}', [PmsExpenseController::class, 'single']);
 Route::get('pmsstatement/{id}', [PmsStatementController::class, 'single']);
+//property statements
 Route::get('pmspropertystatements/{id}', [PmsStatementController::class, 'propertyStatements']);
+Route::get('pmslastmonthpropertystatements/{id}', [PmsStatementController::class, 'propertyLastMonthStatements']);
+Route::get('pmslastninetypropertystatements/{id}', [PmsStatementController::class, 'propertyLastNinetyStatements']);
+Route::get('pmsyearpropertystatements/{id}', [PmsStatementController::class, 'propertyYearStatements']);
+Route::get('pmsquarterpropertystatements/{id}', [PmsStatementController::class, 'propertyQuarterStatements']);
+Route::get('pmslastyearpropertystatements/{id}', [PmsStatementController::class, 'propertyLastYearStatements']);
+
+Route::get('pmsallpropertystatements/{id}', [PmsStatementController::class, 'propertyAllStatements']);
 Route::get('pmspropertyexpenses/{id}', [PmsExpenseController::class, 'propertyExpenses']);
+Route::get('pmslastmonthpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyLastMonthExpenses']);
+Route::get('pmslastninetypropertyexpenses/{id}', [PmsExpenseController::class, 'propertyLastNinetyExpenses']);
+Route::get('pmsyearpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyYearExpenses']);
+Route::get('pmsquarterpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyQuarterExpenses']);
+Route::get('pmslastyearpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyLastYearExpenses']);
+Route::get('pmsallpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyAllExpenses']);
+//tenant statements
+Route::get('pmstenantstatements/{id}', [PmsStatementController::class, 'tenantStatements']);
+Route::get('pmslastmonthtenantstatements/{id}', [PmsStatementController::class, 'tenantLastMonthStatements']);
+Route::get('pmslastninetytenantstatements/{id}', [PmsStatementController::class, 'tenantLastNinetyStatements']);
+Route::get('pmsyeartenantstatements/{id}', [PmsStatementController::class, 'tenantYearStatements']);
+Route::get('pmsquartertenantstatements/{id}', [PmsStatementController::class, 'tenantQuarterStatements']);
+Route::get('pmslastyeartenantstatements/{id}', [PmsStatementController::class, 'tenantLastYearStatements']);
+Route::get('pmsalltenantstatements/{id}', [PmsStatementController::class, 'tenantAllStatements']);
 
 Route::put('property/{id}', [PropertyController::class, 'update']);
 Route::put('category/{id}', [CategoryController::class, 'update']);

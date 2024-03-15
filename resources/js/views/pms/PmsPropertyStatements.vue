@@ -14,14 +14,45 @@
                           <h6>Filter</h6>
                         </li>
     
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                        <li><a class="dropdown-item" href="#">This Year</a></li>
+                        <li>
+                            <router-link :to="`/pmsmonthpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            This Month</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/pmsyearpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            This Year</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/pmsallpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            All Time</a>
+                            </router-link>
+                        </li>
+
                       </ul>
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{property.name}} Statement <span>| Today</span></h5>
+                      <h5 class="card-title">{{property.name}} Statement <span>| This Month</span></h5>
                       <p class="card-text">
                    
                           <button @click="generatePDF">Generate PDF</button>
@@ -116,6 +147,7 @@
           propertytypes: [],
           user: [],
           dueTotal: 0, // Variable to store the sum of the "Due" column
+          propertyId: this.$route.params.id
 
         }
       },
@@ -199,7 +231,7 @@
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
             // Add title
-            const titleText = (this.property.name+" "+this.formatMonth(this.property.created_at)+' Rent Statement').toUpperCase();
+            const titleText = (this.property.name+" "+this.formatMonth(new Date)+' Rent Statement').toUpperCase();
             const titleFontSize = 18;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -217,12 +249,12 @@
             const roundedCommission = Math.round(this.property.commission * 100);
             const commissionTotal = roundedCommission/100*this.totalPaid;
 
-            const netRemissionTotal = this.totalPaid - (this.totalAmountPaid + commissionTotal);
+            const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
             doc.setFontSize(14);
             doc.setTextColor(44, 62, 80);
-            doc.text(this.property.commission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
+            doc.text(roundedCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
 
 
 
@@ -325,7 +357,7 @@
             let totalPages = this.addExpensesToPDF(this.expenses, doc);
             // Save the PDF
             // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
-            let fileName = this.property.name+" "+this.formatMonth(this.property.created_at)+' Rent Statement' + '_Total_Pages_' + totalPages + '.pdf';
+            let fileName = this.property.name+" "+this.formatMonth(new Date)+' Rent Statement' + '_Total_Pages_' + totalPages + '.pdf';
 
             doc.save(fileName);
         },

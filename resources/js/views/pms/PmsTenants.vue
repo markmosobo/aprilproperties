@@ -54,7 +54,7 @@
                             <td>{{tenant.unit.unit_number}}</td>
                             <td>
                               <span v-if="tenant.status == 0" class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacated</span>   
-                              <span v-else-if="tenant.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Occupying</span>
+                              <span v-else-if="tenant.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Renting</span>
                               <span v-else class="badge bg-light text-dark"><i class="bi bi-star me-1"></i> Closed</span>
 
                             </td>
@@ -65,6 +65,7 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                             -->
+                                  <a @click="navigateTo('/pmstenantstatements/'+tenant.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>
                                   <a @click="navigateTo('/edit-pmstenant/'+tenant.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a v-if="tenant.status == 1" @click="vacateTenant(tenant.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Vacate</a>
                                   <a v-if="tenant.status == 2" @click="reopenTenant(tenant.id)" class="dropdown-item" href="#"><i class="ri-refresh-fill mr-2"></i>Reopen</a>
@@ -75,7 +76,8 @@
                           </tr>
                         </tbody>
                       </table>
-    
+                      <!--show total tenants-->
+                        <div><strong>Total Tenants: {{tenants.length}}</strong></div>
                     </div>
     
                   </div>
