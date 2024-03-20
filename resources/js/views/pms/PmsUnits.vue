@@ -56,7 +56,7 @@
                             <td>{{property.monthly_rent ?? 'N/A'}}</td>
                             <td>
                               <span v-if="property.status == 0" class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>   
-                              <span v-else-if="property.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Occupied</span>
+                              <span v-else-if="property.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Rented</span>
                               <span v-else class="badge bg-light text-dark"><i class="bi bi-star me-1"></i> Closed</span>                              
                             </td>
                             <td>

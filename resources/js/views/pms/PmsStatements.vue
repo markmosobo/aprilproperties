@@ -93,8 +93,9 @@
                             <td>{{formatNumber(statement.balance)}}</td>
                             <td>{{format_date(statement.created_at)}}</td>                            
                             <td>
-                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Settled</span>
-                              <span v-else class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Not Settled</span>
+                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
+                              <span v-else-if="statement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
+                              <span v-else class="badge bg-info text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
                             </td>
                             <td>
                               <div class="btn-group" role="group">
@@ -104,7 +105,7 @@
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <!-- <a v-if="user.id == 1" @click="navigateTo('/editstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a> -->
-                                  <a v-if="statement.status == 0" @click="settleTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a v-if="statement.status == 0" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   </div>
                               </div>
                             </td>
@@ -160,8 +161,16 @@
         navigateTo(location){
             this.$router.push(location)
         },
-        settleTenant(id){
-            this.$router.push('/settlestatement/'+id)
+        settleTenant(id, tenantId){
+            // this.$router.push('/settlestatement/'+id)
+            this.$router.push({ 
+              name: 'settlestatement', // Assuming you have named routes
+              params: { 
+                id: id,
+                tenantId: tenantId
+              } 
+            });
+
         },
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
@@ -317,7 +326,15 @@
                             doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 1:
-                            let statusText = statement.status == 1 ? 'Settled' : 'Not Settled';
+                        let statusText;
+
+                        if (statement.status === 1) {
+                            statusText = 'Settled';
+                        } else if (statement.status === 0) {
+                            statusText = 'Not Settled';
+                        } else {
+                            statusText = 'Vacant';
+                        }
                             doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 2:

@@ -92,5 +92,5 @@ class PmsTenantController extends Controller
             'message' => "Tenant Vacated successfully!",
         ], 200);
         
-    }           
+    }   
 }

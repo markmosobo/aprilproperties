@@ -165,9 +165,9 @@
                         <div class="col-sm-10">
                             <select name="category" v-model="form.payment_method" class="form-select" id="">
                                 <option value="0" disabled>Select Payment</option>
-                                <option value="MPESA" selected>MPESA (Till Number)</option>
-                                <option value="CASH">CASH</option>
-                                <option value="BANK">BANK</option>
+                                <option value="Mpesa" selected>MPESA (Till Number)</option>
+                                <option value="Cash">CASH</option>
+                                <option value="Bank">BANK</option>
 
                             </select>
                           <div class="invalid-feedback">Please enter flight number!</div>
@@ -176,7 +176,7 @@
                     </div>
              
                     <div class="row mb-3"></div>
-                    <div v-if="form.payment_method === 'MPESA'" class="form-group row">
+                    <div v-if="form.payment_method === 'Mpesa'" class="form-group row">
                       <div class="col-sm-12">
                         <label for="inputPassword" class="form-label">Please provide MPESA code</label>
                         <div class="col-sm-10">
@@ -268,6 +268,11 @@
           depositRent: [],
           unitNumber: '',
           tenantId: null, // Initialize tenantId
+          user: [],
+          deposit: '',
+          monthly_rent: '',
+          refNo: '',
+          propertyName: ''
 
        }   
     },
@@ -279,27 +284,7 @@
           this.step++;
           this.submit();          
        },
-      printReceipt() {
-        this.submitStatement();
-        this.$router.push('/pmstenants')
-
-        // Open a new window for printing
-        const printWindow = window.open("", "_blank");
-
-        // Build the content for printing
-        const receiptContent = this.buildReceiptContent();
-
-        // Write the content to the new window
-        printWindow.document.write(receiptContent);
-
-        // Close the document stream
-        printWindow.document.close();
-
-        // Trigger the print dialog
-        printWindow.print();
-      },
-
-      buildReceiptContent() {
+      buildReceiptContent(refNo) {
         // Build the HTML content for the receipt
         const receiptHTML = `
         <!DOCTYPE html>
@@ -307,123 +292,145 @@
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>INGO PROPERTIES</title>
+          <title>Receipt Of Payment</title>
           <style>
             body {
-              font-family: monospace;
-              font-size: 12px;
+              font-family: Arial, sans-serif;
               margin: 0;
+              padding: 0;
+              background-color: #f5f5f5;
             }
-            table, th, td {
+            .receipt {
+              max-width: 600px;
+              margin: 20px auto;
+              padding: 20px;
+              background-color: #fff;
+              border: 2px solid #ccc;
+              border-radius: 10px;
+            }
+            .receipt-header {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .receipt-header h1 {
+              margin: 10px 0;
+              color: #333;
+            }
+            .receipt-info {
+              margin-bottom: 20px;
+            }
+            .receipt-info p {
+              margin: 5px 0;
+              color: #555;
+            }
+            .receipt-table {
+              width: 100%;
               border-collapse: collapse;
+              margin-bottom: 20px;
             }
-            th, td {
-              padding: 5px;
+            .receipt-table th, .receipt-table td {
+              padding: 8px;
+              border-bottom: 1px solid #ccc;
+            }
+            .receipt-table th {
               text-align: left;
+              background-color: #f2f2f2;
+              color: #333;
             }
-            .header {
+            .receipt-table td {
+              text-align: left;
+              color: #666;
+            }
+            .receipt-footer {
               text-align: center;
             }
-            .footer {
-              text-align: right;
+            .receipt-footer p {
+              margin: 5px 0;
+              color: #777;
             }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>INGO PROPERTIES</h1>
-            <p>P.O. BOX 1716-50100 KAKAMEGA Opp. Kenya Power Rd.</p>
-            <p>Mob: 0722 844 910</p>
-          </div>
-          <div>
-            <p>VAT: Barware - CHED</p>
-            <p>WAT NO. 0161493R</p>
-            <p>PIN: A0146635900</p>
-            <p>Tel: 0769 08207</p>
-          </div>
-          <div class="header">
-            <h3>FISCAL RECEIPT</h3>
-            <h3>ORIGINAL</h3>
-          </div>
-          <table>
-            <tr>
-              <th>QTY</th>
-              <th>Partic</th>
-              <th>Invoice Nr:</th>
-            </tr>
-            <tr v-for="(item) in cart" :key="productId">
-              <td>0001</td>
-              <td>Operator 01</td>
-              <td>000000000001196</td>
-            </tr>
-            <tr>
-              <td>A</td>
-              <td>00001 Art. 00001</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>Sum</td>
-              <td>1.000 pcs X 40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>700 7000</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>40500.00 A</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>1350 13500</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TOTAL</td>
-              <td>40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TOTAL A-16.00%</td>
-              <td>40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TOTAL TAX A</td>
-              <td>5586.21</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TUTAL TAX</td>
-              <td>5586.21</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>CASH</td>
-              <td>40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>ITEMS NUMBER</td>
-              <td>1</td>
-            </tr>
-          </table>
-          <div class="footer">
-            <p>Printed on: ${new Date().toLocaleString()}</p>
-            <p>CU Serial No: FT ANY LIAB</p>
-            <p>CU Invoice N:0110691570000001198</p>
-            <p>EO&E No 4172</p>
+          <div class="receipt">
+            <div class="receipt-header">
+              <h1>April Properties</h1>
+              <p>Kakamega-Webuye Rd, ACK Building</p>
+              <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+            </div>
+            <div class="receipt-info">
+              <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+              <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
+              <p><strong>For:</strong> ${this.details}</p>
+              <p><strong>Payment Mode:</strong> ${this.form.payment_method}</p>
+              <p><strong>Property:</strong> ${this.name}</p>
+              <p><strong>Tenant:</strong> ${this.tenant}</p>
+            </div>
+            <table class="receipt-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Rent Deposit</td>
+                  <td>KES ${this.formatNumber(this.deposit)}</td>
+                </tr>
+                <tr>
+                  <td>Monthly Rent</td>
+                  <td>KES ${this.formatNumber(this.monthly_rent)}</td>
+                </tr>
+                <tr>
+                  <td>Security Fee</td>
+                  <td>KES ${this.formatNumber(this.security_fee)}</td>
+                </tr>
+                <tr>
+                  <td>Garbage Collection Fee</td>
+                  <td>KES ${this.formatNumber(this.garbage_fee)}</td>
+                </tr>  
+                <tr>
+                  <td>Electricity Deposit</td>
+                  <td>KES ${this.formatNumber(this.electricity_deposit)}</td>
+                </tr>
+                <tr>
+                  <td>Water Deposit</td>
+                  <td>KES ${this.formatNumber(this.water_deposit)}</td>
+                </tr>                                              
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total Amount Due:</th>
+                  <td>KES ${this.formatNumber(this.depositRent)}</td>
+                </tr>
+                <tr>
+                  <th>Amount Paid:</th>
+                  <td>KES ${this.formatNumber(this.form.cash)}</td>
+                </tr>
+                <tr>
+                  <th>Balance:</th>
+                  <td>KES ${this.formatNumber(this.payableAmount)}</td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="receipt-footer">
+              <p>You were served by ${this.user.first_name} ${this.user.last_name}.Thank you for your payment.</p>
+              <p>This receipt acknowledges the payment received for the above property management services.</p>
+            </div>
           </div>
         </body>
         </html>
+
+
         `;
 
         return receiptHTML;
-      },       
+      }, 
+      formatMonth(value){
+          if(value){
+            return moment(String(value)).format('MMM YYYY');
+          }
+      },      
        //ID upload
        onChangePhoto(e) {
          console.log('loadings');
@@ -458,13 +465,15 @@
             axios.get('/api/pmsunit/'+this.form.pms_unit_id).then((response) => {
      
              this.unitinfo = response.data.unit[0];
-               const deposit = parseInt(this.unitinfo.deposit);
-               const monthly_rent = parseInt(this.unitinfo.monthly_rent);
-               const garbage_fee = parseInt(this.unitinfo.garbage_fee);
-               const security_fee = parseInt(this.unitinfo.security_fee);
-             this.depositRent = deposit + monthly_rent + garbage_fee + security_fee;
+               this.deposit = parseInt(this.unitinfo.deposit);
+               this.monthly_rent = parseInt(this.unitinfo.monthly_rent);
+               this.garbage_fee = parseInt(this.unitinfo.garbage_fee);
+               this.security_fee = parseInt(this.unitinfo.security_fee);
+               this.water_deposit = parseInt(this.unitinfo.water_deposit);
+               this.electricity_deposit = parseInt(this.unitinfo.electricity_deposit);
+             this.depositRent = this.deposit + this.monthly_rent + this.garbage_fee + this.security_fee + this.water_deposit + this.electricity_deposit;
              this.unitNumber = this.unitinfo.unit_number;
-             console.log("unitinfo", this.depositRent)
+             console.log("unitinfo", response)
     
              });
        },     
@@ -503,40 +512,101 @@
           // this.$router.push('/pmstenants')
  
        },
-      submitStatement() {
-       let self = this;  // Store the reference to this
-       let payload = {
-          mpesa_code: this.form.mpesa_code,
-          payment_method: this.form.payment_method,
-          paid: this.form.cash,
-          balance: this.payableAmount,
-          total: this.depositRent,
-          pms_property_id: this.form.pms_property_id,
-          unit_number: this.unitNumber,
-          pms_tenant_id: this.tenantId
-       };
+        async submitStatement() {
+          try {
+            const payload = {
+              mpesa_code: this.form.mpesa_code,
+              payment_method: this.form.payment_method,
+              paid: this.form.cash,
+              balance: this.payableAmount,
+              total: this.depositRent,
+              pms_property_id: this.form.pms_property_id,
+              unit_number: this.unitNumber,
+              pms_tenant_id: this.tenantId
+            };
 
-       axios.post("api/pmsstatements", payload)
-          .then(function (response) {
-             console.log(response);
-             // self.step = 1;
-             toast.fire(
-                'Success!',
-                'Invoice saved!',
-                'success'
-             );
-          })
-          .catch(function (error) {
-             console.log(error);
-             // Swal.fire(
-             //    'error!',
-             //    // phone_error + id_error + pass_number,
-             //    'error'
-             // )
-          });
+            const response = await axios.post("api/pmsstatements", payload);
+            console.log(response);
+            this.statement = response.data.pmsstatement;
+            this.refNo = this.statement.ref_no;
+            this.propertyId = this.statement.pms_property_id;
+            await this.getProperty(); // Wait for getProperty to finish
+            await this.getTenant();
+            this.date = this.statement.created_at;
+            this.details = this.statement.details;
+            console.log("tenant-statement", this.propertyId);
+            
+            toast.fire(
+              'Success!',
+              'Invoice saved!',
+              'success'
+            );
 
-       this.$router.push('/pmstenants');
+            // Returning statement data to be used in printReceipt method
+            return this.statement;
+          } catch (error) {
+            console.log(error);
+            // Handle error if needed
+            throw error; // Propagate the error
+          }
+        },
+
+        async getProperty() {
+          try {
+            const response = await axios.get('/api/pmsproperty/' + parseInt(this.propertyId));
+            console.log("propertiit", response);
+            this.property = response.data.property[0];
+            this.name = this.property.name;
+            // Further processing of the response data if needed
+          } catch (error) {
+            console.error("Error fetching unit:", error);
+            // Handle error if needed
+          }
+        },
+
+        async getTenant() {
+          try {
+            const response = await axios.get('/api/pmstenant/' + parseInt(this.tenantId));
+            console.log("tenant", response);
+            this.tenant = response.data.tenant[0];
+            this.tenant = this.tenant.first_name + " " + this.tenant.last_name;
+            // Further processing of the response data if needed
+          } catch (error) {
+            console.error("Error fetching unit:", error);
+            // Handle error if needed
+          }
+        },
+ 
+      async printReceipt() {
+        try {
+          // Call submitStatement() method
+          const statement = await this.submitStatement();
+
+          // Navigate to the desired route after successful submission
+          this.$router.push('/pmstenants');
+
+          // Open a new window for printing
+          const printWindow = window.open("", "_blank");
+
+          // Build the content for printing
+          const receiptContent = this.buildReceiptContent(statement);
+
+          // Write the content to the new window
+          printWindow.document.write(receiptContent);
+
+          // Close the document stream
+          printWindow.document.close();
+
+          // Trigger the print dialog
+          printWindow.print();
+        } catch (error) {
+          // Handle any errors that occurred during submission or printing
+          console.error("Error submitting statement or printing receipt:", error);
+          // For example, display an error message to the user
+          // this.errorMessage = "Failed to submit statement or print receipt. Please try again.";
+        }
       },
+
 
       formatNumber(value) {
         // Use the toLocaleString method to format the number with commas and decimal places
@@ -549,6 +619,7 @@
     },
     mounted() {
        this.loadLists();
+       this.user = JSON.parse(localStorage.getItem('user'));
     },
     computed: {
         payableAmount() {

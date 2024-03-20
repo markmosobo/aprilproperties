@@ -17,7 +17,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('ref_no')->nullable();
             $table->integer('pms_property_id')->unsigned();
-            $table->integer('pms_tenant_id')->unsigned();            
+            $table->integer('pms_tenant_id')->unsigned()->nullable();            
             $table->foreign('pms_property_id')
             ->references('id')
             ->on('pms_properties')

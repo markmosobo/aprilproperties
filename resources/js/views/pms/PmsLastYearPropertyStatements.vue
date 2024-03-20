@@ -94,7 +94,7 @@
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <!-- <a v-if="user.id == 1" @click="navigateTo('/editstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a> -->
-                                  <a v-if="statement.status == 0" @click="settleTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a v-if="statement.status == 0" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   </div>
                               </div>
                             </td>
@@ -193,8 +193,16 @@
 
           return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
         },
-        settleTenant(id){
-            this.$router.push('/settlestatement/'+id)
+        settleTenant(id, tenantId){
+            // this.$router.push('/settlestatement/'+id)
+            this.$router.push({ 
+              name: 'settlestatement', // Assuming you have named routes
+              params: { 
+                id: id,
+                tenantId: tenantId
+              } 
+            });
+
         },
         generatePDF() {
             let pdfName = 'Full Statement';

@@ -51,7 +51,7 @@ class PmsStatementController extends Controller
         $pmsstatement = PmsStatement::findOrFail($id);
 
         if ($pmsstatement) {
-            if($request->balance == 0)
+            if($request->balance <= 0)
             {
                 $pmsstatement->update([
                     'total' => $request->total,
@@ -84,7 +84,7 @@ class PmsStatementController extends Controller
         $pmsstatement = PmsStatement::findOrFail($id);
 
         if ($pmsstatement) {
-            if($request->balance == 0)
+            if($request->balance <= 0)
             {
                 $pmsstatement->update([
                     'paid' => $request->paid,
@@ -283,6 +283,44 @@ class PmsStatementController extends Controller
             'message' => "retrieved",
             'pmsalltenantstatements' => $pmsalltenantstatements
         ], 200);
+    }
+
+    public function overPayment(Request $request, $id)
+    {
+        // Get the start and end dates for the last month
+        $lastMonthStart = Carbon::now()->subMonth()->startOfMonth();
+        $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
+
+        $lastmonthtenantstatement = PmsStatement::where('pms_tenant_id', $id)
+        ->whereBetween('created_at',
+        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "retrieved",
+            'lastmonthtenantstatement' => $lastmonthtenantstatement
+        ], 200);
     } 
+
+    public function updateTenantLastMonthStatement(Request $request, $id)
+    {
+        $lastMonthStatement = PmsStatement::where('pms_tenant_id', $id)->first();
+
+        if($lastMonthStatement){
+            $lastMonthStatement->balance = 0;
+            $lastMonthStatement->save();
+            
+            return response()->json([
+                'status' => true,
+                'message' => "Last month's statement updated successfully!",
+                'lastMonthStatement' => $lastMonthStatement
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => "No last month statement found for the tenant with ID: $id",
+            ], 404);
+        }
+    }
 
 }

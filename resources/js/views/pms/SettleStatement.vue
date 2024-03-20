@@ -80,13 +80,13 @@
                     >
                     <div class="row mb-3"></div>
                     <div class="form-group row">
-                      <input
-                        type="hidden"
-                        id="user_id"
-                        name="user_id"
-                        value="1"
-                        class="form-control"
-                      />
+                      <label v-if="lastmonthBalance < 0" for="validationCustom04" class="form-label"
+                          ><span style="color: green;">Overpayment: <strong>KES {{lastmonthstatement.balance}}</strong></span>              
+                      </label>
+
+                      <label v-if="lastmonthstatement.balance > 0" for="validationCustom04" class="form-label"
+                        ><span style="color: red;">Last Month Arrears: <strong>KES {{lastmonthstatement.balance}}</strong></span></label
+                      >
                       <div class="col-sm-12">
                         <label for="validationCustom04" class="form-label"
                           >Please select payment method:</label
@@ -126,13 +126,15 @@
 
                     <div class="col-md-6">
                     <label for="inputEmail5" class="form-label">Amount Paid</label>
-                    <input type="number" v-model="form.cash" class="form-control" id="inputEmail5">
+                    <input type="number" :disabled="!form.payment_method" v-model="form.cash" class="form-control" id="inputEmail5">
                     </div>
                     <div class="col-md-6">
                     <label for="inputPassword5" class="form-label">Balance</label><br>
                     
-                     <h6>{{payableAmount}}</h6>
-                    </div>        
+                     <h6 v-if="lastmonthBalance < 0">{{payableOverAmount}}</h6>
+                     <h6 v-else>{{payableAmount}}</h6>
+                    </div> 
+                    <button v-if="lastmonthBalance < 0" @click.prevent="applyOverPayment" :disabled="!form.cash">Apply Overpayment</button>       
                     <div class="row mb-3"></div>
                     <div class="col-lg-12 felx mt-4 row">
                         <div class="col-sm-6 col-lg-6">
@@ -158,6 +160,8 @@
  import TheMaster from '@/components/dashboard/TheMaster.vue'
  import axios from 'axios';
  import Swal from 'sweetalert2';
+ import moment from 'moment';
+
  const toast = Swal.mixin({
       toast: true,
       position: 'top-end',
@@ -181,6 +185,9 @@ export default{
             balance: '',
             total: '',
             isAmountValid: true,
+            lastmonthstatement: [],
+            lastmonthBalance: '',
+            overPayment: false,
 
             form:
             {
@@ -237,7 +244,7 @@ export default{
         printWindow.print();
       },
 
-      buildReceiptContent() {
+      buildReceiptContent(refNo) {
         // Build the HTML content for the receipt
         const receiptHTML = `
         <!DOCTYPE html>
@@ -245,122 +252,132 @@ export default{
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>INGO PROPERTIES</title>
+          <title>Receipt Of Payment</title>
           <style>
             body {
-              font-family: monospace;
-              font-size: 12px;
+              font-family: Arial, sans-serif;
               margin: 0;
+              padding: 0;
+              background-color: #f5f5f5;
             }
-            table, th, td {
+            .receipt {
+              max-width: 600px;
+              margin: 20px auto;
+              padding: 20px;
+              background-color: #fff;
+              border: 2px solid #ccc;
+              border-radius: 10px;
+            }
+            .receipt-header {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .receipt-header h1 {
+              margin: 10px 0;
+              color: #333;
+            }
+            .receipt-info {
+              margin-bottom: 20px;
+            }
+            .receipt-info p {
+              margin: 5px 0;
+              color: #555;
+            }
+            .receipt-table {
+              width: 100%;
               border-collapse: collapse;
+              margin-bottom: 20px;
             }
-            th, td {
-              padding: 5px;
+            .receipt-table th, .receipt-table td {
+              padding: 8px;
+              border-bottom: 1px solid #ccc;
+            }
+            .receipt-table th {
               text-align: left;
+              background-color: #f2f2f2;
+              color: #333;
             }
-            .header {
+            .receipt-table td {
+              text-align: left;
+              color: #666;
+            }
+            .receipt-footer {
               text-align: center;
             }
-            .footer {
-              text-align: right;
+            .receipt-footer p {
+              margin: 5px 0;
+              color: #777;
             }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>INGO PROPERTIES</h1>
-            <p>P.O. BOX 1716-50100 KAKAMEGA Opp. Kenya Power Rd.</p>
-            <p>Mob: 0722 844 910</p>
-          </div>
-          <div>
-            <p>VAT: Barware - CHED</p>
-            <p>WAT NO. 0161493R</p>
-            <p>PIN: A0146635900</p>
-            <p>Tel: 0769 08207</p>
-          </div>
-          <div class="header">
-            <h3>FISCAL RECEIPT</h3>
-            <h3>ORIGINAL</h3>
-          </div>
-          <table>
-            <tr>
-              <th>QTY</th>
-              <th>Partic</th>
-              <th>Invoice Nr:</th>
-            </tr>
-            <tr v-for="(item) in cart" :key="productId">
-              <td>0001</td>
-              <td>Operator 01</td>
-              <td>000000000001196</td>
-            </tr>
-            <tr>
-              <td>A</td>
-              <td>00001 Art. 00001</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>Sum</td>
-              <td>1.000 pcs X 40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>700 7000</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>40500.00 A</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>1350 13500</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TOTAL</td>
-              <td>40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TOTAL A-16.00%</td>
-              <td>40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TOTAL TAX A</td>
-              <td>5586.21</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>TUTAL TAX</td>
-              <td>5586.21</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>CASH</td>
-              <td>40500.00</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>ITEMS NUMBER</td>
-              <td>1</td>
-            </tr>
-          </table>
-          <div class="footer">
-            <p>Printed on: ${new Date().toLocaleString()}</p>
-            <p>CU Serial No: FT ANY LIAB</p>
-            <p>CU Invoice N:0110691570000001198</p>
-            <p>EO&E No 4172</p>
+          <div class="receipt">
+            <div class="receipt-header">
+              <h1>April Properties</h1>
+              <p>Kakamega-Webuye Rd, ACK Building</p>
+              <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+            </div>
+            <div class="receipt-info">
+              <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+              <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
+              <p><strong>Rent Month:</strong> ${this.formatMonth(this.date)}</p>
+              <p><strong>Tenant:</strong> ${this.tenant}</p>
+              <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
+              <p><strong>Payment Mode:</strong> ${this.form.payment_method}</p>
+            </div>
+            <table class="receipt-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Rent Payment</td>
+                  <td>KES ${this.formatNumber(this.unitRent)}</td>
+                </tr>
+                <tr>
+                  <td>Garbage Collection Fee</td>
+                  <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
+                </tr>
+                <tr>
+                  <td>Security Fee</td>
+                  <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total:</th>
+                  <td>KES ${this.formatNumber(this.total)}</td>
+                </tr>
+                <tr>
+                  <th>Paid:</th>
+                  <td>KES ${this.formatNumber(this.payableOverAmount)}</td>
+                </tr>
+                <tr>
+                  <th>Balance:</th>
+                  <td>KES ${this.formatNumber(this.balance)}</td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="receipt-footer">
+              <p>You were served by ${this.user.first_name} ${this.user.last_name}.Thank you for your payment.</p>
+              <p>This receipt acknowledges the payment received for the above property management services.</p>
+            </div>
           </div>
         </body>
         </html>
+
+
         `;
 
         return receiptHTML;
+      },
+      formatMonth(value){
+          if(value){
+            return moment(String(value)).format('MMM YYYY');
+          }
       },      
       getStatement()
       {
@@ -370,6 +387,7 @@ export default{
               this.firstName = this.statement.tenant.first_name;
               this.lastName = this.statement.tenant.last_name;
               this.tenant = this.firstName + " " + this.lastName;
+              this.tenantId = this.statement.pms_tenant_id;
               this.phoneNumber = this.statement.tenant.phone_number;
               this.unitNumber = this.statement.tenant.pms_unit_id;
               this.refNo = this.statement.ref_no;
@@ -392,37 +410,53 @@ export default{
       {
         this.$router.push('/statements')
       },
-      settleTenant()
-      {
-       let self = this;  // Store the reference to this
-       let payload = {
-          mpesa_code: this.form.mpesa_code,
-          payment_method: this.form.payment_method,
-          paid: this.form.cash+this.paid,
-          balance: this.payableAmount
-       };
+      settleTenant() {
+          let self = this;
+          let payload; // Define payload variable outside the if-else blocks
 
-       axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
-          .then(function (response) {
-             console.log(response);
-             // self.step = 1;
-             toast.fire(
-                'Success!',
-                'Invoice updated!',
-                'success'
-             );
-          })
-          .catch(function (error) {
-             console.log(error);
-             // Swal.fire(
-             //    'error!',
-             //    // phone_error + id_error + pass_number,
-             //    'error'
-             // )
-          });
+          if (this.lastmonthBalance >= 0) {
+              payload = {
+                  mpesa_code: this.form.mpesa_code,
+                  payment_method: this.form.payment_method,
+                  paid: this.paid + this.form.cash,
+                  balance: this.payableAmount
+              };
+          } else {
+              payload = {
+                  mpesa_code: this.form.mpesa_code,
+                  payment_method: this.form.payment_method,
+                  paid: this.paid,
+                  balance: this.payableOverAmount
+              };
+          }
 
-       this.$router.push('/statements')        
-      },      
+          if(this.lastmonthBalance < 0)
+          {
+            this.updateLastMonthStatement();
+          }
+
+          axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
+              .then(function(response) {
+                  console.log(response);
+                  // self.step = 1;
+                  toast.fire(
+                      'Success!',
+                      'Invoice updated!',
+                      'success'
+                  );
+              })
+              .catch(function(error) {
+                  console.log(error);
+                  // Swal.fire(
+                  //    'error!',
+                  //    // phone_error + id_error + pass_number,
+                  //    'error'
+                  // )
+              });
+
+          this.$router.push('/statements')
+      },
+      
       submit() {
        let self = this;  // Store the reference to this
        let payload = {
@@ -432,9 +466,12 @@ export default{
           balance: this.payableAmount
        };
 
-       axios.put("/api/pmsstatement/" + this.$route.params.id, payload)
+       axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
           .then(function (response) {
              console.log(response);
+             this.statement = this.response.data.statement;
+             this.paid = this.statement.paid;
+             this.balance = this.statement.balance;
              // self.step = 1;
              toast.fire(
                 'Success!',
@@ -453,31 +490,86 @@ export default{
 
        this.$router.push('/statements');
       },
-
-      formatNumber(value) {
-        // Use the toLocaleString method to format the number with commas and decimal places
-        return value.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
+      checkLastMonthStatement() {
+          axios.get('/api/pmslastmonthtenantstatements/' + this.$route.params.tenantId)
+              .then((response) => {
+                  if (response.data?.pmslastmonthtenantstatements?.length > 0) {
+                      this.lastmonthstatement = response.data.pmslastmonthtenantstatements[0];
+                      this.lastmonthBalance = this.lastmonthstatement.balance;
+                      console.log("OverPayment", this.lastmonthstatement);
+                  } else {
+                      console.log("No last month statement found for the tenant.");
+                  }
+              })
+              .catch((error) => {
+                  console.error("Error fetching last month tenant statements:", error);
+              });
       },
+      updateLastMonthStatement() {
+          axios.put('/api/pmslastmonthtenantstatement/' + this.$route.params.tenantId)
+              .then((response) => {
+                      console.log("Tenant.", response);
+              })
+              .catch((error) => {
+                  console.error("Error fetching last month tenant statements:", error);
+              });
+      },
+      applyOverPayment()
+      {
+        this.overPayment = true;
+        this.newTotal =  this.total + this.lastmonthstatement.balance;
+        this.paid = -this.lastmonthstatement.balance + this.form.cash;
+        console.log("changed", this.newTotal)
+      },
+      formatNumber(value) {
+            // Check if the value is not a number
+            if (isNaN(value)) {
+                return value; // Return as it is
+            }
+            
+            // Convert the value to a string
+            let stringValue = value.toString();
+
+            // Split the string into integer and decimal parts
+            let parts = stringValue.split('.');
+
+            // Format the integer part with commas
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+            // If there's a decimal part, limit it to 2 decimal places
+            if (parts.length > 1) {
+                parts[1] = parts[1].substring(0, 2);
+            } else {
+                parts.push('00'); // If no decimal part exists, append '00'
+            }
+
+            // Join the parts back together with a decimal point
+            return parts.join('.');
+        },
     },
     mounted()
     {
       this.getStatement();
       this.getUnit();
+      this.checkLastMonthStatement();
+      this.user = JSON.parse(localStorage.getItem('user'));      
     },
     computed: {
         payableAmount() {
-          if (this.paid > 0) {
-            return this.balance - this.form.cash;
-          }
-          else
-          {
-             return this.total - this.form.cash; // Multiply inputValue by 2 (change this multiplier as needed)
-          }
+
+            if (this.paid > 0) {
+              return this.balance - this.form.cash;
+            }
+            else
+            {
+               return this.total - this.form.cash; // Multiply inputValue by 2 (change this multiplier as needed)
+            } 
+          
        
         },
+        payableOverAmount() {
+            return this.total - this.paid; // Multiply inputValue by 2 (change this multiplier as needed                              
+        },         
     },
 }
 </script>

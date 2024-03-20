@@ -109,6 +109,7 @@ Route::get('pmsunit/{id}', [PmsUnitController::class, 'single']);
 Route::get('pmstenant/{id}', [PmsTenantController::class, 'single']);
 Route::get('pmsexpense/{id}', [PmsExpenseController::class, 'single']);
 Route::get('pmsstatement/{id}', [PmsStatementController::class, 'single']);
+
 //property statements
 Route::get('pmspropertystatements/{id}', [PmsStatementController::class, 'propertyStatements']);
 Route::get('pmslastmonthpropertystatements/{id}', [PmsStatementController::class, 'propertyLastMonthStatements']);
@@ -156,6 +157,7 @@ Route::put('pmstenant/{id}', [PmsTenantController::class, 'update']);
 Route::put('pmsexpense/{id}', [PmsExpenseController::class, 'update']);
 Route::put('pmsstatement/{id}', [PmsStatementController::class, 'update']);
 Route::put('pmssettlestatement/{id}', [PmsStatementController::class, 'settle']);
+Route::put('pmslastmonthtenantstatement/{id}', [PmsStatementController::class, 'updateTenantLastMonthStatement']);
 
 Route::delete('property/{id}', [PropertyController::class, 'destroy']);
 Route::delete('category/{id}', [CategoryController::class, 'destroy']);

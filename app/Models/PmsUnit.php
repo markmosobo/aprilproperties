@@ -19,7 +19,9 @@ class PmsUnit extends Model
         'garbage_fee',
         'security_fee',
         'water_meter',
+        'water_deposit',
         'electricity_meter',
+        'electricity_deposit',
         'status'
     ];  
 

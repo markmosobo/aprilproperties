@@ -23,7 +23,9 @@ class PmsUnitController extends Controller
             'garbage_fee' => $request->garbage_fee,
             'security_fee' => $request->security_fee,
             'water_meter' => $request->water_meter,
-            'electricity_meter' => $request->electricity_meter
+            'water_deposit' => $request->water_deposit,
+            'electricity_meter' => $request->electricity_meter,
+            'electricity_deposit' => $request->electricity_deposit
         ]);
 
     }
