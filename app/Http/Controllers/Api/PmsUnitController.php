@@ -41,6 +41,17 @@ class PmsUnitController extends Controller
         ], 200);
     }
 
+    public function vacantUnits(Request $request, $id)
+    {
+        $units = PmsUnit::where('pms_property_id', $id)->where('status', 0)->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Units",
+            'units' => $units
+        ], 200);
+    }
+
     public function single(Request $request, $id)
     {
         $unit = PmsUnit::where('id', $id)->get();

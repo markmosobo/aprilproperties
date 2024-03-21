@@ -122,6 +122,9 @@
                          </select>
  
                          <div class="invalid-feedback">Please select a unit!</div>
+                         <div v-if="showNoUnitsMessage" class="text-danger">No units available for selected property.</div>
+
+
                       </div>
                    </div>                     
                 </div>
@@ -285,141 +288,153 @@
           this.submit();          
        },
       buildReceiptContent(refNo) {
+        // Determine whether to include the row
+        const showGarbageFeeRow = this.garbage_fee !== 0;
+        const showSecurityFeeRow = this.security_fee !== 0;
+        const showElectricityDepositRow = this.electricity_deposit !== 0;
+        const showWaterDepositRow = this.water_deposit !== 0;
         // Build the HTML content for the receipt
         const receiptHTML = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Receipt Of Payment</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 0;
-              background-color: #f5f5f5;
-            }
-            .receipt {
-              max-width: 600px;
-              margin: 20px auto;
-              padding: 20px;
-              background-color: #fff;
-              border: 2px solid #ccc;
-              border-radius: 10px;
-            }
-            .receipt-header {
-              text-align: center;
-              margin-bottom: 20px;
-            }
-            .receipt-header h1 {
-              margin: 10px 0;
-              color: #333;
-            }
-            .receipt-info {
-              margin-bottom: 20px;
-            }
-            .receipt-info p {
-              margin: 5px 0;
-              color: #555;
-            }
-            .receipt-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 20px;
-            }
-            .receipt-table th, .receipt-table td {
-              padding: 8px;
-              border-bottom: 1px solid #ccc;
-            }
-            .receipt-table th {
-              text-align: left;
-              background-color: #f2f2f2;
-              color: #333;
-            }
-            .receipt-table td {
-              text-align: left;
-              color: #666;
-            }
-            .receipt-footer {
-              text-align: center;
-            }
-            .receipt-footer p {
-              margin: 5px 0;
-              color: #777;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="receipt">
-            <div class="receipt-header">
-              <h1>April Properties</h1>
-              <p>Kakamega-Webuye Rd, ACK Building</p>
-              <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
-            </div>
-            <div class="receipt-info">
-              <p><strong>Invoice Number:</strong> ${this.refNo}</p>
-              <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
-              <p><strong>For:</strong> ${this.details}</p>
-              <p><strong>Payment Mode:</strong> ${this.form.payment_method}</p>
-              <p><strong>Property:</strong> ${this.name}</p>
-              <p><strong>Tenant:</strong> ${this.tenant}</p>
-            </div>
-            <table class="receipt-table">
-              <thead>
-                <tr>
-                  <th>Description</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Rent Deposit</td>
-                  <td>KES ${this.formatNumber(this.deposit)}</td>
-                </tr>
-                <tr>
-                  <td>Monthly Rent</td>
-                  <td>KES ${this.formatNumber(this.monthly_rent)}</td>
-                </tr>
-                <tr>
-                  <td>Security Fee</td>
-                  <td>KES ${this.formatNumber(this.security_fee)}</td>
-                </tr>
-                <tr>
-                  <td>Garbage Collection Fee</td>
-                  <td>KES ${this.formatNumber(this.garbage_fee)}</td>
-                </tr>  
-                <tr>
-                  <td>Electricity Deposit</td>
-                  <td>KES ${this.formatNumber(this.electricity_deposit)}</td>
-                </tr>
-                <tr>
-                  <td>Water Deposit</td>
-                  <td>KES ${this.formatNumber(this.water_deposit)}</td>
-                </tr>                                              
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Total Amount Due:</th>
-                  <td>KES ${this.formatNumber(this.depositRent)}</td>
-                </tr>
-                <tr>
-                  <th>Amount Paid:</th>
-                  <td>KES ${this.formatNumber(this.form.cash)}</td>
-                </tr>
-                <tr>
-                  <th>Balance:</th>
-                  <td>KES ${this.formatNumber(this.payableAmount)}</td>
-                </tr>
-              </tfoot>
-            </table>
-            <div class="receipt-footer">
-              <p>You were served by ${this.user.first_name} ${this.user.last_name}.Thank you for your payment.</p>
-              <p>This receipt acknowledges the payment received for the above property management services.</p>
-            </div>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Receipt Of Payment</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      margin: 0;
+                      padding: 0;
+                      background-color: #f5f5f5;
+                      color: #333;
+                  }
+                  .container {
+                      max-width: 600px;
+                      margin: 20px auto;
+                      padding: 20px;
+                      background-color: #fff;
+                      border: 2px solid #ccc;
+                      border-radius: 10px;
+                      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                  }
+                  .header {
+                      text-align: center;
+                      margin-bottom: 20px;
+                  }
+                  .header h1 {
+                      margin: 10px 0;
+                      color: #333;
+                  }
+                  .info {
+                      margin-bottom: 20px;
+                  }
+                  .info p {
+                      margin: 5px 0;
+                      color: #555;
+                  }
+                  .table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin-bottom: 20px;
+                  }
+                  .table th, .table td {
+                      padding: 8px;
+                      border-bottom: 1px solid #ccc;
+                      text-align: left;
+                  }
+                  .table th {
+                      background-color: #f2f2f2;
+                      color: #333;
+                  }
+                  .table td {
+                      color: #666;
+                  }
+                  .footer {
+                      text-align: center;
+                      margin-top: 20px;
+                      color: #777;
+                  }
+              </style>
+          </head>
+          <body>
+          <div class="container">
+              <div class="header">
+                  <h1>April Properties</h1>
+                  <p>Kakamega-Webuye Rd, ACK Building</p>
+                  <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+              </div>
+              <div class="info">
+                  <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+                  <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
+                  <p><strong>For:</strong> ${this.details}</p>
+                  <p><strong>Payment Mode:</strong> ${this.form.payment_method}</p>
+                  <p><strong>Property:</strong> ${this.name}</p>
+                  <p><strong>Tenant:</strong> ${this.tenant}</p>
+              </div>
+              <table class="table">
+                  <thead>
+                  <tr>
+                      <th>Description</th>
+                      <th>Amount</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr>
+                      <td>Rent Deposit</td>
+                      <td>KES ${this.formatNumber(this.deposit)}</td>
+                  </tr>
+                  <tr>
+                      <td>Monthly Rent</td>
+                      <td>KES ${this.formatNumber(this.monthly_rent)}</td>
+                  </tr>
+                  ${showGarbageFeeRow ? `
+                  <tr>
+                      <td>Garbage Collection Fee</td>
+                      <td>KES ${this.formatNumber(this.garbage_fee)}</td>
+                  </tr>
+                  ` : ''}
+                  ${showSecurityFeeRow ? `
+                  <tr>
+                      <td>Security Fee</td>
+                      <td>KES ${this.formatNumber(this.security_fee)}</td>
+                  </tr>
+                  ` : ''}
+                  ${showElectricityDepositRow ? `
+                  <tr>
+                      <td>Electricity Deposit</td>
+                      <td>KES ${this.formatNumber(this.electricity_deposit)}</td>
+                  </tr>
+                  ` : ''}
+                  ${showWaterDepositRow ? `
+                  <tr>
+                      <td>Water Deposit</td>
+                      <td>KES ${this.formatNumber(this.water_deposit)}</td>
+                  </tr>
+                  ` : ''}
+                  </tbody>
+                  <tfoot>
+                  <tr>
+                      <th>Total Amount Due:</th>
+                      <td>KES ${this.formatNumber(this.depositRent)}</td>
+                  </tr>
+                  <tr>
+                      <th>Amount Paid:</th>
+                      <td>KES ${this.formatNumber(this.form.cash)}</td>
+                  </tr>
+                  <tr>
+                      <th>Balance:</th>
+                      <td>KES ${this.formatNumber(this.payableAmount)}</td>
+                  </tr>
+                  </tfoot>
+              </table>
+              <div class="footer">
+                  <p>You were served by ${this.user.first_name} ${this.user.last_name}. Thank you for your payment.</p>
+                  <p>This receipt acknowledges the payment received for the above property management services.</p>
+              </div>
           </div>
-        </body>
-        </html>
+          </body>
+          </html>
 
 
         `;
@@ -444,7 +459,7 @@
          reader.readAsDataURL(file);
        },
        getUnits() {
-             axios.get('/api/pmsunits/'+this.form.pms_property_id).then((response) => {
+             axios.get('/api/pmsvacantunits/'+this.form.pms_property_id).then((response) => {
      
              this.propunits = response.data.units;
              console.log("props", response)
@@ -536,11 +551,11 @@
             this.details = this.statement.details;
             console.log("tenant-statement", this.propertyId);
             
-            toast.fire(
-              'Success!',
-              'Invoice saved!',
-              'success'
-            );
+            // toast.fire(
+            //   'Success!',
+            //   'Invoice saved!',
+            //   'success'
+            // );
 
             // Returning statement data to be used in printReceipt method
             return this.statement;
@@ -599,6 +614,11 @@
 
           // Trigger the print dialog
           printWindow.print();
+          toast.fire(
+              'Success!',
+              'Invoice saved!',
+              'success'
+            );
         } catch (error) {
           // Handle any errors that occurred during submission or printing
           console.error("Error submitting statement or printing receipt:", error);
@@ -609,12 +629,25 @@
 
 
       formatNumber(value) {
-        // Use the toLocaleString method to format the number with commas and decimal places
-        return value.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-      },       
+          // Check if the value is null or undefined
+          if (value == null) return '';
+
+          // Convert value to string
+          let stringValue = value.toString();
+
+          // Split the string into integer and decimal parts
+          let [integerPart, decimalPart] = stringValue.split('.');
+
+          // Add commas to the integer part
+          integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+          // Add trailing zeros to the decimal part if needed
+          if (decimalPart == null) decimalPart = '00';
+          else if (decimalPart.length === 1) decimalPart += '0';
+
+          // Combine integer and decimal parts with a dot
+          return `${integerPart}.${decimalPart}`;
+        },       
  
     },
     mounted() {
@@ -632,6 +665,9 @@
           // }
        
         },
+        showNoUnitsMessage() {
+          return !this.propunits || this.propunits.length === 0;
+        }
     },    
  
  }

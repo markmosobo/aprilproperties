@@ -194,7 +194,9 @@ export default{
               payment_method: '',
               cash: '',
               mpesa_code: '',
-              balance: ''
+              balance: '',
+              amountPaid: '',
+              balAmount: ''
             }
         }
     },
@@ -203,48 +205,148 @@ export default{
     }, 
     methods:
     {
-      settleReceipt() {
-        this.settleTenant();
-        this.$router.push('/statements')
+      async settleReceipt() {
+          // Call settleTenant method and wait for it to complete
+          await this.settleTenant();
 
-        // Open a new window for printing
-        const printWindow = window.open("", "_blank");
+          // Proceed with the rest of the function after settleTenant completes
+          this.$router.push('/statements');
 
-        // Build the content for printing
-        const receiptContent = this.buildReceiptContent();
+          // Open a new window for printing
+          const printWindow = window.open("", "_blank");
 
-        // Write the content to the new window
-        printWindow.document.write(receiptContent);
+          // Build the content for printing
+          const receiptContent = this.buildReceiptContent();
 
-        // Close the document stream
-        printWindow.document.close();
+          // Write the content to the new window
+          printWindow.document.write(receiptContent);
 
-        // Trigger the print dialog
-        printWindow.print();
+          // Close the document stream
+          printWindow.document.close();
+
+          // Trigger the print dialog
+          printWindow.print();
+          toast.fire(
+              'Success!',
+              'Invoice updated!',
+              'success'
+          );
+      },
+      settleTenant() {
+          return new Promise((resolve, reject) => {
+              let payload; // Define payload variable outside the if-else blocks
+
+              if (this.lastmonthBalance >= 0) {
+                  payload = {
+                      mpesa_code: this.form.mpesa_code,
+                      payment_method: this.form.payment_method,
+                      paid: this.paid + this.form.cash,
+                      balance: this.payableAmount
+                  };
+              } else {
+                  payload = {
+                      mpesa_code: this.form.mpesa_code,
+                      payment_method: this.form.payment_method,
+                      paid: this.paid,
+                      balance: this.payableOverAmount
+                  };
+              }
+
+              if (this.lastmonthBalance < 0) {
+                  this.updateLastMonthStatement();
+              }
+
+              axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
+                  .then(response => {
+                      console.log(response);
+                      this.statement = response.data.statement;
+                      this.amountPaid = this.statement.paid;
+                      this.balAmount = this.statement.balance;
+                      // self.step = 1;
+                      // toast.fire(
+                      //     'Success!',
+                      //     'Invoice updated!',
+                      //     'success'
+                      // );
+                      resolve(); // Resolve the promise when settleTenant completes successfully
+                  })
+                  .catch(error => {
+                      console.log(error);
+                      reject(error); // Reject the promise if there's an error
+                  });
+          });
       },
 
+
+
+      submit() {
+    return new Promise((resolve, reject) => {
+        let self = this;  // Store the reference to this
+        let payload = {
+            mpesa_code: this.form.mpesa_code,
+            payment_method: this.form.payment_method,
+            paid: this.form.cash,
+            balance: this.payableAmount
+        };
+
+        axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
+            .then(function (response) {
+                console.log(response);
+                self.statement = response.data.statement;
+                self.amountPaid = self.statement.paid;
+                self.balAmount = self.statement.balance;
+                // self.step = 1;
+                // toast.fire(
+                //     'Success!',
+                //     'Invoice updated!',
+                //     'success'
+                // );
+                resolve(); // Resolve the promise once submission is successful
+            })
+            .catch(function (error) {
+                console.log(error);
+                reject(error); // Reject the promise if there's an error during submission
+            });
+
+        this.$router.push('/statements'); // Move this line into the promise chain
+    });
+      },
 
       printReceipt() {
-        this.submit();
-        this.$router.push('/statements')
+          this.submit().then(() => {
+              // Continue with the rest of the function after submit completes
+              this.$router.push('/statements');
 
-        // Open a new window for printing
-        const printWindow = window.open("", "_blank");
+              // Open a new window for printing
+              const printWindow = window.open("", "_blank");
 
-        // Build the content for printing
-        const receiptContent = this.buildReceiptContent();
+              // Build the content for printing
+              const receiptContent = this.buildReceiptContent();
 
-        // Write the content to the new window
-        printWindow.document.write(receiptContent);
+              // Write the content to the new window
+              printWindow.document.write(receiptContent);
 
-        // Close the document stream
-        printWindow.document.close();
+              // Close the document stream
+              printWindow.document.close();
 
-        // Trigger the print dialog
-        printWindow.print();
+              // Trigger the print dialog
+              printWindow.print();
+              toast.fire(
+                  'Success!',
+                  'Invoice updated!',
+                  'success'
+              );
+          }).catch(error => {
+              console.error("Error during submission:", error);
+              // Handle error if needed
+          });
       },
 
+
       buildReceiptContent(refNo) {
+         // Determine whether to include the row
+        const showGarbageFeeRow = this.unitGarbageFee !== 0;
+        const showSecurityFeeRow = this.unitSecurityFee !== 0;
         // Build the HTML content for the receipt
         const receiptHTML = `
         <!DOCTYPE html>
@@ -337,27 +439,34 @@ export default{
                   <td>Rent Payment</td>
                   <td>KES ${this.formatNumber(this.unitRent)}</td>
                 </tr>
+                <!-- Conditionally include garbage collection fee row -->
+                ${showGarbageFeeRow ? `
                 <tr>
                   <td>Garbage Collection Fee</td>
                   <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
                 </tr>
+                ` : ''}
+                </tr>
+                <!-- Conditionally include security fee row -->
+                ${showSecurityFeeRow ? `
                 <tr>
                   <td>Security Fee</td>
                   <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
                 </tr>
+                ` : ''}
               </tbody>
               <tfoot>
                 <tr>
-                  <th>Total:</th>
+                  <th>Total Amount Due:</th>
                   <td>KES ${this.formatNumber(this.total)}</td>
                 </tr>
                 <tr>
-                  <th>Paid:</th>
-                  <td>KES ${this.formatNumber(this.payableOverAmount)}</td>
+                  <th>Amount Paid:</th>
+                  <td>KES ${this.formatNumber(this.amountPaid)}</td>
                 </tr>
                 <tr>
                   <th>Balance:</th>
-                  <td>KES ${this.formatNumber(this.balance)}</td>
+                  <td>KES ${this.formatNumber(this.balAmount)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -390,6 +499,7 @@ export default{
               this.tenantId = this.statement.pms_tenant_id;
               this.phoneNumber = this.statement.tenant.phone_number;
               this.unitNumber = this.statement.tenant.pms_unit_id;
+              this.getUnit(this.unitNumber);            
               this.refNo = this.statement.ref_no;
               this.details = this.statement.details;
               this.date = this.statement.created_at;
@@ -400,96 +510,27 @@ export default{
               console.log("statement", this.statement)
           })
       },
-      getUnit()
-      {
-        axios.get('/api/pmsunit/'+parseInt(this.unitNumber)).then((response) => {
-          console.log("unit", response)
-        })
+      getUnit(unitNumber) {
+          axios.get('/api/pmsunit/' + parseInt(unitNumber))
+              .then((response) => {
+                this.unit = response.data.unit[0];
+                this.unitName = this.unit.unit_number;
+                this.unitRent = this.unit.monthly_rent;
+                this.unitSecurityFee = this.unit.security_fee;
+                this.unitGarbageFee = this.unit.garbage_fee;
+                this.unitType = this.unit.type;
+                  console.log("unit", this.unit);
+                  // Further processing of the response data if needed
+              })
+              .catch((error) => {
+                  console.error("Error fetching unit:", error);
+              });
       },
       cancel()
       {
         this.$router.push('/statements')
       },
-      settleTenant() {
-          let self = this;
-          let payload; // Define payload variable outside the if-else blocks
 
-          if (this.lastmonthBalance >= 0) {
-              payload = {
-                  mpesa_code: this.form.mpesa_code,
-                  payment_method: this.form.payment_method,
-                  paid: this.paid + this.form.cash,
-                  balance: this.payableAmount
-              };
-          } else {
-              payload = {
-                  mpesa_code: this.form.mpesa_code,
-                  payment_method: this.form.payment_method,
-                  paid: this.paid,
-                  balance: this.payableOverAmount
-              };
-          }
-
-          if(this.lastmonthBalance < 0)
-          {
-            this.updateLastMonthStatement();
-          }
-
-          axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
-              .then(function(response) {
-                  console.log(response);
-                  // self.step = 1;
-                  toast.fire(
-                      'Success!',
-                      'Invoice updated!',
-                      'success'
-                  );
-              })
-              .catch(function(error) {
-                  console.log(error);
-                  // Swal.fire(
-                  //    'error!',
-                  //    // phone_error + id_error + pass_number,
-                  //    'error'
-                  // )
-              });
-
-          this.$router.push('/statements')
-      },
-      
-      submit() {
-       let self = this;  // Store the reference to this
-       let payload = {
-          mpesa_code: this.form.mpesa_code,
-          payment_method: this.form.payment_method,
-          paid: this.form.cash,
-          balance: this.payableAmount
-       };
-
-       axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
-          .then(function (response) {
-             console.log(response);
-             this.statement = this.response.data.statement;
-             this.paid = this.statement.paid;
-             this.balance = this.statement.balance;
-             // self.step = 1;
-             toast.fire(
-                'Success!',
-                'Invoice updated!',
-                'success'
-             );
-          })
-          .catch(function (error) {
-             console.log(error);
-             // Swal.fire(
-             //    'error!',
-             //    // phone_error + id_error + pass_number,
-             //    'error'
-             // )
-          });
-
-       this.$router.push('/statements');
-      },
       checkLastMonthStatement() {
           axios.get('/api/pmslastmonthtenantstatements/' + this.$route.params.tenantId)
               .then((response) => {
