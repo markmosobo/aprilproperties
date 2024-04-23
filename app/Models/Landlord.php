@@ -12,6 +12,8 @@ class Landlord extends Model
         'first_name',
         'last_name',
         'email',
-        'phone_no'
+        'phone_no',
+        'id_number',
+        'address'
     ];
 }

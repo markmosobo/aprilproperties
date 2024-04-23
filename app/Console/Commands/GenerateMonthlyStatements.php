@@ -81,6 +81,7 @@ class GenerateMonthlyStatements extends Command
                     $startOfMonth = Carbon::now()->startOfMonth();
                     $formattedDate = $startOfMonth->format('M Y');
                     $tenantUnit = $tenant->unit_number;
+                    $unitId = $tenant->pms_unit_id;
                     $orgDate = now();
                     $date = str_replace('-"', '/', $orgDate);
                     $newDate = date("YmdHis", strtotime($date));
@@ -90,6 +91,7 @@ class GenerateMonthlyStatements extends Command
                         'ref_no' => $refno,
                         'pms_property_id' => $tenant->pms_property_id,
                         'pms_tenant_id' => $tenant->id,
+                        'pms_unit_id' => $unitId,
                         'details' => "Rent-".$tenant->unit->unit_number."-".$formattedDate,
                         'status' => 0, // status for rented units
                         'total' => $monthlyTotal, // You can set the default total
@@ -153,7 +155,7 @@ class GenerateMonthlyStatements extends Command
                     PmsStatement::create([
                         'ref_no' => $refno,
                         'pms_property_id' => $vacant->pms_property_id,
-                        // 'pms_tenant_id' => 0,
+                        'pms_unit_id' => $vacant->pms_unit_id,
                         'details' => "Rent-".$vacant->unit_number."-".$formattedDate,
                         'status' => 2, // status for vacant units
                         'total' => 0, // You can set the default total

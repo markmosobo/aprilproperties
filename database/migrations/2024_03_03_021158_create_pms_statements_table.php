@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('ref_no')->nullable();
             $table->integer('pms_property_id')->unsigned();
             $table->integer('pms_tenant_id')->unsigned()->nullable();            
+            $table->integer('pms_unit_id')->unsigned()->nullable();            
             $table->foreign('pms_property_id')
             ->references('id')
             ->on('pms_properties')
@@ -25,6 +26,10 @@ return new class extends Migration
             $table->foreign('pms_tenant_id')
             ->references('id')
             ->on('pms_tenants')
+            ->onDelete('cascade'); 
+            $table->foreign('pms_unit_id')
+            ->references('id')
+            ->on('pms_units')
             ->onDelete('cascade'); 
             $table->string('details')->nullable(); 
             $table->string('payment_method')->nullable(); 

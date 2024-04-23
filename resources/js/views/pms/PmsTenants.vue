@@ -35,6 +35,18 @@
                             Add Tenant
                           </a>
                       </router-link>
+
+                      <router-link to="/add-pmscurrenttenant" custom v-slot="{ href, navigate, isActive }">
+                          <a
+                            :href="href"
+                            :class="{ active: isActive }"
+                            class="btn btn-sm btn-primary rounded-pill"
+                            style="background-color: orange; border-color: orange;"
+                            @click="navigate"
+                          >
+                            Add Renting Tenant
+                          </a>
+                      </router-link>
             
                       </p>
     

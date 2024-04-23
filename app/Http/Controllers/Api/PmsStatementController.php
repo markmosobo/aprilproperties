@@ -29,6 +29,7 @@ class PmsStatementController extends Controller
                 'ref_no' => $refno,
                 'pms_property_id' => $request->pms_property_id,
                 'pms_tenant_id' => $request->pms_tenant_id,
+                'pms_unit_id' => $request->pms_unit_id,
                 'details' => "Rent+Deposit - ".$request->unit_number."-".$formattedDate,
                 'total' => $request->total,
                 'paid' => $request->paid,
@@ -146,7 +147,7 @@ class PmsStatementController extends Controller
 
     public function propertyStatements(Request $request, $id)
     {
-        $pmspropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->whereMonth('created_at', Carbon::now()->month)->get();
+        $pmspropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereMonth('created_at', Carbon::now()->month)->get();
 
         return response()->json([
             'status' => true,
@@ -157,7 +158,7 @@ class PmsStatementController extends Controller
 
     public function propertyLastMonthStatements(Request $request, $id)
     {
-        $pmslastmonthpropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->whereBetween('created_at',
+        $pmslastmonthpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
 
         return response()->json([
@@ -169,7 +170,7 @@ class PmsStatementController extends Controller
 
     public function propertyLastNinetyStatements(Request $request, $id)
     {
-        $pmslastninetypropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->whereBetween('created_at',
+        $pmslastninetypropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->subDays(89)->startOfDay(), Carbon::now()->endOfDay()])->get();
 
         return response()->json([
@@ -181,7 +182,7 @@ class PmsStatementController extends Controller
 
     public function propertyYearStatements(Request $request, $id)
     {
-        $pmsyearpropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->whereBetween('created_at',
+        $pmsyearpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])->get();
 
         return response()->json([
@@ -193,7 +194,7 @@ class PmsStatementController extends Controller
 
      public function propertyQuarterStatements(Request $request, $id)
     {
-        $pmsquarterpropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->whereBetween('created_at',
+        $pmsquarterpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->startOfQuarter(), Carbon::now()->endOfDay()])->get();
 
         return response()->json([
@@ -205,7 +206,7 @@ class PmsStatementController extends Controller
 
      public function propertyLastYearStatements(Request $request, $id)
     {
-        $pmslastyearpropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->whereBetween('created_at',
+        $pmslastyearpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()])->get();
 
         return response()->json([
@@ -217,7 +218,7 @@ class PmsStatementController extends Controller
 
     public function propertyAllStatements(Request $request, $id)
     {
-        $pmsallpropertystatements = PmsStatement::with('tenant','property')->where('pms_property_id', $id)->get();
+        $pmsallpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->get();
 
         return response()->json([
             'status' => true,
@@ -228,7 +229,7 @@ class PmsStatementController extends Controller
 
     public function tenantStatements(Request $request, $id)
     {
-        $pmstenantstatements = PmsStatement::with('tenant','property')->where('pms_tenant_id', $id)->whereMonth('created_at', Carbon::now()->month)->get();
+        $pmstenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->whereMonth('created_at', Carbon::now()->month)->get();
 
         return response()->json([
             'status' => true,
@@ -239,7 +240,7 @@ class PmsStatementController extends Controller
 
     public function tenantLastMonthStatements(Request $request, $id)
     {
-        $pmslastmonthtenantstatements = PmsStatement::with('tenant','property')->where('pms_tenant_id', $id)->whereBetween('created_at',
+        $pmslastmonthtenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->whereBetween('created_at',
         [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
 
         return response()->json([
@@ -251,7 +252,7 @@ class PmsStatementController extends Controller
 
     public function tenantLastNinetyStatements(Request $request, $id)
     {
-        $pmslastninetytenantstatements = PmsStatement::with('tenant','property')->where('pms_tenant_id', $id)->whereBetween('created_at',
+        $pmslastninetytenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->whereBetween('created_at',
         [Carbon::now()->subDays(89)->startOfDay(), Carbon::now()->endOfDay()])->get();
 
         return response()->json([
@@ -263,7 +264,7 @@ class PmsStatementController extends Controller
 
     public function tenantYearStatements(Request $request, $id)
     {
-        $pmsyeartenantstatements = PmsStatement::with('tenant','property')->where('pms_tenant_id', $id)->whereBetween('created_at',
+        $pmsyeartenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->whereBetween('created_at',
         [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])->get();
 
         return response()->json([
@@ -275,7 +276,7 @@ class PmsStatementController extends Controller
 
     public function tenantQuarterStatements(Request $request, $id)
     {
-        $pmsquartertenantstatements = PmsStatement::with('tenant','property')->where('pms_tenant_id', $id)->whereBetween('created_at',
+        $pmsquartertenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->whereBetween('created_at',
         [Carbon::now()->startOfQuarter(), Carbon::now()->endOfDay()])->get();
 
         return response()->json([
@@ -287,7 +288,7 @@ class PmsStatementController extends Controller
 
     public function tenantLastYearStatements(Request $request, $id)
     {
-        $pmslastyeartenantstatements = PmsStatement::with('tenant','property')->where('pms_tenant_id', $id)->whereBetween('created_at',
+        $pmslastyeartenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->whereBetween('created_at',
         [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()])->get();
 
         return response()->json([
@@ -299,7 +300,7 @@ class PmsStatementController extends Controller
 
     public function tenantAllStatements(Request $request, $id)
     {
-        $pmsalltenantstatements = PmsStatement::with('tenant','property')->where('pms_tenant_id', $id)->get();
+        $pmsalltenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->get();
 
         return response()->json([
             'status' => true,

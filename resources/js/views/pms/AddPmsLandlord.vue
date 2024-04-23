@@ -5,7 +5,7 @@
           <!-- General Form Elements -->
           <form @submit.prevent="">
           <fieldset v-if="step == 1">
-             <h5 class="card-title text-center">Add landlord</h5>
+             <h5 class="card-title text-center">Add Landlord</h5>
  
              <div class="row m-auto p-auto justify-content- g-3 needs-validation" novalidate="" autocomplete="off">
                 <div class="row  mb-3"></div>
@@ -77,6 +77,41 @@
                             id="title"
                             name="title"
                             v-model="form.phone_no"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter title!</div>
+                      </div>
+                   </div>
+
+                </div>
+
+                <div class="row mb-3"></div>
+                <div class="form-group row">
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Physical Address</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="Physical Address"
+                            id="title"
+                            name="title"
+                            v-model="form.address"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter title!</div>
+                      </div>
+                   </div>
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">National ID Number</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="National ID Number"
+                            id="title"
+                            name="title"
+                            v-model="form.id_number"
                             class="form-control"
                             required=""
                         />

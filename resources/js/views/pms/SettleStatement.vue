@@ -94,7 +94,7 @@
                         <div class="col-sm-10">
                             <select name="category" v-model="form.payment_method" class="form-select" id="">
                                 <option value="0" disabled>Select Payment</option>
-                                <option value="Mpesa" selected>MPESA (Till Number)</option>
+                                <option value="Mpesa" selected>MPESA (Paybill Number)</option>
                                 <option value="Cash">CASH</option>
                                 <option value="Bank">BANK</option>
 
@@ -141,9 +141,10 @@
                         <button @click.prevent="cancel()" class="btn btn-dark">Cancel</button>
                         </div>
                        <div class="col-sm-6 col-lg-6 text-end">
-                        <button @click.prevent="settleReceipt" type="submit" v-if="status == 0 && paid>0" class="btn btn-primary">Print Receipt</button>
-                        <button @click="printReceipt" v-else class="btn btn-primary">Print Receipt</button>
+                            <button @click.prevent="settleReceipt" type="submit" v-if="status == 0 && paid > 0" class="btn btn-darkgreen">Settle</button>
+                            <button @click="printReceipt" v-else class="btn btn-orange">Print Receipt</button>
                         </div>
+
                     </div>
                   </form>
                 
@@ -413,6 +414,8 @@ export default{
           </style>
         </head>
         <body>
+          <img src="@/assets/img/apex-logo.png" alt="Company Logo" style="display: block; margin: 0 auto; max-width: 100%;">
+
           <div class="receipt">
             <div class="receipt-header">
               <h1>April Properties</h1>
@@ -614,3 +617,18 @@ export default{
     },
 }
 </script>
+
+<style>
+  .btn-darkgreen {
+    background-color: darkgreen;
+    border-color: darkgreen;
+    color: #fff; /* Set text color to white */
+}
+
+.btn-orange {
+    background-color: orange;
+    border-color: orange;
+    color: #fff; /* Set text color to white */
+}
+
+</style>

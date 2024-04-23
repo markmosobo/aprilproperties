@@ -135,88 +135,9 @@
                     <!-- <button @click.prevent="prev()" class="btn btn-dark">Previous</button> -->
                 </div>
                 <div class="col-sm-6 col-lg-6 text-end">
-                    <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" @click.prevent="next()" class="btn btn-sm btn-primary rounded-pill">Proceed to Invoice</button>
+                    <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" @click.prevent="next()" class="btn btn-sm btn-primary rounded-pill">Submit</button>
                 </div>
             </div>
-          </fieldset>
-
-          <fieldset v-if="step == 2">
-                   <h5 class="card-title">Settle Invoice</h5>
-                  <div class="row">
-                    <div class="col-lg-12 col-md-4 label ">Rent & Deposit:<strong>KES {{formatNumber(depositRent)}}</strong></div>
-                    <!-- <div class="col-lg-9 col-md-8">{{form.first_name}} {{form.last_name}}</div> -->
-                  </div>                
-                    <form
-                    class="row g-3 needs-validation"
-                    novalidate=""
-                    method="post"
-                    autocomplete="off"
-                    >
-                    <div class="row mb-3"></div>
-                    <div class="form-group row">
-                      <input
-                        type="hidden"
-                        id="user_id"
-                        name="user_id"
-                        value="1"
-                        class="form-control"
-                      />
-                      <div class="col-sm-12">
-                        <label for="validationCustom04" class="form-label"
-                          >Please select payment method:</label
-                        >
-                        <div class="col-sm-10">
-                            <select name="category" v-model="form.payment_method" class="form-select" id="">
-                                <option value="0" disabled>Select Payment</option>
-                                <option value="Mpesa" selected>MPESA (Paybill Number)</option>
-                                <option value="Cash">CASH</option>
-                                <option value="Bank">BANK</option>
-
-                            </select>
-                          <div class="invalid-feedback">Please enter flight number!</div>
-                        </div>
-                      </div>
-                    </div>
-             
-                    <div class="row mb-3"></div>
-                    <div v-if="form.payment_method === 'Mpesa'" class="form-group row">
-                      <div class="col-sm-12">
-                        <label for="inputPassword" class="form-label">Please provide MPESA code</label>
-                        <div class="col-sm-10">
-                          <input
-                            type="decimal"
-                            placeholder="Transaction Code"
-                            v-model="form.mpesa_code"
-                            id="mpesa_code"
-                            name="mpesa_code"
-                            class="form-control"
-                            required=""
-                          />
-                          <div class="invalid-feedback">Please enter address!</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row mb-3"></div>
-
-                    <div class="col-md-6">
-                    <label for="inputEmail5" class="form-label">Amount Paid</label>
-                    <input type="number" v-model="form.cash" class="form-control" id="inputEmail5">
-                    </div>
-                    <div class="col-md-6">
-                    <label for="inputPassword5" class="form-label">Balance</label><br>
-                    
-                     <h6>{{formatNumber(payableAmount)}}</h6>
-                    </div>        
-                    <div class="row mb-3"></div>
-                    <div class="col-lg-12 felx mt-4 row">
-                        <div class="col-sm-6 col-lg-6">
-                        <button @click.prevent="prev()" class="btn btn-sm btn-dark rounded-pill">Previous</button>
-                        </div>
-                        <div class="col-sm-6 col-lg-6 text-end">
-                        <button @click.prevent="printReceipt()" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm rounded-pill btn-primary">Print Receipt</button>
-                        </div>
-                    </div>
-                  </form>
           </fieldset>
  
           </form>
@@ -270,7 +191,6 @@
           properties: [],
           depositRent: [],
           unitNumber: '',
-          unitId: '',
           tenantId: null, // Initialize tenantId
           user: [],
           deposit: '',
@@ -285,7 +205,7 @@
           this.step--;
        },
        next() {
-          this.step++;
+          // this.step++;
           this.submit();          
        },
       buildReceiptContent(refNo) {
@@ -489,7 +409,6 @@
                this.electricity_deposit = parseInt(this.unitinfo.electricity_deposit);
              this.depositRent = this.deposit + this.monthly_rent + this.garbage_fee + this.security_fee + this.water_deposit + this.electricity_deposit;
              this.unitNumber = this.unitinfo.unit_number;
-             this.unitId = this.unitinfo.id;
              console.log("unitinfo", response)
     
              });
@@ -526,7 +445,7 @@
              //    'error'
              // )
           });
-          // this.$router.push('/pmstenants')
+          this.$router.push('/pmstenants')
  
        },
         async submitStatement() {
@@ -539,8 +458,7 @@
               total: this.depositRent,
               pms_property_id: this.form.pms_property_id,
               unit_number: this.unitNumber,
-              pms_tenant_id: this.tenantId,
-              pms_unit_id: this.unitId
+              pms_tenant_id: this.tenantId
             };
 
             const response = await axios.post("api/pmsstatements", payload);
@@ -586,7 +504,7 @@
           try {
             const response = await axios.get('/api/pmstenant/' + parseInt(this.tenantId));
             console.log("tenant", response);
-            this.tenant = response.data.tenant;
+            this.tenant = response.data.tenant[0];
             this.tenant = this.tenant.first_name + " " + this.tenant.last_name;
             // Further processing of the response data if needed
           } catch (error) {

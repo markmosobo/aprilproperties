@@ -63,24 +63,25 @@
                         <thead>
                           <tr>
                             <th scope="col">Invoice</th>
-                            <th scope="col">Detail</th>
+                            <th scope="col">Unit</th>
+                            <th scope="col">Tenant</th>
                             <th scope="col">Due</th>
                             <th scope="col">Paid</th>
                             <th scope="col">Bal</th>
                             <th scope="col">Payment Mode</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Invoiced On</th>
+                            <th scope="col">Date</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr v-for="statement in statements" :key="statement.id">
                             <td>{{statement.ref_no}}</td>
-                            <td>{{statement.details}}</td>
+                            <td>{{statement.unit.unit_number ?? "N/A"}}</td>
+                            <td>{{statement.tenant.first_name}} {{statement.tenant.last_name}}</td> 
                             <td>{{formatNumber(statement.total)}}</td>
                             <td>{{formatNumber(statement.paid)}}</td>
                             <td>{{formatNumber(statement.balance)}}</td>
-                            <td>{{statement.payment_method}}</td>
                             <td>
                               <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Settled</span>
                               <span v-else class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Not Settled</span>

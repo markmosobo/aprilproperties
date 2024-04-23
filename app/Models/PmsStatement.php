@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\PmsProperty;
 use App\Models\PmsTenant;
+use App\Models\PmsUnit;
 
 class PmsStatement extends Model
 {
@@ -16,6 +17,7 @@ class PmsStatement extends Model
         'ref_no',
         'pms_property_id',
         'pms_tenant_id',
+        'pms_unit_id',
         'details',
         'total',
         'paid',
@@ -33,6 +35,11 @@ class PmsStatement extends Model
 
     public function property(){
         return $this->belongsTo(PmsProperty::class, 'pms_property_id');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(PmsUnit::class,'pms_unit_id');
     }
 
 }
