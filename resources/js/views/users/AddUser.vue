@@ -87,13 +87,16 @@
                 </div>
 
              </div>
+
+          <p class="mt-3">Users should change it after first time login. The default password is: <strong>aprilproperties</strong></p>
+
              <!--  button -->
              <div class="col-lg-12 felx mt-4 row">
                 <div class="col-sm-6 col-lg-6">
                     <!-- <button @click.prevent="prev()" class="btn btn-dark">Previous</button> -->
                 </div>
                 <div class="col-sm-6 col-lg-6 text-end">
-                    <button type="submit" @click.prevent="submit()" class="btn btn-sm btn-primary rounded-pill">Submit</button>
+                    <button type="submit" @click.prevent="submit()" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill">Submit</button>
                 </div>
             </div>
           </fieldset>
@@ -136,7 +139,7 @@
           form: {
           role_id: '',
           title: '',
-          password: 'IngoProperties'
+          password: 'password'
           
           },
           message: "",

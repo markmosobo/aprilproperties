@@ -15,7 +15,8 @@ class PmsProperty extends Model
         'name',
         'landlord_id',
         'units_no',
-        'commission'
+        'commission',
+        'fixed_commission',
     ];
 
     public function landlord()

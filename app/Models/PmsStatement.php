@@ -20,6 +20,7 @@ class PmsStatement extends Model
         'total',
         'paid',
         'balance',
+        'water_bill',
         'status',
         'payment_method',
         'mpesa_code',

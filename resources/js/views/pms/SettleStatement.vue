@@ -586,7 +586,7 @@ export default{
 
             // Join the parts back together with a decimal point
             return parts.join('.');
-        },
+      },
     },
     mounted()
     {

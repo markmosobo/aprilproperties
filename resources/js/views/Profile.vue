@@ -102,7 +102,7 @@
                     </div>
 
                     <div class="text-center">
-                      <button type="submit" class="btn btn-sm rounded-pill btn-primary">Save Changes</button>
+                      <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm rounded-pill btn-primary">Save Changes</button>
                     </div>
                   </form><!-- End Profile Edit Form -->
 
@@ -127,7 +127,7 @@
                     </div>
 
                     <div class="text-center">
-                      <button type="submit" class="btn btn-sm rounded-pill btn-primary">Change Password</button>
+                      <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm rounded-pill btn-primary">Change Password</button>
                     </div>
                   </form><!-- End Change Password Form -->
 

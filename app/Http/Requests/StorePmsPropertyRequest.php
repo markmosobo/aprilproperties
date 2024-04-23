@@ -27,7 +27,8 @@ class StorePmsPropertyRequest extends FormRequest
             'name' => 'required|max:255',
             'landlord_id' => 'required',
             'units_no' => 'required',
-            'commission' => 'required'
+            'commission' => 'sometimes',
+            'fixed_commission' => 'sometimes'
 
         ];
     }

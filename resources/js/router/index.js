@@ -75,6 +75,7 @@ import PmsUnits from '../views/pms/PmsUnits.vue'
 import AddPmsUnit from '../views/pms/AddPmsUnit.vue'
 import EditPmsUnit from '../views/pms/EditPmsUnit.vue'
 import ViewPmsUnit from '../views/pms/ViewPmsUnit.vue'
+import PmsTenant from '../views/pms/PmsTenant.vue'
 import EditPmsTenant from '../views/pms/EditPmsTenant.vue'
 import AddPmsExpense from '../views/pms/AddPmsExpense.vue'
 import EditPmsExpense from '../views/pms/EditPmsExpense.vue'
@@ -98,6 +99,7 @@ import PmsAllTenantStatements from '../views/pms/PmsAllTenantStatements.vue'
 import ViewStatement from '../views/pms/ViewStatement.vue'
 import EditStatement from '../views/pms/EditStatement.vue'
 import SettleStatement from '../views/pms/SettleStatement.vue'
+import InvoiceStatement from '../views/pms/InvoiceStatement.vue'
 
 function guardMyroute(to, from, next)
 {
@@ -522,7 +524,13 @@ const routes = [
         name: 'pmstenants',
         component: PmsTenants,
         beforeEnter : guardMyroute,
-    },    
+    },
+    {
+        path:'/pmstenant/:id',
+        name: 'pmstenant',
+        component: PmsTenant,
+        beforeEnter : guardMyroute,
+    },        
     {
         path:'/add-pmstenant',
         name: 'add-pmstenant',
@@ -667,6 +675,12 @@ const routes = [
         component: EditStatement,
         beforeEnter : guardMyroute,
     },
+    {
+        path:'/invoicestatement/:id',
+        name: 'invoicestatement',
+        component: InvoiceStatement,
+        beforeEnter : guardMyroute,
+    }, 
     {
         path:'/settlestatement/:id/:tenantId',
         name: 'settlestatement',

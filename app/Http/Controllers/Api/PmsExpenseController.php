@@ -14,7 +14,7 @@ class PmsExpenseController extends Controller
          $orgDate = now();
          $date = str_replace('-"', '/', $orgDate);
          $newDate = date("YmdHis", strtotime($date));
-        $refno = "IPMC".$newDate;
+        $refno = "APRL".$newDate;
         $expense = PmsExpense::create([
             'pms_unit_id' => $request->pms_unit_id,
             'pms_property_id' => $request->pms_property_id,

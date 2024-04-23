@@ -38,7 +38,7 @@ class PmsTenantController extends Controller
 
     public function single(Request $request, $id)
     {
-        $tenant = PmsTenant::with('unit','property')->where('id', $id)->get();
+        $tenant = PmsTenant::with('unit','property')->where('id', $id)->first();
 
         return response()->json([
             'status' => true,

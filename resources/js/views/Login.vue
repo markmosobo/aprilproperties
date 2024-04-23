@@ -15,9 +15,9 @@
                     href="#"
                     class="logo d-flex align-items-center w-auto"
                   >
-                    <img src="@/assets/img/logo.png" alt="" />
+                    <img src="@/assets/img/apex-logo.png" alt="" />
                     <!-- <img src="/images/ingo-colored-logo.png" alt=""> -->
-                    <span class="d-none d-lg-block">Apex Properties</span>
+                    <span class="d-none d-lg-block" style="color: darkgreen;">APRIL PROPERTIES</span>
                   </a>
                   </router-link>
                 </div>
@@ -26,7 +26,7 @@
                 <div class="card mb-3">
                   <div class="card-body">
                     <div class="pt-4 pb-2">
-                      <h5 class="card-title text-center pb-0 fs-4">
+                      <h5 class="card-title text-center pb-0 fs-4" style="color: darkgreen;">
                         Login to Your Account
                       </h5>
                       <p class="text-center small">
@@ -91,7 +91,7 @@
                       <div class="col-12">
                         <p class="small mb-0">
                           Don't have account?
-                          <router-link to="/register"> create Account</router-link>
+                          <router-link to="/register" style="color: orange;"> Create Account</router-link>
                         </p>
                       </div>
                     </form>

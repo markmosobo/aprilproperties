@@ -233,7 +233,7 @@
       </li> -->
 
       <!-- agents menu-->
-      <li v-show="user.role_id == 2" class="nav-item">
+<!--       <li v-show="user.role_id == 2" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#mylisitings-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Manage Listings</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -251,9 +251,10 @@
             </router-link>
           </li>                
         </ul>
-      </li><!-- End Components Nav --> 
+      </li> -->
+      <!-- End Components Nav --> 
 
-      <li class="nav-heading">Property Management System</li>
+      <li class="nav-heading">Property Management</li>
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
@@ -305,11 +306,11 @@
             </a>
             </router-link>
           </li>
-          <li>
+<!--           <li>
             <a href="icons-remix.html">
               <i class="bi bi-circle"></i><span>Statements</span>
             </a>
-          </li>
+          </li> -->
           <!--<li>
             <a href="icons-boxicons.html">
               <i class="bi bi-circle"></i><span>Boxicons</span>

@@ -135,7 +135,7 @@
                     <!-- <button @click.prevent="prev()" class="btn btn-dark">Previous</button> -->
                 </div>
                 <div class="col-sm-6 col-lg-6 text-end">
-                    <button type="submit" @click.prevent="next()" class="btn btn-sm btn-primary rounded-pill">Proceed to Invoice</button>
+                    <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" @click.prevent="next()" class="btn btn-sm btn-primary rounded-pill">Proceed to Invoice</button>
                 </div>
             </div>
           </fieldset>
@@ -213,7 +213,7 @@
                         <button @click.prevent="prev()" class="btn btn-sm btn-dark rounded-pill">Previous</button>
                         </div>
                         <div class="col-sm-6 col-lg-6 text-end">
-                        <button @click.prevent="printReceipt()" class="btn btn-sm rounded-pill btn-primary">Print Receipt</button>
+                        <button @click.prevent="printReceipt()" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm rounded-pill btn-primary">Print Receipt</button>
                         </div>
                     </div>
                   </form>

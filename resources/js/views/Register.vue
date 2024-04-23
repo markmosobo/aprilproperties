@@ -16,8 +16,8 @@
                     class="logo d-flex align-items-center w-auto"
                   >
                     <!-- <img src="@/assets/img/logo.png" alt="" /> -->
-                    <img src="/images/ingo-colored-logo.png" alt="">
-                    <span class="d-none d-lg-block">IPMC</span>
+                    <img src="/images/apex-logo.png" alt="">
+                    <span class="d-none d-lg-block" style="color: darkgreen;">APRIL PROPERTIES</span>
                   </a>
                   </router-link>
                 </div>
@@ -26,7 +26,7 @@
                 <div class="card mb-3">
                   <div class="card-body">
                     <div class="pt-4 pb-2">
-                      <h5 class="card-title text-center pb-0 fs-4">
+                      <h5 class="card-title text-center pb-0 fs-4" style="color: darkgreen;">
                         Create an Account
                       </h5>
                       <p class="text-center small">
@@ -111,7 +111,7 @@
                           />
                           <label class="form-check-label" for="acceptTerms"
                             >I agree and accept the
-                            <a href="#">terms and conditions</a></label
+                            <a href="#" style="color: orange;">terms and conditions</a></label
                           >
                           <div class="invalid-feedback">
                             You must agree before submitting.
@@ -126,7 +126,7 @@
                       <div class="col-12">
                         <p class="small mb-0">
                           Already have an account?
-                          <router-link to="login">log in</router-link>
+                          <router-link to="login" style="color: orange;">Log In</router-link>
                         </p>
                       </div>
                     </form>

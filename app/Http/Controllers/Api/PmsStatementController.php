@@ -33,8 +33,9 @@ class PmsStatementController extends Controller
                 'total' => $request->total,
                 'paid' => $request->paid,
                 'balance' => $request->balance,
-                'status' => 0,
-                'payment_method' => $request->payment_method,                
+                'status' => 0, //status for rented unit
+                'payment_method' => $request->payment_method,  
+                'water_bill' => 0              
             ]);
 
             return response()->json([
@@ -79,7 +80,7 @@ class PmsStatementController extends Controller
         }
     }
 
-        public function settle(Request $request, $id)
+    public function settle(Request $request, $id)
     {
         $pmsstatement = PmsStatement::findOrFail($id);
 
@@ -109,6 +110,28 @@ class PmsStatementController extends Controller
             ], 200);
         }
     } 
+
+    public function invoice(Request $request, $id)
+    {
+        $pmsstatement = PmsStatement::findOrFail($id);
+
+        if ($pmsstatement) {
+
+            $pmsstatement->update([
+                'water_bill' => $request->water_bill,
+                'total' => $request->water_bill + $pmsstatement->total,
+                'status' => 0,
+            ]);
+                
+
+            return response()->json([
+                'status' => true,
+                'message' => "Statement Invoiced successfully!",
+                'statement' => $pmsstatement
+            ], 200);
+        }
+    } 
+
 
     public function single(Request $request, $id)
     {

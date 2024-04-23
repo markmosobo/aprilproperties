@@ -8,7 +8,7 @@
                   <div class="card top-selling overflow-auto">
     
                     <div class="filter">
-                      <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+<!--                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <li class="dropdown-header text-start">
                           <h6>Filter</h6>
@@ -17,7 +17,7 @@
                         <li><a class="dropdown-item" href="#">Today</a></li>
                         <li><a class="dropdown-item" href="#">This Month</a></li>
                         <li><a class="dropdown-item" href="#">This Year</a></li>
-                      </ul>
+                      </ul> -->
                     </div>
     
                     <div class="card-body pb-0">
@@ -69,7 +69,8 @@
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <a @click="navigateTo('/viewuser/'+user.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
+                                  <a @click="navigateTo('/viewuser/'+user.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>       
+                                  <a @click="resetPassword(user.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>Reset Password</a>                                     
                                   <a v-if="user.status == 2" @click="activateUser(user.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Activate</a>
                                   <a v-if="user.status == 1" @click="deactivateUser(user.id)" class="dropdown-item" href="#"><i class="ri-refresh-fill mr-2"></i>Deactivate</a>
                                   </div>
@@ -127,6 +128,18 @@
         },
         navigateTo(location){
             this.$router.push(location)
+        },
+        resetPassword(id){
+          axios.put('api/resetpassword/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Password has been reset',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
         },
         activateUser(id){
           axios.put('api/activateuser/'+ id).then(() => {

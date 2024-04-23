@@ -92,8 +92,8 @@
                         <button @click.prevent="cancel()" class="btn btn-dark">Cancel</button>
                         </div>
                         <div class="col-sm-6 col-lg-6 text-end">
-                        <button @click.prevent="settleTenant()" type="submit" v-if="status == 0" class="btn btn-primary">Settle</button>
-                        <button @click="printReceipt" v-else class="btn btn-primary">Print Receipt</button>
+                        <button @click.prevent="settleTenant()" type="submit" v-if="status == 0" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">Settle</button>
+                        <button @click="printReceipt" v-else class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">Print Receipt</button>
                         </div>
                     </div>
                   </form>
@@ -154,6 +154,7 @@ export default{
               this.tenant = this.firstName + " " + this.lastName;
               this.phoneNumber = this.statement.tenant.phone_number;
               this.unitNumber = this.statement.tenant.pms_unit_id;
+              this.tenantId = this.statement.pms_tenant_id;
               this.getUnit(this.unitNumber);
               this.refNo = this.statement.ref_no;
               this.details = this.statement.details;
@@ -194,7 +195,13 @@ export default{
       },
       settleTenant()
       {
-        this.$router.push('/settlestatement/'+this.$route.params.id)
+         this.$router.push({ 
+            name: 'settlestatement', // Assuming you have named routes
+            params: { 
+              id: this.statementId,
+              tenantId: this.tenantId
+            } 
+          });
       },
       submit() {
        let self = this;  // Store the reference to this

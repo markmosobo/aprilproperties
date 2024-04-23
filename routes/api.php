@@ -158,6 +158,7 @@ Route::put('pmstenant/{id}', [PmsTenantController::class, 'update']);
 Route::put('pmsexpense/{id}', [PmsExpenseController::class, 'update']);
 Route::put('pmsstatement/{id}', [PmsStatementController::class, 'update']);
 Route::put('pmssettlestatement/{id}', [PmsStatementController::class, 'settle']);
+Route::put('pmsinvoicestatement/{id}', [PmsStatementController::class, 'invoice']);
 Route::put('pmslastmonthtenantstatement/{id}', [PmsStatementController::class, 'updateTenantLastMonthStatement']);
 
 Route::delete('property/{id}', [PropertyController::class, 'destroy']);
@@ -217,6 +218,7 @@ Route::put('deactivatesocial/{id}',[SocialLinkController::class,'deactivate']);
 Route::get('myproperties/{id}', [PropertyController::class,'myProperty']);
 Route::put('profile/{id}',[ProfileController::class, 'update']);
 Route::put('changepassword/{id}',[ProfileController::class, 'changePassword']);
+Route::put('resetpassword/{id}',[ProfileController::class, 'resetPassword']);
 
 Route::put('activateuser/{id}',[UserController::class,'activate']);
 Route::put('deactivateuser/{id}',[UserController::class,'deactivate']);

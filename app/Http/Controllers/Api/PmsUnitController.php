@@ -13,6 +13,7 @@ class PmsUnitController extends Controller
     public function store(Request $request, $id)
     {
         $property = PmsProperty::findOrFail($id);
+
         $property->units()->create(
         [
             'unit_number' => $request->unit_number,
@@ -20,12 +21,12 @@ class PmsUnitController extends Controller
             'type' => $request->type,
             'deposit' => $request->deposit,
             'monthly_rent' => $request->monthly_rent,
-            'garbage_fee' => $request->garbage_fee,
-            'security_fee' => $request->security_fee,
+            'garbage_fee' => $request->garbage_fee ?? 0,
+            'security_fee' => $request->security_fee ?? 0,
             'water_meter' => $request->water_meter,
-            'water_deposit' => $request->water_deposit,
+            'water_deposit' => $request->water_deposit ?? 0,
             'electricity_meter' => $request->electricity_meter,
-            'electricity_deposit' => $request->electricity_deposit
+            'electricity_deposit' => $request->electricity_deposit ?? 0
         ]);
 
     }
@@ -66,7 +67,20 @@ class PmsUnitController extends Controller
     public function update(Request $request,  $id)
     {
         $unit = PmsUnit::findOrFail($id);
-        $unit->update($request->all());
+        // $unit->update($request->all());
+        $unit->update([
+            'unit_number' => $request->unit_number,
+            'pms_property_id' => $unit->pms_property_id,
+            'type' => $request->type,
+            'deposit' => $request->deposit,
+            'monthly_rent' => $request->monthly_rent,
+            'garbage_fee' => $request->garbage_fee ?? 0, // Set to 0 if null
+            'security_fee' => $request->security_fee ?? 0,
+            'water_meter' => $request->water_meter,
+            'water_deposit' => $request->water_deposit ?? 0,
+            'electricity_meter' => $request->electricity_meter,
+            'electricity_deposit' => $request->electricity_deposit ?? 0
+        ]);
         return response()->json([
             'status' => true,
             'message' => "Unit Updated successfully!",

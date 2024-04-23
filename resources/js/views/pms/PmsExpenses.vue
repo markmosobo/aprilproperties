@@ -8,7 +8,7 @@
                   <div class="card top-selling overflow-auto">
     
                     <div class="filter">
-                      <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+<!--                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <li class="dropdown-header text-start">
                           <h6>Filter</h6>
@@ -17,7 +17,7 @@
                         <li><a class="dropdown-item" href="#">Today</a></li>
                         <li><a class="dropdown-item" href="#">This Month</a></li>
                         <li><a class="dropdown-item" href="#">This Year</a></li>
-                      </ul>
+                      </ul> -->
                     </div>
     
                     <div class="card-body pb-0">
@@ -29,6 +29,7 @@
                             :href="href"
                             :class="{ active: isActive }"
                             class="btn btn-sm btn-primary rounded-pill"
+                            style="background-color: darkgreen; border-color: darkgreen;"
                             @click="navigate"
                           >
                             Add Expense
@@ -59,7 +60,7 @@
                             <td>{{format_date(expense.created_at)}}</td>
                             <td>
                               <div class="btn-group" role="group">
-                                  <button id="btnGroupDrop1" type="button" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">

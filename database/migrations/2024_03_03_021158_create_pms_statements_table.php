@@ -33,6 +33,7 @@ return new class extends Migration
             $table->float('total')->nullable();
             $table->float('paid')->nullable();
             $table->float('balance')->nullable();
+            $table->float('water_bill')->nullable();
             $table->timestamps();
         });
     }

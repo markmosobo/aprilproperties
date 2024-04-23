@@ -8,11 +8,11 @@
           <div class="row">
 
             <!-- Sales Card -->
-            <div class="col-xxl-4 col-md-6">
+            <div class="col-xxl-4 col-md-4">
               <div class="card info-card sales-card">
 
                 <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
                       <h6>Filter</h6>
@@ -21,19 +21,19 @@
                     <li><a class="dropdown-item" href="#">Today</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
                     <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
+                  </ul> -->
                 </div>
 
                 <div class="card-body">
-                  <h5 class="card-title">Open Properties <span>| All Time</span></h5>
+                  <h5 class="card-title">All Properties <span>| All Time</span></h5>
 
                   <div class="d-flex align-items-center">
                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-building"></i>
+                    <span style="color: darkgreen;"><i class="bi bi-building"></i></span>
                     </div>
                     <div class="ps-3">
-                      <h6>{{openproperties.length}}</h6>
-                      <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                      <h6>{{pmsPropertyCount}}</h6>
+                      <!-- <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
 
                     </div>
                   </div>
@@ -43,11 +43,11 @@
             </div><!-- End Sales Card -->
 
             <!-- Revenue Card -->
-            <div class="col-xxl-4 col-md-6">
+            <div class="col-xxl-4 col-md-4">
               <div class="card info-card revenue-card">
 
                 <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
                       <h6>Filter</h6>
@@ -56,34 +56,68 @@
                     <li><a class="dropdown-item" href="#">Today</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
                     <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
+                  </ul> -->
                 </div>
 
                 <div class="card-body">
-                  <h5 class="card-title">Closed Properties <span>| All Time</span></h5>
+                  <h5 class="card-title">Rented Units <span>| All Time</span></h5>
 
                   <div class="d-flex align-items-center">
                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-building"></i>
+                      <i class="bi bi-house-door" style="color: orange;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{closedproperties.length}}</h6>
-                      <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                      <h6>{{pmsrentedpropertycount}}</h6>
+                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
 
                     </div>
                   </div>
                 </div>
 
               </div>
-            </div><!-- End Revenue Card -->
+            </div>
+            <!-- End Revenue Card -->
+            <div class="col-xxl-4 col-md-4">
+              <div class="card info-card revenue-card">
+
+                <div class="filter">
+                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Filter</h6>
+                    </li>
+
+                    <li><a class="dropdown-item" href="#">Today</a></li>
+                    <li><a class="dropdown-item" href="#">This Month</a></li>
+                    <li><a class="dropdown-item" href="#">This Year</a></li>
+                  </ul> -->
+                </div>
+
+                <div class="card-body">
+                  <h5 class="card-title">Vacant Units <span>| All Time</span></h5>
+
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-house"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{pmsvacantpropertycount}}</h6>
+                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
+
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
 
             <!-- Customers Card -->
-            <div class="col-xxl-4 col-xl-12">
+            <div class="col-xxl-4 col-xl-4">
 
               <div class="card info-card customers-card">
 
                 <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+<!--                   <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
                       <h6>Filter</h6>
@@ -92,19 +126,19 @@
                     <li><a class="dropdown-item" href="#">Today</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
                     <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
+                  </ul> -->
                 </div>
 
                 <div class="card-body">
-                  <h5 class="card-title">Users <span>| All Time</span></h5>
+                  <h5 class="card-title">Users <span>| All System Users</span></h5>
 
                   <div class="d-flex align-items-center">
                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-people"></i>
+                      <i class="bi bi-people" style="color: darkgreen;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{users.length}}</h6>
-                      <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span>
+                      <h6>{{userscount}}</h6>
+                      <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
 
                     </div>
                   </div>
@@ -112,7 +146,80 @@
                 </div>
               </div>
 
-            </div><!-- End Customers Card -->
+            </div>
+            <!-- End Customers Card -->
+            <div class="col-xxl-4 col-xl-4">
+
+              <div class="card info-card customers-card">
+
+                <div class="filter">
+<!--                   <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Filter</h6>
+                    </li>
+
+                    <li><a class="dropdown-item" href="#">Today</a></li>
+                    <li><a class="dropdown-item" href="#">This Month</a></li>
+                    <li><a class="dropdown-item" href="#">This Year</a></li>
+                  </ul> -->
+                </div>
+
+                <div class="card-body">
+                  <h5 class="card-title">Landlords <span>| All Landlords</span></h5>
+
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{landlordscount}}</h6>
+                      <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
+            <div class="col-xxl-4 col-xl-4">
+
+              <div class="card info-card customers-card">
+
+                <div class="filter">
+<!--                   <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Filter</h6>
+                    </li>
+
+                    <li><a class="dropdown-item" href="#">Today</a></li>
+                    <li><a class="dropdown-item" href="#">This Month</a></li>
+                    <li><a class="dropdown-item" href="#">This Year</a></li>
+                  </ul> -->
+                </div>
+
+                <div class="card-body">
+                  <h5 class="card-title">Tenants <span>| All Tenants</span></h5>
+
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-person-badge"></i>
+
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{tenantscount}}</h6>
+                      <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
 
 
           </div>
@@ -132,11 +239,11 @@
           <div class="row">
 
             <!-- Sales Card -->
-            <div class="col-xxl-4 col-md-6">
+            <div class="col-xxl-4 col-md-4">
               <div class="card info-card sales-card">
 
                 <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
                       <h6>Filter</h6>
@@ -145,19 +252,19 @@
                     <li><a class="dropdown-item" href="#">Today</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
                     <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
+                  </ul> -->
                 </div>
 
                 <div class="card-body">
-                  <h5 class="card-title">My Listings <span>| All Time</span></h5>
+                  <h5 class="card-title">All Properties <span>| All Time</span></h5>
 
                   <div class="d-flex align-items-center">
                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-building"></i>
+                    <span style="color: darkgreen;"><i class="bi bi-building"></i></span>
                     </div>
                     <div class="ps-3">
-                      <h6>{{openproperties.length}}</h6>
-                      <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                      <h6>{{pmsPropertyCount}}</h6>
+                      <!-- <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
 
                     </div>
                   </div>
@@ -167,11 +274,11 @@
             </div><!-- End Sales Card -->
 
             <!-- Revenue Card -->
-            <div class="col-xxl-4 col-md-6">
+            <div class="col-xxl-4 col-md-4">
               <div class="card info-card revenue-card">
 
                 <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
                       <h6>Filter</h6>
@@ -180,27 +287,60 @@
                     <li><a class="dropdown-item" href="#">Today</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
                     <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul>
+                  </ul> -->
                 </div>
 
                 <div class="card-body">
-                  <h5 class="card-title">My Featured Listings <span>| All Time</span></h5>
+                  <h5 class="card-title">Rented Units <span>| All Time</span></h5>
 
                   <div class="d-flex align-items-center">
                     <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-building"></i>
+                      <i class="bi bi-house-door" style="color: orange;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{closedproperties.length}}</h6>
-                      <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span>
+                      <h6>{{pmsrentedpropertycount}}</h6>
+                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
 
                     </div>
                   </div>
                 </div>
 
               </div>
-            </div><!-- End Revenue Card -->
+            </div>
+            <!-- End Revenue Card -->
+            <div class="col-xxl-4 col-md-4">
+              <div class="card info-card revenue-card">
 
+                <div class="filter">
+                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <li class="dropdown-header text-start">
+                      <h6>Filter</h6>
+                    </li>
+
+                    <li><a class="dropdown-item" href="#">Today</a></li>
+                    <li><a class="dropdown-item" href="#">This Month</a></li>
+                    <li><a class="dropdown-item" href="#">This Year</a></li>
+                  </ul> -->
+                </div>
+
+                <div class="card-body">
+                  <h5 class="card-title">Vacant Units <span>| All Time</span></h5>
+
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-house"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{pmsvacantpropertycount}}</h6>
+                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
+
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
 
           </div>
         </div><!-- End Left side columns -->
@@ -244,7 +384,14 @@
           blogs: [],
           openproperties: [],
           closedproperties: [],
-          users: []
+          users: [],
+          pmsPropertyCount: [],
+          pmsvacantpropertycount: [],
+          pmsrentedpropertycount: [],
+          userscount: [],
+          landlordscount: [],
+          tenantscount: [],
+
         }
       },
       methods: {
@@ -257,6 +404,12 @@
             this.openproperties = response.data.lists.openproperties;
             this.closedproperties = response.data.lists.closedproperties;
             this.users = response.data.lists.users;
+            this.pmsPropertyCount = response.data.lists.pmspropertycount;
+            this.pmsvacantpropertycount = response.data.lists.pmsvacantpropertycount;
+            this.pmsrentedpropertycount = response.data.lists.pmsrentedpropertycount;
+            this.userscount = response.data.lists.userscount;
+            this.landlordscount = response.data.lists.landlordscount;
+            this.tenantscount = response.data.lists.tenantscount;
 
           })
         }

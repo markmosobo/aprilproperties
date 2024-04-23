@@ -91,7 +91,7 @@ class GenerateMonthlyStatements extends Command
                         'pms_property_id' => $tenant->pms_property_id,
                         'pms_tenant_id' => $tenant->id,
                         'details' => "Rent-".$tenant->unit->unit_number."-".$formattedDate,
-                        'status' => 0, // You can set the default status
+                        'status' => 0, // status for rented units
                         'total' => $monthlyTotal, // You can set the default total
                         'paid' => 0, // You can set the default paid amount
                         'balance' => 0, // You can set the default balance
@@ -155,7 +155,7 @@ class GenerateMonthlyStatements extends Command
                         'pms_property_id' => $vacant->pms_property_id,
                         // 'pms_tenant_id' => 0,
                         'details' => "Rent-".$vacant->unit_number."-".$formattedDate,
-                        'status' => 2, // You can set the default status
+                        'status' => 2, // status for vacant units
                         'total' => 0, // You can set the default total
                         'paid' => 0, // You can set the default paid amount
                         'balance' => 0, // You can set the default balance

@@ -68,6 +68,13 @@ class ListController extends Controller
         $openproperties = Property::latest()->with('type','images')->where('status',1)->get();
         $closedproperties = Property::latest()->with('type','images')->where('status',2)->get();
 
+        //dashboard count
+        $pmsPropertyCount = PmsProperty::all()->count();
+        $pmsVacantPropertyCount = PmsUnit::where('status', 0)->count();
+        $pmsRentedPropertyCount = PmsUnit::where('status', 1)->count();
+        $usersCount = User::all()->count();
+        $tenantsCount = PmsTenant::all()->count();
+        $landlordsCount = Landlord::all()->count();
 
         return response()->json([
             "lists" => [
@@ -105,7 +112,14 @@ class ListController extends Controller
                 'units' => $units,
                 'pmstenants' => $pmstenants,
                 'pmsexpenses' => $pmsexpenses,
-                'statements' => $statements
+                'statements' => $statements,
+
+                'pmspropertycount' => $pmsPropertyCount,
+                'pmsvacantpropertycount' => $pmsVacantPropertyCount,
+                'pmsrentedpropertycount' => $pmsRentedPropertyCount,
+                'userscount' => $usersCount,
+                'landlordscount' => $landlordsCount,
+                'tenantscount' => $tenantsCount
 
                 
             ]
