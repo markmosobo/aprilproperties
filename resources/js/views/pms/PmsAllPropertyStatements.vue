@@ -289,8 +289,8 @@
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
-            let columnWidths = [60, 30, 70, 30, 30, 30];
-            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Due', 'Paid', 'Bal'];
+            let columnWidths = [40, 50, 70, 30, 30, 30];
+            let columnHeaders = ['UNIT NUMBER', 'TENANT', 'DETAIL', 'DUE', 'PAID', 'BAL'];
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -327,11 +327,10 @@
                     doc.rect(xPos, yPos, columnWidths[i], cellHeight);
                     switch (i) {
                         case 0:
-                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.unit.unit_number, xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 1:
-                            let statusText = statement.status == 1 ? 'Settled' : 'Not Settled';
-                            doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.tenant.first_name + " "+ statement.tenant.last_name, xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 2:
                             doc.text(statement.details, xPos + cellPadding, yPos + cellHeight - cellPadding);

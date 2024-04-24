@@ -50,8 +50,8 @@
                         <tbody>
                           <tr v-for="landlord in landlords" :key="landlord.id">
                             <td>{{landlord.first_name}} {{landlord.last_name}}</td>
-                            <td>{{landlord.email}}</td>
-                            <td>{{landlord.phone_no}}</td>
+                            <td>{{landlord.email ?? "N/A"}}</td>
+                            <td>{{landlord.phone_no ?? "N/A"}}</td>
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

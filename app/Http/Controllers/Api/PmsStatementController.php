@@ -17,14 +17,14 @@ class PmsStatementController extends Controller
             $date = str_replace('-"', '/', $orgDate);
             $newDate = date("YmdHis", strtotime($date));
             $refno = "INV".$newDate." ".$request->unit_number." Rent+Deposit @".$request->total;
-            // if($request->balance > 0)
-            // {
-            //     $paystatus = 0;
-            // }
-            // else
-            // {
-            //     $paystatus = 1;
-            // }
+            if($request->balance <= 0)
+            {
+                $payStatus = 1;
+            }
+            else
+            {
+                $payStatus = 0;
+            }
             $pmsstatement = PmsStatement::create([
                 'ref_no' => $refno,
                 'pms_property_id' => $request->pms_property_id,
@@ -34,7 +34,7 @@ class PmsStatementController extends Controller
                 'total' => $request->total,
                 'paid' => $request->paid,
                 'balance' => $request->balance,
-                'status' => 0, //status for rented unit
+                'status' => $payStatus, //status for rented unit
                 'payment_method' => $request->payment_method,  
                 'water_bill' => 0              
             ]);
