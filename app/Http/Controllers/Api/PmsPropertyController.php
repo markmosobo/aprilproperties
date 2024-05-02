@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PmsProperty;
+use App\Models\PmsUnit;
 use App\Http\Requests\StorePmsPropertyRequest;
 use Illuminate\Support\Facades\File;
 
@@ -53,7 +54,28 @@ class PmsPropertyController extends Controller
             'message' => "Property",
             'property' => $property
         ], 200);
-    }    
+    }  
+
+    public function destroy(Request $request, $id)
+    {
+        $property=PmsProperty::findOrFail($id);
+        if($property){
+        $property->delete();
+
+        //delete units asssociated with property
+        $units = PmsUnit::where('pms_property_id', $id)->get();
+        if($units->isNotEmpty()) {
+            PmsUnit::where('pms_property_id', $id)->delete();
+        }
+
+
+        return response()->json([
+            'status' => true,
+            'message' => "Property Deleted successfully!",
+        ], 200);
+        }
+    }  
 
 
 }
+

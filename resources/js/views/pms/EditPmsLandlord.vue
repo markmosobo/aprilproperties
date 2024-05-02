@@ -5,7 +5,7 @@
           <!-- General Form Elements -->
           <form @submit.prevent="">
           <fieldset v-if="step == 1">
-             <h5 class="card-title text-center">Edit unit</h5>
+             <h5 class="card-title text-center">Edit Landlord</h5>
  
              <div class="row m-auto p-auto justify-content- g-3 needs-validation" novalidate="" autocomplete="off">
                 <div class="row  mb-3"></div>
@@ -20,79 +20,83 @@
                       class="form-control"
                    />
                     <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Unit Number*</label>
+                      <label for="inputPassword" class="form-label">First Name*</label>
                       <div class="col-sm-10">
                         <input
                             type="text"
-                            placeholder="Unit Number"
-                            id="unit_number"
-                            name="unit_number"
-                            v-model="form.unit_number"
+                            placeholder="First Name"
+                            id="first_name"
+                            name="first_name"
+                            v-model="form.first_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback" v-if="!form.unit_number">Please enter unit number!</div>
+                        <div class="invalid-feedback" v-if="!form.first_name">Please enter first name!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Type*</label>
+                      <label for="inputPassword" class="form-label">Last Name*</label>
                       <div class="col-sm-10">
-                         <select name="type" v-model="form.type" class="form-select" id="type">
-                            <option value="0" selected disabled>Select Type</option>
-                            <option value="Residential">Residential</option>
-                            <option value="Commercial">Commercial</option>
+                        <input
+                            type="text"
+                            placeholder="Last Name"
+                            id="last_name"
+                            name="last_name"
+                            v-model="form.last_name"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
+                      </div>
+                   </div>
  
-                         </select>
-                        <div class="invalid-feedback" v-if="!form.type">Please select type!</div>
-                      </div>
-                   </div>
- 
                 </div>
                 <div class="row mb-3"></div>
                 <div class="form-group row">
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Deposit*</label>
+                      <label for="inputPassword" class="form-label">Email Address</label>
                       <div class="col-sm-10">
                         <input
-                            type="number"
-                            placeholder="Deposit"
-                            id="deposit"
-                            name="deposit"
-                            v-model="form.deposit"
+                            type="text"
+                            placeholder="Email Address"
+                            id="title"
+                            name="title"
+                            v-model="form.email"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback" v-if="!form.deposit">Please enter deposit!</div>
+                        <div class="invalid-feedback">Please enter title!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Monthly Rent*</label>
+                      <label for="inputPassword" class="form-label">Phone Number</label>
                       <div class="col-sm-10">
                         <input
-                            type="number"
-                            placeholder="Monthly Rent"
-                            id="monthly_rent"
-                            name="monthly_rent"
-                            v-model="form.monthly_rent"
+                            type="text"
+                            placeholder="Phone Number"
+                            id="title"
+                            name="title"
+                            v-model="form.phone_no"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback" v-if="!form.monthly_rent">Please enter monthly rent!</div>
+                        <div class="invalid-feedback">Please enter title!</div>
                       </div>
                    </div>
 
                 </div>
+
                 <div class="row mb-3"></div>
                 <div class="form-group row">
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Monthly Garbage Collection Fee</label>
+                      <label for="inputPassword" class="form-label">Physical Address</label>
                       <div class="col-sm-10">
                         <input
-                            type="number"
-                            placeholder="Optional e.g 500"
+                            type="text"
+                            placeholder="Physical Address"
                             id="title"
                             name="title"
-                            v-model="form.garbage_fee"
+                            v-model="form.address"
                             class="form-control"
                             required=""
                         />
@@ -100,14 +104,14 @@
                       </div>
                    </div>
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Monthly Security Fee</label>
+                      <label for="inputPassword" class="form-label">National ID Number</label>
                       <div class="col-sm-10">
                         <input
-                            type="number"
-                            placeholder="Optional e.g 500"
+                            type="text"
+                            placeholder="National ID Number"
                             id="title"
                             name="title"
-                            v-model="form.security_fee"
+                            v-model="form.id_number"
                             class="form-control"
                             required=""
                         />
@@ -116,79 +120,12 @@
                    </div>
 
                 </div>
-                <div class="row mb-3"></div>
-                <div class="form-group row">
-                   <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Electricity Deposit</label>
-                      <div class="col-sm-10">
-                        <input
-                            type="number"
-                            placeholder="Optional e.g 500"
-                            id="title"
-                            name="title"
-                            v-model="form.electricity_deposit"
-                            class="form-control"
-                            required=""
-                        />
-                        <div class="invalid-feedback">Please enter title!</div>
-                      </div>
-                   </div>
-                   <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Water Deposit</label>
-                      <div class="col-sm-10">
-                        <input
-                            type="number"
-                            placeholder="Optional e.g 500"
-                            id="title"
-                            name="title"
-                            v-model="form.water_deposit"
-                            class="form-control"
-                            required=""
-                        />
-                        <div class="invalid-feedback">Please enter title!</div>
-                      </div>
-                   </div>
 
-                </div>
-                <div class="row mb-3"></div>                
-                <div class="form-group row">
-                   <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Electricity Meter No</label>
-                      <div class="col-sm-10">
-                        <input
-                            type="number"
-                            placeholder="Electricity Meter No"
-                            id="title"
-                            name="title"
-                            v-model="form.electricity_meter"
-                            class="form-control"
-                            required=""
-                        />
-                        <div class="invalid-feedback">Please enter title!</div>
-                      </div>
-                   </div>
-                   <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Water Meter No</label>
-                      <div class="col-sm-10">
-                        <input
-                            type="number"
-                            placeholder="Water Meter No"
-                            id="title"
-                            name="title"
-                            v-model="form.water_meter"
-                            class="form-control"
-                            required=""
-                        />
-                        <div class="invalid-feedback">Please enter title!</div>
-                      </div>
-                   </div>
-
-                </div>
              </div>
              <!--  button -->
              <div class="col-lg-12 felx mt-4 row">
                 <div class="col-sm-6 col-lg-6">
-                    <button @click.prevent="back()" class="btn btn-sm btn-dark rounded-pill">Back</button>
+                    <!-- <button @click.prevent="prev()" class="btn btn-dark">Previous</button> -->
                 </div>
                 <div class="col-sm-6 col-lg-6 text-end">
                     <!-- <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" @click.prevent="submit()" class="btn btn-sm btn-primary rounded-pill">Submit</button> -->
@@ -241,14 +178,8 @@
     data () {
        return {
           form: {
-          unit_number: '',
-          type: '',
-          deposit: '',
-          monthly_rent: '',
-          garbage_fee: 0,
-          security_fee: '',
-          electricity_deposit: '',
-          water_deposit: '',
+          role_id: '',
+          title: '',
           
           },
           message: "",
@@ -273,16 +204,16 @@
          }
          reader.readAsDataURL(file);
        },
-        getUnit() {
-             axios.get('/api/pmsunit/'+this.$route.params.id).then((response) => {
+        getLandlord() {
+             axios.get('/api/landlord/'+this.$route.params.id).then((response) => {
      
-             this.form = response.data.unit[0];
+             this.form = response.data.landlord;
              console.log("props", this.form)
     
              });
-        }, 
-         async submit() {
-            if (this.validateForm()) {
+        },
+       async submit() {
+            if (this.validateForm()) {        
                 // Start submitting process
                 this.submitting = true;
                 
@@ -300,43 +231,31 @@
                     this.submitting = false;
                 }
             }
-        }, 
+        },
         validateForm() {
           let isValid = true;
-          if (!this.form.unit_number) {
+          if (!this.form.first_name) {
               isValid = false;
-              document.getElementById('unit_number').classList.add('is-invalid');
+              document.getElementById('first_name').classList.add('is-invalid');
           } else {
-              document.getElementById('unit_number').classList.remove('is-invalid');
+              document.getElementById('first_name').classList.remove('is-invalid');
           }
-          if (!this.form.type) {
+          if (!this.form.last_name) {
               isValid = false;
-              document.getElementById('type').classList.add('is-invalid');
+              document.getElementById('last_name').classList.add('is-invalid');
           } else {
-              document.getElementById('type').classList.remove('is-invalid');
-          }
-          if (!this.form.deposit) {
-              isValid = false;
-              document.getElementById('deposit').classList.add('is-invalid');
-          } else {
-              document.getElementById('deposit').classList.remove('is-invalid');
-          }
-          if (!this.form.monthly_rent) {
-              isValid = false;
-              document.getElementById('monthly_rent').classList.add('is-invalid');
-          } else {
-              document.getElementById('monthly_rent').classList.remove('is-invalid');
+              document.getElementById('last_name').classList.remove('is-invalid');
           }
           return isValid;
-       },             
-       submitForm(){
-          axios.put("/api/pmsunit/"+this.$route.params.id, this.form)
+       },        
+       async submitForm(){
+          axios.put("/api/landlord/"+this.$route.params.id, this.form)
           .then(function (response) {
              console.log(response);
              // this.step = 1;
              toast.fire(
                 'Success!',
-                'Unit updated!',
+                'Landlord details updated!',
                 'success'
              )
           })
@@ -348,15 +267,12 @@
              //    'error'
              // )
           });
-          this.$router.push('/pmsunits/'+this.form.pms_property_id)
-       },
-       back(){
-         this.$router.push('/pmsunits/'+this.form.pms_property_id)
+          this.$router.push('/pmslandlords')
        }
  
     },
     mounted() {
-      this.getUnit()
+      this.getLandlord();
     }
  
  }

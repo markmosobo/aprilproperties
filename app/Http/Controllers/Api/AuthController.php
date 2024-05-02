@@ -57,6 +57,7 @@ class AuthController extends Controller
      
       $postArray['password'] = bcrypt($postArray['password']); 
       $postArray['role_id'] = 2;
+      $postArray['status'] = 2;
       $user = User::create($postArray); 
       
       $success['token'] = $this->apiToken;  

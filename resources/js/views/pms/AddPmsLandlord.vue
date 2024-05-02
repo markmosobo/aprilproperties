@@ -25,13 +25,13 @@
                         <input
                             type="text"
                             placeholder="First Name"
-                            id="title"
-                            name="title"
+                            id="first_name"
+                            name="first_name"
                             v-model="form.first_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.first_name">Please enter first name!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -40,13 +40,13 @@
                         <input
                             type="text"
                             placeholder="Last Name"
-                            id="title"
-                            name="title"
+                            id="last_name"
+                            name="last_name"
                             v-model="form.last_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
                       </div>
                    </div>
  
@@ -128,7 +128,16 @@
                     <!-- <button @click.prevent="prev()" class="btn btn-dark">Previous</button> -->
                 </div>
                 <div class="col-sm-6 col-lg-6 text-end">
-                    <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" @click.prevent="submit()" class="btn btn-sm btn-primary rounded-pill">Submit</button>
+                    <!-- <button type="submit" style="background-color: darkgreen; border-color: darkgreen;" @click.prevent="submit()" class="btn btn-sm btn-primary rounded-pill">Submit</button> -->
+                    <button type="submit" 
+                          style="background-color: darkgreen; border-color: darkgreen;" 
+                          @click.prevent="submit()" 
+                          :class="{ 'btn-success': !submitting, 'btn-secondary': submitting }"
+                          class="btn rounded-pill"
+                          :disabled="submitting">
+                      <span v-if="!submitted">Submit</span>
+                      <span v-else>Submitting...</span>
+                  </button>
                 </div>
             </div>
           </fieldset>
@@ -178,6 +187,8 @@
           loading: false,
           step: 1, 
           roles: [],
+          submitting: false,
+          submitted: false
        }   
     },
     methods: {
@@ -193,7 +204,44 @@
          }
          reader.readAsDataURL(file);
        },
-       submit(){
+       async submit() {
+            if (this.validateForm()) {
+
+                // Start submitting process
+                this.submitting = true;
+                
+                try {
+                    // Simulate asynchronous submission process (you would replace this with your actual submission logic)
+                    await this.submitForm();
+
+                    // Submission successful
+                    this.submitted = true;
+                } catch (error) {
+                    // Handle submission error
+                    console.error("Submission error:", error);
+                } finally {
+                    // End submitting process
+                    this.submitting = false;
+                }
+            }
+        },
+        validateForm() {
+          let isValid = true;
+          if (!this.form.first_name) {
+              isValid = false;
+              document.getElementById('first_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('first_name').classList.remove('is-invalid');
+          }
+          if (!this.form.last_name) {
+              isValid = false;
+              document.getElementById('last_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('last_name').classList.remove('is-invalid');
+          }
+          return isValid;
+       },        
+       async submitForm(){
           axios.post("api/landlords", this.form)
           .then(function (response) {
              console.log(response);

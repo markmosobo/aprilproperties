@@ -25,13 +25,13 @@
                         <input
                             type="text"
                             placeholder="First Name"
-                            id="title"
-                            name="title"
+                            id="first_name"
+                            name="first_name"
                             v-model="form.first_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter first name!</div>
+                        <div class="invalid-feedback" v-if="!form.first_name">Please enter first name!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -40,13 +40,13 @@
                         <input
                             type="text"
                             placeholder="Last Name"
-                            id="title"
-                            name="title"
+                            id="last_name"
+                            name="last_name"
                             v-model="form.last_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter last name!</div>
+                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
                       </div>
                    </div>
  
@@ -81,13 +81,13 @@
                         <input
                             type="text"
                             placeholder="Phone Number"
-                            id="title"
-                            name="title"
+                            id="phone_number"
+                            name="phone_number"
                             v-model="form.phone_number"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter phone number!</div>
+                        <div class="invalid-feedback" v-if="!form.phone_number">Please enter phone number!</div>
                       </div>
                    </div>
  
@@ -99,14 +99,14 @@
                       >Property*</label
                       >
                       <div class="col-sm-10">
-                         <select @change="getUnits" name="landlord" v-model="form.pms_property_id" class="form-select" id="">
+                         <select @change="getUnits" name="property" v-model="form.pms_property_id" class="form-select" id="property">
                             <option value="0" selected disabled>Select Property</option>
                             <option v-for="property in properties" :value="property.id"
                             :selected="property.id == form.pms_property_id" :key="property.id">{{ property.name}} </option>
  
                          </select>
  
-                         <div class="invalid-feedback">Please select a property!</div>
+                        <div class="invalid-feedback" v-if="!form.pms_property_id">Please select property!</div>
                       </div>
                    </div>  
                    <div class="col-sm-6">
@@ -114,14 +114,14 @@
                       >Unit*</label
                       >
                       <div class="col-sm-10">
-                         <select @change="getUnitInfo" :disabled="!form.pms_property_id" name="unit" v-model="form.pms_unit_id" class="form-select" id="">
+                         <select @change="getUnitInfo" :disabled="!form.pms_property_id" name="unit" v-model="form.pms_unit_id" class="form-select" id="unit">
                             <option value="0" selected disabled>Select Unit</option>
                             <option v-for="unit in propunits" :value="unit.id"
                             :selected="unit.id == form.unit_id" :key="unit.id">{{ unit.unit_number}}</option>
  
                          </select>
  
-                         <div class="invalid-feedback">Please select a unit!</div>
+                        <div class="invalid-feedback" v-if="!form.pms_unit_id">Please select unit!</div>
                          <div v-if="showNoUnitsMessage" class="text-danger">No units available for selected property.</div>
 
 
@@ -166,14 +166,14 @@
                           >Please select payment method:</label
                         >
                         <div class="col-sm-10">
-                            <select name="category" v-model="form.payment_method" class="form-select" id="">
+                            <select name="payment" v-model="form.payment_method" class="form-select" id="payment">
                                 <option value="0" disabled>Select Payment</option>
                                 <option value="Mpesa" selected>MPESA (Paybill Number)</option>
                                 <option value="Cash">CASH</option>
                                 <option value="Bank">BANK</option>
 
                             </select>
-                          <div class="invalid-feedback">Please enter flight number!</div>
+                          <div class="invalid-feedback" v-if="!form.payment_method">Please select payment method!</div>
                         </div>
                       </div>
                     </div>
@@ -192,7 +192,7 @@
                             class="form-control"
                             required=""
                           />
-                          <div class="invalid-feedback">Please enter address!</div>
+                          <div class="invalid-feedback" v-if="!form.mpesa_code">Please enter MPESA code!</div>
                         </div>
                       </div>
                     </div>
@@ -200,7 +200,8 @@
 
                     <div class="col-md-6">
                     <label for="inputEmail5" class="form-label">Amount Paid</label>
-                    <input type="number" v-model="form.cash" class="form-control" id="inputEmail5">
+                    <input type="number" :disabled="!form.payment_method" name="cash" id="cash" v-model="form.cash" class="form-control">
+                    <div class="invalid-feedback" v-if="!form.cash">Please enter amount paid!</div>
                     </div>
                     <div class="col-md-6">
                     <label for="inputPassword5" class="form-label">Balance</label><br>
@@ -213,7 +214,7 @@
                         <button @click.prevent="prev()" class="btn btn-sm btn-dark rounded-pill">Previous</button>
                         </div>
                         <div class="col-sm-6 col-lg-6 text-end">
-                        <button @click.prevent="printReceipt()" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm rounded-pill btn-primary">Print Receipt</button>
+                        <button @click.prevent="printReceipt()" :disabled="!form.cash" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm rounded-pill btn-primary">Print Receipt</button>
                         </div>
                     </div>
                   </form>
@@ -285,9 +286,46 @@
           this.step--;
        },
        next() {
+        if (this.validateForm()) {        
+
           this.step++;
-          this.submit();          
+          this.submit(); 
+        }           
        },
+       validateForm() {
+          let isValid = true;
+          if (!this.form.first_name) {
+              isValid = false;
+              document.getElementById('first_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('first_name').classList.remove('is-invalid');
+          }
+          if (!this.form.last_name) {
+              isValid = false;
+              document.getElementById('last_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('last_name').classList.remove('is-invalid');
+          }
+          if (!this.form.phone_number) {
+              isValid = false;
+              document.getElementById('phone_number').classList.add('is-invalid');
+          } else {
+              document.getElementById('phone_number').classList.remove('is-invalid');
+          }
+          if (!this.form.pms_property_id) {
+              isValid = false;
+              document.getElementById('property').classList.add('is-invalid');
+          } else {
+              document.getElementById('property').classList.remove('is-invalid');
+          }
+          if (!this.form.pms_unit_id) {
+              isValid = false;
+              document.getElementById('unit').classList.add('is-invalid');
+          } else {
+              document.getElementById('unit').classList.remove('is-invalid');
+          }
+          return isValid;
+       },       
       buildReceiptContent(refNo) {
         // Determine whether to include the row
         const showGarbageFeeRow = this.garbage_fee !== 0;
@@ -356,12 +394,16 @@
                       margin-top: 20px;
                       color: #777;
                   }
+                  .logo {
+                      margin-bottom: 5px;
+                  }
               </style>
           </head>
           <body>
           <div class="container">
               <div class="header">
                   <h1>April Properties</h1>
+                  <img src="./apex-logo.png" alt="April Properties Logo" class="logo">
                   <p>Kakamega-Webuye Rd, ACK Building</p>
                   <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
               </div>

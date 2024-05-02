@@ -59,7 +59,7 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                             -->
-                                  <a v-if="user.id == 1" @click="navigateTo('/editlandlord/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a v-if="user.id == 1" @click="navigateTo('/edit-pmslandlord/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a @click="deleteLandlord(landlord.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
                               </div>
@@ -119,8 +119,8 @@
                   text: "You won't be able to revert this!",
                   icon: 'warning',
                   showCancelButton: true,
-                  confirmButtonColor: '#3085d6',
-                  cancelButtonColor: '#d33',
+                  confirmButtonColor: '#006400',
+                  cancelButtonColor: '#FFA500',
                   confirmButtonText: 'Yes, delete it!'
                 }).then((result) => {
                   if (result.isConfirmed) { 

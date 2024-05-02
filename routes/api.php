@@ -178,6 +178,7 @@ Route::delete('sociallink/{id}', [SocialLinkController::class, 'destroy']);
 Route::delete('message/{id}', [MessageController::class, 'destroy']);
 Route::delete('project/{id}', [ProjectController::class, 'destroy']);
 Route::delete('landlord/{id}', [LandlordController::class, 'destroy']);
+Route::delete('pmsproperty/{id}', [PmsPropertyController::class, 'destroy']);
 Route::delete('pmstenant/{id}', [PmsTenantController::class, 'destroy']);
 Route::delete('pmsunit/{id}', [PmsUnitController::class, 'destroy']);
 Route::delete('pmsexpense/{id}', [PmsExpenseController::class, 'destroy']);

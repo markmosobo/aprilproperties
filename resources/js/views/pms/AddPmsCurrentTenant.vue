@@ -25,13 +25,13 @@
                         <input
                             type="text"
                             placeholder="First Name"
-                            id="title"
-                            name="title"
+                            id="first_name"
+                            name="first_name"
                             v-model="form.first_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter first name!</div>
+                        <div class="invalid-feedback" v-if="!form.first_name">Please enter first name!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -40,13 +40,13 @@
                         <input
                             type="text"
                             placeholder="Last Name"
-                            id="title"
-                            name="title"
+                            id="last_name"
+                            name="last_name"
                             v-model="form.last_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter last name!</div>
+                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
                       </div>
                    </div>
  
@@ -81,13 +81,13 @@
                         <input
                             type="text"
                             placeholder="Phone Number"
-                            id="title"
-                            name="title"
+                            id="phone_number"
+                            name="phone_number"
                             v-model="form.phone_number"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter phone number!</div>
+                        <div class="invalid-feedback" v-if="!form.phone_number">Please enter phone number!</div>
                       </div>
                    </div>
  
@@ -99,14 +99,14 @@
                       >Property*</label
                       >
                       <div class="col-sm-10">
-                         <select @change="getUnits" name="landlord" v-model="form.pms_property_id" class="form-select" id="">
+                         <select @change="getUnits" name="property" v-model="form.pms_property_id" class="form-select" id="property">
                             <option value="0" selected disabled>Select Property</option>
                             <option v-for="property in properties" :value="property.id"
                             :selected="property.id == form.pms_property_id" :key="property.id">{{ property.name}} </option>
  
                          </select>
  
-                         <div class="invalid-feedback">Please select a property!</div>
+                        <div class="invalid-feedback" v-if="!form.pms_property_id">Please select property!</div>
                       </div>
                    </div>  
                    <div class="col-sm-6">
@@ -114,14 +114,14 @@
                       >Unit*</label
                       >
                       <div class="col-sm-10">
-                         <select @change="getUnitInfo" :disabled="!form.pms_property_id" name="unit" v-model="form.pms_unit_id" class="form-select" id="">
+                         <select @change="getUnitInfo" :disabled="!form.pms_property_id" name="unit" v-model="form.pms_unit_id" class="form-select" id="unit">
                             <option value="0" selected disabled>Select Unit</option>
                             <option v-for="unit in propunits" :value="unit.id"
                             :selected="unit.id == form.unit_id" :key="unit.id">{{ unit.unit_number}}</option>
  
                          </select>
  
-                         <div class="invalid-feedback">Please select a unit!</div>
+                         <div class="invalid-feedback" v-if="!form.pms_unit_id">Please select unit!</div>
                          <div v-if="showNoUnitsMessage" class="text-danger">No units available for selected property.</div>
 
 
@@ -415,13 +415,47 @@
        },     
        loadLists() {
           axios.get('api/lists').then((response) => {
-          this.blogcategories = response.data.lists.blogcategories;
           this.units = response.data.lists.units;
           this.properties = response.data.lists.pmsproperties;
  
           });
        },
+       validateForm() {
+          let isValid = true;
+          if (!this.form.first_name) {
+              isValid = false;
+              document.getElementById('first_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('first_name').classList.remove('is-invalid');
+          }
+          if (!this.form.last_name) {
+              isValid = false;
+              document.getElementById('last_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('last_name').classList.remove('is-invalid');
+          }
+          if (!this.form.phone_number) {
+              isValid = false;
+              document.getElementById('phone_number').classList.add('is-invalid');
+          } else {
+              document.getElementById('phone_number').classList.remove('is-invalid');
+          }
+          if (!this.form.pms_property_id) {
+              isValid = false;
+              document.getElementById('property').classList.add('is-invalid');
+          } else {
+              document.getElementById('property').classList.remove('is-invalid');
+          }
+          if (!this.form.pms_unit_id) {
+              isValid = false;
+              document.getElementById('unit').classList.add('is-invalid');
+          } else {
+              document.getElementById('unit').classList.remove('is-invalid');
+          }
+          return isValid;
+       },
        submit(){
+        if (this.validateForm()) {                
           let self = this;
           axios.post("api/tenants", this.form)
           .then(function (response) {
@@ -431,11 +465,11 @@
              console.log("tenant", self.tenantId);
 
              // this.step = 1;
-             // toast.fire(
-             //    'Success!',
-             //    'Tenant added!',
-             //    'success'
-             // )
+             toast.fire(
+                'Success!',
+                'Tenant added!',
+                'success'
+             )
           })
           .catch(function (error) {
              console.log(error);
@@ -446,6 +480,7 @@
              // )
           });
           this.$router.push('/pmstenants')
+        }  
  
        },
         async submitStatement() {

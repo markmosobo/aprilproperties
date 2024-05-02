@@ -25,13 +25,13 @@
                         <input
                             type="text"
                             placeholder="First Name"
-                            id="title"
-                            name="title"
+                            id="first_name"
+                            name="first_name"
                             v-model="form.first_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.first_name">Please enter first name!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -40,13 +40,13 @@
                         <input
                             type="text"
                             placeholder="Last Name"
-                            id="title"
-                            name="title"
+                            id="last_name"
+                            name="last_name"
                             v-model="form.last_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
                       </div>
                    </div>
  
@@ -59,13 +59,13 @@
                         <input
                             type="text"
                             placeholder="Email Address"
-                            id="title"
-                            name="title"
+                            id="email"
+                            name="email"
                             v-model="form.email"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.email">Please enter email address!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -73,14 +73,33 @@
                       >Role</label
                       >
                       <div class="col-sm-10">
-                         <select name="role" v-model="form.role_id" class="form-select" id="">
+                         <select name="role" v-model="form.role_id" class="form-select" id="role">
                             <option value="0" selected>Select Role</option>
                             <option v-for="role in roles" :value="role.id"
                             :selected="role.id == form.role_id" :key="role.id">{{ role.name}}</option>
  
                          </select>
  
-                      <div class="invalid-feedback">Please enter role!</div>
+                        <div class="invalid-feedback" v-if="!form.role_id">Please select role!</div>
+                      </div>
+                   </div>
+
+                </div>
+                <div class="row mb-3"></div>
+                <div class="form-group row">
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Phone Number</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="Phone Number"
+                            id="phone_number"
+                            name="phone_number"
+                            v-model="form.phone_number"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback" v-if="!form.phone_number">Please enter phone number!</div>
                       </div>
                    </div>
 
@@ -168,7 +187,42 @@
  
           });
        },
+       validateForm() {
+          let isValid = true;
+          if (!this.form.first_name) {
+              isValid = false;
+              document.getElementById('first_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('first_name').classList.remove('is-invalid');
+          }
+          if (!this.form.last_name) {
+              isValid = false;
+              document.getElementById('last_name').classList.add('is-invalid');
+          } else {
+              document.getElementById('last_name').classList.remove('is-invalid');
+          }
+          if (!this.form.phone_number) {
+              isValid = false;
+              document.getElementById('phone_number').classList.add('is-invalid');
+          } else {
+              document.getElementById('phone_number').classList.remove('is-invalid');
+          }
+          if (!this.form.email) {
+              isValid = false;
+              document.getElementById('email').classList.add('is-invalid');
+          } else {
+              document.getElementById('email').classList.remove('is-invalid');
+          }
+          if (!this.form.role_id) {
+              isValid = false;
+              document.getElementById('role').classList.add('is-invalid');
+          } else {
+              document.getElementById('role').classList.remove('is-invalid');
+          }
+          return isValid;
+       },
        submit(){
+        if (this.validateForm()) {                         
           axios.post("api/users", this.form)
           .then(function (response) {
              console.log(response);
@@ -188,6 +242,7 @@
              // )
           });
           this.$router.push('/all-users')
+         }
        }
  
     },

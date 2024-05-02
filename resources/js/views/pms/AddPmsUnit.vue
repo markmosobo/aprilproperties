@@ -25,25 +25,25 @@
                         <input
                             type="text"
                             placeholder="Unit Number"
-                            id="title"
-                            name="title"
+                            id="unit_number"
+                            name="unit_number"
                             v-model="form.unit_number"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.unit_number">Please enter unit number!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
                       <label for="inputPassword" class="form-label">Type*</label>
                       <div class="col-sm-10">
-                         <select name="unit" v-model="form.type" class="form-select" id="">
+                         <select name="type" v-model="form.type" class="form-select" id="type">
                             <option value="0" selected disabled>Select Type</option>
                             <option value="Residential">Residential</option>
                             <option value="Commercial">Commercial</option>
  
                          </select>
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.type">Please select type!</div>
                       </div>
                    </div>
  
@@ -56,13 +56,13 @@
                         <input
                             type="number"
                             placeholder="Deposit"
-                            id="title"
-                            name="title"
+                            id="deposit"
+                            name="deposit"
                             v-model="form.deposit"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.deposit">Please enter deposit!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -71,13 +71,13 @@
                         <input
                             type="number"
                             placeholder="Monthly Rent"
-                            id="title"
-                            name="title"
+                            id="monthly_rent"
+                            name="monthly_rent"
                             v-model="form.monthly_rent"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback">Please enter title!</div>
+                        <div class="invalid-feedback" v-if="!form.monthly_rent">Please enter monthly rent!</div>
                       </div>
                    </div>
 
@@ -191,7 +191,16 @@
                     <!-- <button @click.prevent="prev()" class="btn btn-dark">Previous</button> -->
                 </div>
                 <div class="col-sm-6 col-lg-6 text-end">
-                    <button type="submit" @click.prevent="submit()" class="btn btn-sm btn-primary rounded-pill">Submit</button>
+                    <!-- <button type="submit" @click.prevent="submit()" class="btn btn-sm btn-primary rounded-pill">Submit</button> -->
+                    <button type="submit" 
+                          style="background-color: darkgreen; border-color: darkgreen;" 
+                          @click.prevent="submit()" 
+                          :class="{ 'btn-success': !submitting, 'btn-secondary': submitting }"
+                          class="btn rounded-pill"
+                          :disabled="submitting">
+                      <span v-if="!submitted">Submit</span>
+                      <span v-else>Submitting...</span>
+                  </button>
                 </div>
             </div>
           </fieldset>
@@ -247,6 +256,8 @@
           loading: false,
           step: 1, 
           roles: [],
+          submitting: false,
+          submitted: false
        }   
     },
     methods: {
@@ -262,7 +273,55 @@
          }
          reader.readAsDataURL(file);
        },
-       submit(){
+        async submit() {
+            if (this.validateForm()) {
+                // Start submitting process
+                this.submitting = true;
+                
+                try {
+                    // Simulate asynchronous submission process (you would replace this with your actual submission logic)
+                    await this.submitForm();
+
+                    // Submission successful
+                    this.submitted = true;
+                } catch (error) {
+                    // Handle submission error
+                    console.error("Submission error:", error);
+                } finally {
+                    // End submitting process
+                    this.submitting = false;
+                }
+            }
+        },
+        validateForm() {
+          let isValid = true;
+          if (!this.form.unit_number) {
+              isValid = false;
+              document.getElementById('unit_number').classList.add('is-invalid');
+          } else {
+              document.getElementById('unit_number').classList.remove('is-invalid');
+          }
+          if (!this.form.type) {
+              isValid = false;
+              document.getElementById('type').classList.add('is-invalid');
+          } else {
+              document.getElementById('type').classList.remove('is-invalid');
+          }
+          if (!this.form.deposit) {
+              isValid = false;
+              document.getElementById('deposit').classList.add('is-invalid');
+          } else {
+              document.getElementById('deposit').classList.remove('is-invalid');
+          }
+          if (!this.form.monthly_rent) {
+              isValid = false;
+              document.getElementById('monthly_rent').classList.add('is-invalid');
+          } else {
+              document.getElementById('monthly_rent').classList.remove('is-invalid');
+          }
+          return isValid;
+       },
+       submitForm(){
           axios.post("/api/pmsunits/"+this.$route.params.id, this.form)
           .then(function (response) {
              console.log(response);

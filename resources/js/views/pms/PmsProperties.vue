@@ -65,7 +65,9 @@
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> -->                                            
                                   <a @click="navigateTo('/pmsunits/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Units</a>
-                                  <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>                                  
+                                  <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>  
+                                  <a @click="deleteProperty(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                 
                                   </div>
                               </div>
                             </td>
@@ -169,16 +171,16 @@
         deleteProperty(id){
                 Swal.fire({
                   title: 'Are you sure?',
-                  text: "You won't be able to revert this!",
+                  text: "All units associated with property will be deleted. You won't be able to revert this!",
                   icon: 'warning',
                   showCancelButton: true,
-                  confirmButtonColor: '#3085d6',
-                  cancelButtonColor: '#d33',
+                  confirmButtonColor: '#006400',
+                  cancelButtonColor: '#FFA500',
                   confirmButtonText: 'Yes, delete it!'
                 }).then((result) => {
                   if (result.isConfirmed) { 
                   //send request to the server
-                  axios.delete('/api/property/'+id).then(() => {
+                  axios.delete('/api/pmsproperty/'+id).then(() => {
                   toast.fire(
                     'Deleted!',
                     'Property has been deleted.',
