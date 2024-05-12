@@ -262,7 +262,7 @@
         </a>
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-              <router-link to="/pmsproperties" custom v-slot="{ href, navigate, isActive }">
+              <router-link to="/managedproperties" custom v-slot="{ href, navigate, isActive }">
                 <a
                   :href="href"
                   :class="{ active: isActive }"

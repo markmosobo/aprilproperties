@@ -63,9 +63,10 @@
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> -->                                            
+                                  <a @click="navigateTo('/pmsproperties/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a @click="navigateTo('/pmsunits/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Units</a>
                                   <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>  
+                                  <a @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a @click="deleteProperty(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                  
                                   </div>

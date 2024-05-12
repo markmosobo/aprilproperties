@@ -45,9 +45,20 @@ class PmsPropertyController extends Controller
         ], 200);
     }
 
+    public function update(Request $request,  $id)
+    {
+        $property = PmsProperty::findOrFail($id);
+        $property->update($request->all());
+        return response()->json([
+            'status' => true,
+            'message' => "Property Updated successfully!",
+            'property' => $property
+        ], 200);
+    }
+
     public function single(Request $request, $id)
     {
-        $property = PmsProperty::with('images')->where('id', $id)->get();
+        $property = PmsProperty::with('images','landlord')->where('id', $id)->first();
 
         return response()->json([
             'status' => true,

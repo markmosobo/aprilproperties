@@ -153,6 +153,7 @@ Route::put('sociallink/{id}', [SocialLinkController::class, 'update']);
 Route::put('message/{id}', [MessageController::class, 'update']);
 Route::put('project/{id}', [ProjectController::class, 'update']);
 Route::put('landlord/{id}', [LandlordController::class, 'update']);
+Route::put('pmsproperty/{id}', [PmsPropertyController::class, 'update']);
 Route::put('pmsunit/{id}', [PmsUnitController::class, 'update']);
 Route::put('pmstenant/{id}', [PmsTenantController::class, 'update']);
 Route::put('pmsexpense/{id}', [PmsExpenseController::class, 'update']);

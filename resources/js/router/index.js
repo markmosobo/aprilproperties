@@ -17,7 +17,10 @@ import AllProperties from '../views/properties/AllProperties.vue'
 import FeaturedProperties from '../views/properties/FeaturedProperties.vue'
 import MyProperties from '../views/properties/MyProperties.vue'
 import AddProperty from '../views/properties/AddProperty.vue'
+import ManagedProperties from '../views/pms/ManagedProperties.vue'
 import AddPmsProperty from '../views/pms/AddPmsProperty.vue'
+import ViewPmsProperty from '../views/pms/ViewPmsProperty.vue'
+import EditPmsProperty from '../views/pms/EditPmsProperty.vue'
 import AddPmsLandlord from '../views/pms/AddPmsLandlord.vue'
 import EditPmsLandlord from '../views/pms/EditPmsLandlord.vue'
 import AddPmsTenant from '../views/pms/AddPmsTenant.vue'
@@ -474,11 +477,18 @@ const routes = [
 
     //pms routes
     {
-        path:'/pmsproperties',
-        name: 'pmsproperties',
-        component : () => import("../views/pms/PmsProperties.vue"),
+        path:'/managedproperties',
+        name: 'managedproperties',
+        component: ManagedProperties,
+        // component : () => import("../views/pms/PmsProperties.vue"),
         beforeEnter : guardMyroute,
     },
+    {
+        path:'/pmsproperties/:id',
+        name: 'pmsproperties',
+        component: ViewPmsProperty,
+        beforeEnter : guardMyroute,
+    }, 
     {
         path:'/pmsunits/:id',
         name: 'pmsunits',
@@ -507,6 +517,12 @@ const routes = [
         path:'/add-pmsproperty',
         name: 'add-pmsproperty',
         component: AddPmsProperty,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/edit-pmsproperty/:id',
+        name: 'edit-pmsproperty',
+        component: EditPmsProperty,
         beforeEnter : guardMyroute,
     },
     {
