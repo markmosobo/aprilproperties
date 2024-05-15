@@ -145,7 +145,7 @@
                         // Create a new instance of jsPDF
           const pdf = new jsPDF();
           var img = new Image();
-          img.src = '/images/ingo-colored-logo.png';
+          img.src = '/images/apex-logo.png';
 
           // pdf.addImage(img, 'PNG', 10, 10, 40, 40, { align: "center" });
           pdf.setFont("helvetica");
@@ -189,7 +189,9 @@
           // Add content to the PDF
           // pdf.text('Hello, this is a PDF generated with Vue.js!', 10, 10);
           img.onload = function() {
-          pdf.addImage(img, 'PNG', 10, 10, 40, 40);
+          // pdf.addImage(img, 'PNG', 10, 10, 40, 40);
+          pdf.addImage(img, 'PNG', 10, 10, 20, 20);
+
 
           // Save the PDF
           pdf.save('invoice-pdf.pdf');

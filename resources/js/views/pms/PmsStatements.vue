@@ -52,7 +52,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Full Statement <span>| Full Statement</span></h5>
+                      <h5 class="card-title">All Statements <span>| All Statements</span></h5>
                       <p class="card-text">
                    
 <!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
@@ -65,14 +65,14 @@
                             Add Landlord
                           </a>
                       </router-link> -->
-                          <button @click="generatePDF">Generate PDF</button>
+                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
             
                       </p>
     
                       <table id="AllStatementsTable" class="table table-borderless">
                         <thead>
                           <tr>
-                            <th scope="col">Invoice</th>
+                            <th scope="col">Tenant</th>
                             <th scope="col">Property</th>
                             <th scope="col">Detail</th>
                             <th scope="col">Due</th>
@@ -85,7 +85,7 @@
                         </thead>
                         <tbody>
                           <tr v-for="statement in statements" :key="statement.id">
-                            <td>{{statement.ref_no}}</td>
+                            <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
                             <td>{{statement.property.name}}</td>                            
                             <td>{{statement.details}}</td>
                             <td>{{formatNumber(statement.total)}}</td>

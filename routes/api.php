@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\PmsTenantController;
 use App\Http\Controllers\Api\PmsExpenseController;
 use App\Http\Controllers\Api\PmsYearController;
 use App\Http\Controllers\Api\PmsStatementController;
+use App\Http\Controllers\Api\PmsInvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -110,6 +111,7 @@ Route::get('pmsunit/{id}', [PmsUnitController::class, 'single']);
 Route::get('pmstenant/{id}', [PmsTenantController::class, 'single']);
 Route::get('pmsexpense/{id}', [PmsExpenseController::class, 'single']);
 Route::get('pmsstatement/{id}', [PmsStatementController::class, 'single']);
+Route::get('pmsinvoicethrostatement/{id}', [PmsStatementController::class, 'singleInvoice']);
 
 //property statements
 Route::get('pmspropertystatements/{id}', [PmsStatementController::class, 'propertyStatements']);
@@ -135,6 +137,10 @@ Route::get('pmsyeartenantstatements/{id}', [PmsStatementController::class, 'tena
 Route::get('pmsquartertenantstatements/{id}', [PmsStatementController::class, 'tenantQuarterStatements']);
 Route::get('pmslastyeartenantstatements/{id}', [PmsStatementController::class, 'tenantLastYearStatements']);
 Route::get('pmsalltenantstatements/{id}', [PmsStatementController::class, 'tenantAllStatements']);
+
+//tenant invoices
+Route::get('pmstenantinvoices/{id}', [PmsInvoiceController::class, 'tenantInvoices']);
+
 
 Route::put('property/{id}', [PropertyController::class, 'update']);
 Route::put('category/{id}', [CategoryController::class, 'update']);

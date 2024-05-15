@@ -55,7 +55,7 @@
                       <h5 class="card-title">{{tenant.first_name}} {{tenant.last_name}}'s Statement <span>| Last 90 Days</span></h5>
                       <p class="card-text">
                    
-                          <button @click="generatePDF">Generate PDF</button>
+                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
             
                       </p>
     
@@ -150,7 +150,7 @@
         getTenant()
         {
           axios.get('/api/pmstenant/'+ this.$route.params.id).then((response) => {
-            this.tenant = response.data.tenant[0] 
+            this.tenant = response.data.tenant;
             console.log("dat", this.tenant)
           }).catch(() => {
               console.log('error')

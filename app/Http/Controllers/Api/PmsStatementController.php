@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PmsStatement;
+use App\Models\Invoice;
 use Carbon\Carbon;
 
 class PmsStatementController extends Controller
@@ -92,7 +93,15 @@ class PmsStatementController extends Controller
                     'paid' => $request->paid,
                     'balance' => $request->balance,
                     'status' => 1,
-                ]);                
+                ]);  
+                //update status on invoice
+                $invoice = Invoice::where('statement_id', $id)->first();
+                if($invoice)
+                {
+                    $invoice->update([
+                    'status' => 1, //means statement settled
+                    ]);
+                }              
             }
             else
             {
@@ -117,6 +126,19 @@ class PmsStatementController extends Controller
         $pmsstatement = PmsStatement::findOrFail($id);
 
         if ($pmsstatement) {
+
+            //create invoice
+            Invoice::create([
+                'statement_id' => $pmsstatement->id,
+                'ref_no' => $pmsstatement->ref_no,
+                'pms_property_id' => $pmsstatement->pms_property_id,
+                'pms_tenant_id' => $pmsstatement->pms_tenant_id,
+                'pms_unit_id' => $pmsstatement->pms_unit_id,
+                'details' => "Rent+Deposit - ".$pmsstatement->details,
+                'total' => $pmsstatement->total,
+                'status' => 0, //status 0 for not settled 1 for settled
+                'water_bill' => $request->water_bill                  
+            ]);
 
             $pmsstatement->update([
                 'water_bill' => $request->water_bill,
@@ -345,6 +367,17 @@ class PmsStatementController extends Controller
                 'message' => "No last month statement found for the tenant with ID: $id",
             ], 404);
         }
+    }
+
+    public function singleInvoice(Request $request, $id)
+    {
+        $invoice = Invoice::with('tenant','property','unit')->where('statement_id', $id)->first();
+
+        return response()->json([
+            'status' => true,
+            'message' => "retrieved",
+            'invoice' => $invoice
+        ], 200);
     }
 
 }

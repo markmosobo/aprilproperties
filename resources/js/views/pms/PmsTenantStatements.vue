@@ -15,7 +15,7 @@
                         </li>
     
                         <li>
-                            <router-link :to="`/pmsmonthtenantstatements/${tenantId}`" custom v-slot="{ href, navigate, isActive }">
+                            <router-link :to="`/pmstenantstatements/${tenantId}`" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -55,7 +55,7 @@
                       <h5 class="card-title">{{tenant.first_name}} {{tenant.last_name}}'s Statement <span>| This Month</span></h5>
                       <p class="card-text">
                    
-                          <button @click="generatePDF">Generate PDF</button>
+                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
             
                       </p>
     
@@ -150,7 +150,7 @@
         getTenant()
         {
           axios.get('/api/pmstenant/'+ this.$route.params.id).then((response) => {
-            this.tenant = response.data.tenant[0] 
+            this.tenant = response.data.tenant;
             console.log("dat", this.tenant)
           }).catch(() => {
               console.log('error')
@@ -160,7 +160,7 @@
             this.$router.push(location)
         },
          invoiceTenant(id){
-            this.$router.push('invoicestatement/'+id)
+            this.$router.replace('/invoicestatement/'+id)
         },
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)

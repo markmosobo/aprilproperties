@@ -26,6 +26,7 @@ use App\Models\PmsUnit;
 use App\Models\PmsTenant;
 use App\Models\PmsExpense;
 use App\Models\PmsStatement;
+use App\Models\Invoice;
 
 class ListController extends Controller
 {
@@ -53,6 +54,7 @@ class ListController extends Controller
         $landlords = Landlord::all();
         $units = PmsUnit::all();
         $statements = PmsStatement::with('property', 'tenant')->latest()->get();
+        $pmsinvoices = Invoice::with('property', 'tenant')->latest()->get();
         $pmstenants = PmsTenant::orderBy('id', 'desc')->with('unit','property')->get();
         $pmsexpenses = PmsExpense::with('user')->latest()->get();
 
@@ -113,6 +115,7 @@ class ListController extends Controller
                 'pmstenants' => $pmstenants,
                 'pmsexpenses' => $pmsexpenses,
                 'statements' => $statements,
+                'pmsinvoices' => $pmsinvoices,
 
                 'pmspropertycount' => $pmsPropertyCount,
                 'pmsvacantpropertycount' => $pmsVacantPropertyCount,

@@ -106,6 +106,10 @@ import EditStatement from '../views/pms/EditStatement.vue'
 import SettleStatement from '../views/pms/SettleStatement.vue'
 import InvoiceStatement from '../views/pms/InvoiceStatement.vue'
 
+import PmsInvoices from '../views/pms/PmsInvoices.vue'
+import ViewInvoice from '../views/pms/ViewInvoice.vue'
+import PmsTenantInvoices from '../views/pms/PmsTenantInvoices.vue'
+
 function guardMyroute(to, from, next)
 {
  var isAuthenticated= false;
@@ -685,6 +689,24 @@ const routes = [
         path:'/pmsalltenantstatements/:id',
         name: 'pmsalltenantstatements',
         component: PmsAllTenantStatements,
+        beforeEnter : guardMyroute,
+    },
+        {
+        path:'/invoices',
+        name: 'invoices',
+        component: PmsInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/viewinvoice/:id',
+        name: 'viewinvoice',
+        component: ViewInvoice,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmstenantinvoices/:id',
+        name: 'pmstenantinvoices',
+        component: PmsTenantInvoices,
         beforeEnter : guardMyroute,
     },
     {

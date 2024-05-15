@@ -55,7 +55,7 @@
                       <h5 class="card-title">{{property.name}} Statement <span>| Last 90 Days</span></h5>
                       <p class="card-text">
                    
-                          <button @click="generatePDF">Generate PDF</button>
+                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
             
                       </p>
     
@@ -63,12 +63,11 @@
                         <thead>
                           <tr>
                             <th scope="col">Invoice</th>
-                            <th scope="col">Unit</th>
                             <th scope="col">Tenant</th>
+                            <th scope="col">Details</th>
                             <th scope="col">Due</th>
                             <th scope="col">Paid</th>
                             <th scope="col">Bal</th>
-                            <th scope="col">Payment Mode</th>
                             <th scope="col">Status</th>
                             <th scope="col">Date</th>
                             <th scope="col">Action</th>
@@ -77,14 +76,15 @@
                         <tbody>
                           <tr v-for="statement in statements" :key="statement.id">
                             <td>{{statement.ref_no}}</td>
-                            <td>{{statement.unit.unit_number ?? "N/A"}}</td>
-                            <td>{{statement.tenant.first_name}} {{statement.tenant.last_name}}</td> 
+                            <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
+                            <td>{{statement.details}}</td>
                             <td>{{formatNumber(statement.total)}}</td>
                             <td>{{formatNumber(statement.paid)}}</td>
                             <td>{{formatNumber(statement.balance)}}</td>
                             <td>
-                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Settled</span>
-                              <span v-else class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Not Settled</span>
+                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
+                              <span v-else-if="statement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
+                              <span v-else class="badge bg-info text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
                             </td>
                             <td>{{format_date(statement.created_at)}}</td>
                             <td>
@@ -95,7 +95,7 @@
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
-                                  <a v-if="statement.status == 0" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   </div>
                               </div>
                             </td>
@@ -156,7 +156,7 @@
         getProperty()
         {
           axios.get('/api/pmsproperty/'+ this.$route.params.id).then((response) => {
-            this.property = response.data.property[0] 
+            this.property = response.data.property; 
             console.log("dat", this.property)
           }).catch(() => {
               console.log('error')

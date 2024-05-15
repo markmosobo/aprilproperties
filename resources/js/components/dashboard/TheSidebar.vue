@@ -319,7 +319,7 @@
         </ul>
       </li><!-- End Tenants Nav -->
 
-<!--       <li class="nav-item">
+      <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#expenses-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-gem"></i><span>Manage Expenses</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -336,13 +336,8 @@
             </a>
             </router-link>
           </li>
-          <li>
-            <a href="icons-remix.html">
-              <i class="bi bi-circle"></i><span>Statements</span>
-            </a>
-          </li>
         </ul>
-      </li> -->
+      </li>
       <!-- End Expenses Nav -->
 
       <li class="nav-item">
@@ -355,6 +350,20 @@
                   >
           <i class="bi bi-grid"></i>
           <span>Statements</span>
+        </a>
+        </router-link>
+      </li>
+
+       <li class="nav-item">
+        <router-link to="/invoices" custom v-slot="{ href, navigate, isActive }">
+                  <a
+                    :href="href"
+                    :class="{ active: isActive }"
+                    class="nav-link"
+                    @click="navigate"
+                  >
+          <i class="bi bi-grid"></i>
+          <span>Invoices</span>
         </a>
         </router-link>
       </li>

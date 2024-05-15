@@ -8,14 +8,25 @@
                   <div class="card top-selling overflow-auto">
     
                     <div class="filter">
-                      <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+<!--                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <li class="dropdown-header text-start">
                           <h6>Filter</h6>
                         </li>
     
                         <li>
-                            <router-link :to="`/pmsyearpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/statements/" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            This Month</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link to="/pmsyearstatements" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -26,76 +37,74 @@
                             </router-link>
                         </li>
                         <li>
-                            <router-link :to="`/pmsquarterpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <router-link to="/pmsallstatements" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
                                 class="dropdown-item"
                                 @click="navigate"
                             >
-                            This Quarter</a>
-                            </router-link>
-                        </li>
-                        <li>
-                            <router-link :to="`/pmslastyearpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
-                            <a
-                                :href="href"
-                                :class="{ active: isActive }"
-                                class="dropdown-item"
-                                @click="navigate"
-                            >
-                            Last Year</a>
+                            All Time</a>
                             </router-link>
                         </li>
 
-                      </ul>
+                      </ul> -->
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{property.name}} Statement <span>| Last Year</span></h5>
+                      <h5 class="card-title">All Invoices <span>| All Invoices</span></h5>
                       <p class="card-text">
                    
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
+<!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
+                          <a
+                            :href="href"
+                            :class="{ active: isActive }"
+                            class="btn btn-sm btn-primary rounded-pill"
+                            @click="navigate"
+                          >
+                            Add Landlord
+                          </a>
+                      </router-link> -->
+                          <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
             
                       </p>
     
                       <table id="AllStatementsTable" class="table table-borderless">
                         <thead>
                           <tr>
-                            <th scope="col">Invoice</th>
                             <th scope="col">Tenant</th>
-                            <th scope="col">Details</th>
+                            <th scope="col">Property</th>
+                            <th scope="col">Detail</th>
+                            <th scope="col">Rent</th>
+                            <th scope="col">Water</th>
                             <th scope="col">Due</th>
-                            <th scope="col">Paid</th>
-                            <th scope="col">Bal</th>
-                            <th scope="col">Status</th>
                             <th scope="col">Date</th>
+                            <th scope="col">Status</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
                         <tbody>
                           <tr v-for="statement in statements" :key="statement.id">
                             <td>{{statement.ref_no}}</td>
-                            <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
-                            <td>{{statement.details}}</td> 
+                            <td>{{statement.property.name}}</td>                            
+                            <td>{{statement.details}}</td>
                             <td>{{formatNumber(statement.total)}}</td>
-                            <td>{{formatNumber(statement.paid)}}</td>
-                            <td>{{formatNumber(statement.balance)}}</td>
+                            <td>{{formatNumber(statement.water_bill)}}</td>
+                            <td>{{formatNumber(statement.total + statement.water_bill)}}</td>
+                            <td>{{format_date(statement.updated_at)}}</td>
                             <td>
-                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
-                              <span v-else-if="statement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
-                              <span v-else class="badge bg-info text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
+                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Settled</span>
+                              <span v-else class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Not Settled</span>
                             </td>
-                            <td>{{format_date(statement.created_at)}}</td>
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
                                   </button>
-                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
-                                  <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
-                                  <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
+                                  <a @click="navigateTo('/viewinvoice/'+statement.statement_id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> 
+                                  <a @click="navigateTo('/viewinvoice/'+statement.statement_id )" class="dropdown-item" href="#"><i class="ri-printer-fill mr-2"></i>Print</a>                                           
+                                  <!-- <a v-if="statement.status == 0" @click="settleTenant(statement.statement_id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a> -->
                                   </div>
                               </div>
                             </td>
@@ -107,7 +116,7 @@
                         Paid: {{ formatNumber(calculateTotal('paid')) }},
                         Bal: {{ formatNumber(calculateTotal('balance')) }}
                       </strong>
-                      </div>    
+                      </div>     
                     </div>
     
                   </div>
@@ -141,60 +150,17 @@
     export default {
       data(){
         return {
-          property: [],
           statements: [],
-          expenses: [],
-          categories: [],
-          propertytypes: [],
-          user: [],
-          dueTotal: 0, // Variable to store the sum of the "Due" column
-          propertyId: this.$route.params.id
-
+          collectedTotal: 0,
+          expensesTotal: 0,
+          user: []
         }
       },
       methods: {
-        getProperty()
-        {
-          axios.get('/api/pmsproperty/'+ this.$route.params.id).then((response) => {
-            this.property = response.data.property;
-            console.log("dat", this.property)
-          }).catch(() => {
-              console.log('error')
-          })
+        navigateTo(location){
+            this.$router.push(location)
         },
-        getPropertyStatements() {
-             axios.get('/api/pmslastyearpropertystatements/'+this.$route.params.id).then((response) => {
-             this.statements = response.data.pmslastyearpropertystatements;
-             console.log("props", response)
-             setTimeout(() => {
-                  $("#AllStatementsTable").DataTable();
-              }, 10);
-    
-             });
-        },
-        getPropertyExpenses()
-        {
-          axios.get('/api/pmslastyearpropertyexpenses/'+this.$route.params.id).then((response) => {
-            this.expenses = response.data.pmslastyearpropertyexpenses;
-            console.log("expenses", this.expenses)
-            // Calculate the total amount paid
-            this.totalAmountPaid = this.calculateTotalAmountPaid();
-          })
-        },
-        calculateTotalAmountPaid() {
-        if (!this.expenses || this.expenses.length === 0) {
-              return 0; // If expenses data is empty or undefined, return 0
-            }
-
-            // Use reduce to sum up the amount_paid property for all expenses
-            return this.expenses.reduce((total, expense) => total + expense.amount_paid, 0);
-        },
-        calculateTotal(property) {
-          // Function to calculate total for Total, Paid, and Bal columns
-
-          return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
-        },
-        invoiceTenant(id){
+         invoiceTenant(id){
             this.$router.push('invoicestatement/'+id)
         },
         settleTenant(id, tenantId){
@@ -207,6 +173,43 @@
               } 
             });
 
+        },
+        capitalizeFirstLetter(str) {
+          return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        formatNumber(value) {
+            // Check if the value is not a number
+            if (isNaN(value)) {
+                return value; // Return as it is
+            }
+            
+            // Convert the value to a string
+            let stringValue = value.toString();
+
+            // Split the string into integer and decimal parts
+            let parts = stringValue.split('.');
+
+            // Format the integer part with commas
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+            // If there's a decimal part, limit it to 2 decimal places
+            if (parts.length > 1) {
+                parts[1] = parts[1].substring(0, 2);
+            } else {
+                parts.push('00'); // If no decimal part exists, append '00'
+            }
+
+            // Join the parts back together with a decimal point
+            return parts.join('.');
+        },
+
+        format_date(value){
+          if(value){
+            return moment(String(value)).format('lll')
+          }
+        },
+        capitalizeFirstLetter(str) {
+          return str.charAt(0).toUpperCase() + str.slice(1);
         },
         generatePDF() {
             let pdfName = 'Full Statement';
@@ -224,7 +227,7 @@
             doc.text(rightHeaderText, rightheaderX, rightheaderY, { align: 'left' });
 
             // Add top-right header
-            const headerText = 'Generated on: ' + new Date().toLocaleString()+'\n'+this.property.name+'\n'+this.property.units_no + ' Units';
+            const headerText = 'Generated on: ' + new Date().toLocaleString();
             const headerFontSize = 12;
             const headerX = doc.internal.pageSize.width - 20; // Adjust the X coordinate
             const headerY = 10;
@@ -232,7 +235,6 @@
             doc.setFontSize(headerFontSize);
             doc.setTextColor(44, 62, 80);
             doc.text(headerText, headerX, headerY, { align: 'right' });
-
 
             // Add image at the top
             const imageUrl = '/images/apex-logo.png'; // Replace with the URL of your image
@@ -242,10 +244,8 @@
             const imageY = 20;
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
-            const lastYear = (this.formatYear(new Date)) - 1;
-
-            // Add title
-            const titleText = (this.property.name+" "+lastYear+' Rent Statement').toUpperCase();
+           // Add title
+            const titleText = (' Full Rent Statement').toUpperCase();
             const titleFontSize = 18;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -255,36 +255,29 @@
             doc.setTextColor(44, 62, 80); // Set text color to a dark shade
             doc.text(titleText, titleX, titleY);
 
+
+
             // // Add subtitle with date information
             // doc.setFontSize(14);
             // doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
             // doc.text('Generated on: ' + new Date().toLocaleString(), 20, imageY + imageHeight + 20);
 
-            const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = roundedCommission/100*this.totalPaid;
-
-            const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
-
-            // Add content headers
-            doc.setFontSize(14);
-            doc.setTextColor(44, 62, 80);
-            doc.text(roundedCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
-
-
+            const netRentTotal = this.totalPaid - this.totalAmountPaid;          
 
             doc.setFontSize(14);
             doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
 
             let textY = imageY + imageHeight + 20; // Initial y-coordinate for the first text
 
-            doc.text('Total Rent Collected: ' + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
+            doc.text('Total Rent Collected: '  + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
-            doc.text('Total Expenses Incurred: '+ 'KES ' +this.formatNumber(this.totalAmountPaid), 20, textY);
+            doc.text('Total Expenses Incurred: '  + 'KES ' + this.formatNumber(this.totalAmountPaid), 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
-            doc.text('Net Remission: ' + 'KES ' + this.formatNumber(netRemissionTotal) , 20, textY);
+            doc.text('Total Rent Less Expenses: ' + 'KES ' + this.formatNumber(netRentTotal) , 20, textY);
             textY += 10; // Increment y-coordinate for the next text
+            
 
             doc.setFontSize(12);
             doc.setTextColor(0);
@@ -294,7 +287,7 @@
             let cellPadding = 2;
             let lineHeight = 5;
             let columnWidths = [60, 30, 70, 30, 30, 30];
-            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Due', 'Paid', 'Bal'];
+            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Total', 'Paid', 'Bal'];
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -305,6 +298,7 @@
                 doc.text(columnHeaders[i], xPos + cellPadding, headerYPos + cellHeight - cellPadding);
                 xPos += columnWidths[i];
             }
+
 
             let currentPage = 1;
             let currentRow = 0;
@@ -334,7 +328,15 @@
                             doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 1:
-                            let statusText = statement.status == 1 ? 'Settled' : 'Not Settled';
+                        let statusText;
+
+                        if (statement.status === 1) {
+                            statusText = 'Settled';
+                        } else if (statement.status === 0) {
+                            statusText = 'Not Settled';
+                        } else {
+                            statusText = 'Vacant';
+                        }
                             doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 2:
@@ -369,7 +371,7 @@
             let totalPages = this.addExpensesToPDF(this.expenses, doc);
             // Save the PDF
             // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
-            let fileName = this.property.name+" "+lastYear+' Rent Statement' + '_Total_Pages_' + totalPages + '.pdf';
+            let fileName = 'Full Statement' + '_Total_Pages_' + totalPages + '.pdf';
 
             doc.save(fileName);
         },
@@ -459,60 +461,183 @@
   
             doc.setFontSize(10);
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
-              
+
             return currentPage; // Return the total number of pages used for expenses
         },
-        formatMonth(dateString) {
-          // Parse the date string using Moment.js and format it
-           return moment(dateString).format('MMM YYYY');
-        },
-        formatYear(dateString) {
-          // Parse the date string using Moment.js and format it
-           return moment(dateString).format('YYYY');
-        },
-        formatNumber(value) {
-          // Check if the value is null or undefined
-          if (value == null) return '';
+      printReceipt() {
+        // this.submit();
+        this.$router.push('/invoices')
 
-          // Convert value to string
-          let stringValue = value.toString();
+        // Open a new window for printing
+        const printWindow = window.open("", "_blank");
 
-          // Split the string into integer and decimal parts
-          let [integerPart, decimalPart] = stringValue.split('.');
+        // Build the content for printing
+        const receiptContent = this.buildReceiptContent();
 
-          // Add commas to the integer part
-          integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        // Write the content to the new window
+        printWindow.document.write(receiptContent);
 
-          // Add trailing zeros to the decimal part if needed
-          if (decimalPart == null) decimalPart = '00';
-          else if (decimalPart.length === 1) decimalPart += '0';
+        // Close the document stream
+        printWindow.document.close();
 
-          // Combine integer and decimal parts with a dot
-          return `${integerPart}.${decimalPart}`;
-        },
-        format_date(value){
-          if(value){
-            return moment(String(value)).format('lll')
-          }
-        },
-        capitalizeFirstLetter(str) {
-          return str.charAt(0).toUpperCase() + str.slice(1);
-        },
-        navigateTo(location){
-            this.$router.push(location)
-        },
+        // Trigger the print dialog
+        printWindow.print();
+      },
+      buildReceiptContent(refNo) {
+        // Build the HTML content for the receipt
+        const receiptHTML = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Rent Invoice</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              background-color: #f5f5f5;
+            }
+            .receipt {
+              max-width: 600px;
+              margin: 20px auto;
+              padding: 20px;
+              background-color: #fff;
+              border: 2px solid #ccc;
+              border-radius: 10px;
+            }
+            .receipt-header {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .receipt-header h1 {
+              margin: 10px 0;
+              color: #333;
+            }
+            .receipt-info {
+              margin-bottom: 20px;
+            }
+            .receipt-info p {
+              margin: 5px 0;
+              color: #555;
+            }
+            .receipt-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            .receipt-table th, .receipt-table td {
+              padding: 8px;
+              border-bottom: 1px solid #ccc;
+            }
+            .receipt-table th {
+              text-align: left;
+              background-color: #f2f2f2;
+              color: #333;
+            }
+            .receipt-table td {
+              text-align: left;
+              color: #666;
+            }
+            .receipt-footer {
+              text-align: center;
+            }
+            .receipt-footer p {
+              margin: 5px 0;
+              color: #777;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            <img src="@/assets/img/apex-logo.png" alt="">
+
+            <div class="receipt-header">
+              <h1>April Properties</h1>
+              <p>Kakamega-Webuye Rd, ACK Building</p>
+              <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+            </div>
+            <div class="receipt-info">
+              <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+              <p><strong>Date Issued:</strong> ${this.formatDate(this.dateIssued)}</p>
+              <p><strong>Rent Month:</strong> ${this.formatMonth(this.date)}</p>
+              <p><strong>Tenant:</strong> ${this.tenant}</p>
+              <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
+            </div>
+            <table class="receipt-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Rent Payment</td>
+                  <td>KES ${this.formatNumber(this.unitRent)}</td>
+                </tr>
+                <tr>
+                  <td>Garbage Collection Fee</td>
+                  <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
+                </tr>
+                <tr>
+                  <td>Security Fee</td>
+                  <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
+                </tr>
+                <tr>
+                  <td>Water Bill</td>
+                  <td>KES ${this.formatNumber(this.waterBillAmount)}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total KES. Incl. Water Bill:</th>
+                  <td>KES ${this.formatNumber(this.total)}</td>
+                </tr>
+
+              </tfoot>
+            </table>
+            <div class="receipt-footer">
+              <p>You were invoiced by ${this.user.first_name} ${this.user.last_name}.For MPESA payment:</p>
+              <p>MPESA Paybill</p>
+              <p>Enter Business Number:86767</p>
+              <p>Account No. 7576565</p>
+            </div>
+          </div>
+        </body>
+        </html>
+
+
+        `;
+
+        return receiptHTML;
+      },        
         loadLists() {
              axios.get('api/lists').then((response) => {
-             this.categories = response.data.lists.categories;
-             this.propertytypes = response.data.lists.propertytypes;
-             this.properties = response.data.lists.pmsproperties;
-             console.log("props", this.properties)
+             this.statements = response.data.lists.pmsinvoices;
+             this.expenses = response.data.lists.pmsexpenses;
+             // Calculate the total amount paid
+            this.totalAmountPaid = this.calculateTotalAmountPaid();
              setTimeout(() => {
-                  $("#AllPropertiesTable").DataTable();
+                  $("#AllStatementsTable").DataTable();
               }, 10);
     
              });
-          },
+        },
+        calculateTotalAmountPaid() {
+        if (!this.expenses || this.expenses.length === 0) {
+              return 0; // If expenses data is empty or undefined, return 0
+            }
+
+            // Use reduce to sum up the amount_paid property for all expenses
+            return this.expenses.reduce((total, expense) => total + expense.amount_paid, 0);
+        },
+        calculateTotal(property) {
+          // Function to calculate total for Total, Paid, and Bal columns
+
+          return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
+        },
       },
       components : {
           TheMaster,
@@ -521,7 +646,7 @@
       {
         // Computed property to calculate total due
         totalDue() {
-          return this.calculateTotal('due');
+          return this.calculateTotal('total');
         },
         // Computed property to calculate total paid
         totalPaid() {
@@ -531,11 +656,9 @@
         totalBalance() {
           return this.calculateTotal('balance');
         }
-      },
+      },      
       mounted(){
-        this.getProperty();
-        this.getPropertyStatements();
-        this.getPropertyExpenses();
+        this.loadLists();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
 

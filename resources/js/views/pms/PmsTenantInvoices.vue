@@ -15,6 +15,17 @@
                         </li>
     
                         <li>
+                            <router-link :to="`/pmstenantstatements/${tenantId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            This Month</a>
+                            </router-link>
+                        </li>
+                        <li>
                             <router-link :to="`/pmsyeartenantstatements/${tenantId}`" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
@@ -23,28 +34,6 @@
                                 @click="navigate"
                             >
                             This Year</a>
-                            </router-link>
-                        </li>
-                        <li>
-                            <router-link :to="`/pmsquartertenantstatements/${tenantId}`" custom v-slot="{ href, navigate, isActive }">
-                            <a
-                                :href="href"
-                                :class="{ active: isActive }"
-                                class="dropdown-item"
-                                @click="navigate"
-                            >
-                            This Quarter</a>
-                            </router-link>
-                        </li>
-                        <li>
-                            <router-link :to="`/pmslastyeartenantstatements/${tenantId}`" custom v-slot="{ href, navigate, isActive }">
-                            <a
-                                :href="href"
-                                :class="{ active: isActive }"
-                                class="dropdown-item"
-                                @click="navigate"
-                            >
-                            Last Year</a>
                             </router-link>
                         </li>
                         <li>
@@ -63,10 +52,10 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{tenant.first_name}} {{tenant.last_name}}'s Statement <span>| This Year</span></h5>
+                      <h5 class="card-title">{{tenant.first_name}} {{tenant.last_name}}'s Invoices <span>| This Month</span></h5>
                       <p class="card-text">
                    
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
+                          <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
             
                       </p>
     
@@ -76,10 +65,10 @@
                             <th scope="col">Invoice</th>
                             <th scope="col">Property</th>                            
                             <th scope="col">Detail</th>
-                            <th scope="col">Total</th>
-                            <th scope="col">Paid</th>
-                            <th scope="col">Bal</th>
-                            <th scope="col">Transaction On</th>
+                            <th scope="col">Rent</th>
+                            <th scope="col">Water</th>
+                            <th scope="col">Due</th>
+                            <th scope="col">Date</th>
                             <th scope="col">Status</th>
                             <th scope="col">Action</th>
                           </tr>
@@ -87,11 +76,11 @@
                         <tbody>
                           <tr v-for="statement in statements" :key="statement.id">
                             <td>{{statement.ref_no}}</td>
-                            <td>{{statement.details}}</td>
                             <td>{{statement.property.name}}</td>                            
+                            <td>{{statement.details}}</td>
                             <td>{{formatNumber(statement.total)}}</td>
-                            <td>{{formatNumber(statement.paid)}}</td>
-                            <td>{{formatNumber(statement.balance)}}</td>
+                            <td>{{formatNumber(statement.water_bill)}}</td>
+                            <td>{{formatNumber(statement.total + statement.water_bill)}}</td>
                             <td>{{format_date(statement.updated_at)}}</td>
                             <td>
                               <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Settled</span>
@@ -103,21 +92,21 @@
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
-                                  <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
-                                  <a v-if="statement.status == 0" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a @click="navigateTo('/viewinvoice/'+statement.statement_id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> 
+                                  <a @click="navigateTo('/viewinvoice/'+statement.statement_id )" class="dropdown-item" href="#"><i class="ri-printer-fill mr-2"></i>Print</a>                                                                             
+                                  <!-- <a v-if="statement.status == 0" @click="settleTenant(statement.statement_id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a> -->
                                   </div>
                               </div>
                             </td>
                           </tr>
                         </tbody>
                       </table>
-                      <div><strong>Total: 
+<!--                       <div><strong>Total: 
                         Due: {{ formatNumber(calculateTotal('total')) }},
                         Paid: {{ formatNumber(calculateTotal('paid')) }},
                         Bal: {{ formatNumber(calculateTotal('balance')) }}
                       </strong>
-                      </div>    
+                      </div>   -->  
                     </div>
     
                   </div>
@@ -161,7 +150,7 @@
         getTenant()
         {
           axios.get('/api/pmstenant/'+ this.$route.params.id).then((response) => {
-            this.tenant = response.data.tenant; 
+            this.tenant = response.data.tenant;
             console.log("dat", this.tenant)
           }).catch(() => {
               console.log('error')
@@ -171,7 +160,7 @@
             this.$router.push(location)
         },
          invoiceTenant(id){
-            this.$router.push('invoicestatement/'+id)
+            this.$router.replace('/invoicestatement/'+id)
         },
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)
@@ -217,10 +206,6 @@
         formatMonth(dateString) {
           // Parse the date string using Moment.js and format it
            return moment(dateString).format('MMM YYYY');
-        },
-        formatYear(dateString) {
-          // Parse the date string using Moment.js and format it
-           return moment(dateString).format('YYYY');
         }, 
         calculateTotal(property) {
           // Function to calculate total for Total, Paid, and Bal columns
@@ -228,9 +213,9 @@
           return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
         },      
         getTenantStatements() {
-             axios.get('/api/pmsyeartenantstatements/'+this.$route.params.id).then((response) => {
-             this.statements = response.data.pmsyeartenantstatements;
-             console.log("props", response)
+             axios.get('/api/pmstenantinvoices/'+this.$route.params.id).then((response) => {
+             this.statements = response.data.pmstenantinvoices;
+             console.log("invoices", response)
              setTimeout(() => {
                   $("#AllStatementsTable").DataTable();
               }, 10);
@@ -272,9 +257,8 @@
             const imageY = 20;
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
-
             // Add title
-            const titleText = (tenantName+"'s "+this.formatYear(new Date)+' Rent Statement').toUpperCase();
+            const titleText = (tenantName+"'s "+this.formatMonth(new Date)+' Rent Statement').toUpperCase();
             const titleFontSize = 18;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -399,7 +383,7 @@
             // Call the function to add expenses to the PDF with pagination
             // let totalPages = this.addExpensesToPDF(this.expenses, doc);
             // Save the PDF
-            let fileName = tenantName +' '+ this.formatYear(new Date)+' Rent Statement' + '_Page_' + currentPage + '.pdf';
+            let fileName = tenantName +"'s ' "+ this.formatMonth(new Date)+' Rent Statement' + '_Page_' + currentPage + '.pdf';
             // let fileName = this.property.name+" "+this.formatMonth(this.property.created_at)+' Rent Statement' + '_Total_Pages_' + totalPages + '.pdf';
 
             doc.save(fileName);

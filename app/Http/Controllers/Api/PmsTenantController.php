@@ -42,7 +42,7 @@ class PmsTenantController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => "Unit",
+            'message' => "tenant",
             'tenant' => $tenant
         ], 200);
     } 
