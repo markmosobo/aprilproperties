@@ -340,7 +340,7 @@
       </li>
       <!-- End Expenses Nav -->
 
-      <li class="nav-item">
+<!--       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#statements-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-file-earmark-text"></i><span>Manage Statements</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -382,7 +382,7 @@
             </router-link>
           </li>    
         </ul>
-      </li>
+      </li> -->
 
       <li class="nav-item">
         <router-link to="/statements" custom v-slot="{ href, navigate, isActive }">

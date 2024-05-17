@@ -111,7 +111,7 @@
                             placeholder="National ID Number"
                             id="title"
                             name="title"
-                            v-model="form.nid"
+                            v-model="form.id_number"
                             class="form-control"
                             required=""
                         />

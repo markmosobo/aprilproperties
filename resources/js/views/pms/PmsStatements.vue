@@ -206,7 +206,7 @@
 
         format_date(value){
           if(value){
-            return moment(String(value)).format('lll')
+            return moment(String(value)).format('DD/MM/YYYY')
           }
         },
         capitalizeFirstLetter(str) {
@@ -469,6 +469,7 @@
              axios.get('api/lists').then((response) => {
              this.statements = response.data.lists.statements;
              this.expenses = response.data.lists.pmsexpenses;
+             console.log(this.statements)
              // Calculate the total amount paid
             this.totalAmountPaid = this.calculateTotalAmountPaid();
              setTimeout(() => {

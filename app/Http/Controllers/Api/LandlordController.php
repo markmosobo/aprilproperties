@@ -16,7 +16,7 @@ class LandlordController extends Controller
             'email' =>$request->email,
             'phone_no' =>$request->phone_no,
             'address' =>$request->address,
-            'nid' =>$request->nid,
+            'id_number' =>$request->id_number,
             'commission' =>$request->commission,
             'fixed_commission' =>$request->fixed_commission,
         ]);
