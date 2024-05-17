@@ -14,8 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('landlords', function (Blueprint $table) {
-            $table->string('nid')->nullable();
-            $table->string('address')->nullable();
+            $table->integer('commission')->nullable(); // Change 'string' to the data type you need
+            $table->float('fixed_commission')->nullable(); // Change 'string' to the data type you need
+
         });
     }
 

@@ -55,7 +55,7 @@ class PmsUnitController extends Controller
 
     public function single(Request $request, $id)
     {
-        $unit = PmsUnit::where('id', $id)->get();
+        $unit = PmsUnit::where('id', $id)->first();
 
         return response()->json([
             'status' => true,

@@ -10,7 +10,16 @@ class LandlordController extends Controller
 {
     public function store(Request $request)
     {
-        $landlord = Landlord::create($request->all());
+        $landlord = Landlord::create([
+            'first_name' =>$request->first_name,
+            'last_name' =>$request->last_name,
+            'email' =>$request->email,
+            'phone_no' =>$request->phone_no,
+            'address' =>$request->address,
+            'nid' =>$request->nid,
+            'commission' =>$request->commission,
+            'fixed_commission' =>$request->fixed_commission,
+        ]);
 
         return response()->json([
             'status' => true,
@@ -51,4 +60,5 @@ class LandlordController extends Controller
             'landlord' => $landlord
         ], 200);
     }
+    
 }

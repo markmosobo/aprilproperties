@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PmsStatement;
 use App\Models\Invoice;
+use App\Models\Landlord;
 use Carbon\Carbon;
 
 class PmsStatementController extends Controller
@@ -379,5 +380,35 @@ class PmsStatementController extends Controller
             'invoice' => $invoice
         ], 200);
     }
+
+     public function invoiceDate(Request $request, $id)
+    {
+        $invoice = Invoice::with('tenant','property','unit')->where('statement_id', $id)->first();
+
+        return response()->json([
+            'status' => true,
+            'message' => "retrieved",
+            'invoice' => $invoice
+        ], 200);
+    }
+
+   public function landlordStatements(Request $request, $id)
+    {
+        $landlord = Landlord::findOrFail($id);
+        
+        $pmslandlordstatements = PmsStatement::with('tenant', 'property', 'unit')
+            ->whereHas('property.landlord', function ($query) use ($landlord) {
+                $query->where('landlord_id', $landlord->id);
+            })
+            ->whereMonth('created_at', Carbon::now()->month)
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Retrieved",
+            'pmslandlordstatements' => $pmslandlordstatements
+        ], 200);
+    }
+
 
 }

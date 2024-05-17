@@ -101,6 +101,7 @@ import PmsYearTenantStatements from '../views/pms/PmsYearTenantStatements.vue'
 import PmsQuarterTenantStatements from '../views/pms/PmsQuarterTenantStatements.vue'
 import PmsLastYearTenantStatements from '../views/pms/PmsLastYearTenantStatements.vue'
 import PmsAllTenantStatements from '../views/pms/PmsAllTenantStatements.vue'
+import PmsLandlordStatements from '../views/pms/PmsLandlordStatements.vue'
 import ViewStatement from '../views/pms/ViewStatement.vue'
 import EditStatement from '../views/pms/EditStatement.vue'
 import SettleStatement from '../views/pms/SettleStatement.vue'
@@ -689,6 +690,12 @@ const routes = [
         path:'/pmsalltenantstatements/:id',
         name: 'pmsalltenantstatements',
         component: PmsAllTenantStatements,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmslandlordstatements/:id',
+        name: 'pmslandlordstatements',
+        component: PmsLandlordStatements,
         beforeEnter : guardMyroute,
     },
         {

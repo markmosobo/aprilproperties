@@ -70,6 +70,11 @@ class ListController extends Controller
         $openproperties = Property::latest()->with('type','images')->where('status',1)->get();
         $closedproperties = Property::latest()->with('type','images')->where('status',2)->get();
 
+        //invoices
+        $awaitinginvoicing = PmsStatement::latest->where('water_bill', null)->with('property','tenant','unit')->get();
+        $invoicestosettle = PmsStatement::latest->where('water_bill', !null)->where('status',0)->with('property','tenant','unit')->get();
+        $settledinvoices = PmsStatement::latest->where('water_bill', !null)->where('status',1)->with('property','tenant','unit')->get();
+
         //dashboard count
         $pmsPropertyCount = PmsProperty::all()->count();
         $pmsVacantPropertyCount = PmsUnit::where('status', 0)->count();
@@ -116,6 +121,9 @@ class ListController extends Controller
                 'pmsexpenses' => $pmsexpenses,
                 'statements' => $statements,
                 'pmsinvoices' => $pmsinvoices,
+                'awaitinginvoicing' => $awaitinginvoicing,
+                'invoicestosettle' => $invoicestosettle,
+                'settledinvoices' => $settledinvoices,
 
                 'pmspropertycount' => $pmsPropertyCount,
                 'pmsvacantpropertycount' => $pmsVacantPropertyCount,

@@ -85,7 +85,7 @@
                         </thead>
                         <tbody>
                           <tr v-for="statement in statements" :key="statement.id">
-                            <td>{{statement.ref_no}}</td>
+                            <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
                             <td>{{statement.property.name}}</td>                            
                             <td>{{statement.details}}</td>
                             <td>{{formatNumber(statement.total)}}</td>

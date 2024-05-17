@@ -46,8 +46,8 @@
                   </thead>
                   <tbody>
                     <tr>
-                      <td v-if="status == 1" scope="row"><span style="color: green;">Paid</span></td>
-                      <td v-else scope="row"><span style="color: red;">Unpaid</span></td>
+                      <td v-if="status == 1" scope="row"><span style="color: green;">Settled</span></td>
+                      <td v-else scope="row"><span style="color: red;">Unsettled</span></td>
                       <td>{{formatNumber(paid)}}</td>
                       <td>{{refNo}}</td>
                       <td>{{formatNumber(balance)}}</td>
@@ -516,7 +516,7 @@ export default{
       getUnit(unitNumber) {
           axios.get('/api/pmsunit/' + parseInt(unitNumber))
               .then((response) => {
-                this.unit = response.data.unit[0];
+                this.unit = response.data.unit;
                 this.unitName = this.unit.unit_number;
                 this.unitRent = this.unit.monthly_rent;
                 this.unitSecurityFee = this.unit.security_fee;

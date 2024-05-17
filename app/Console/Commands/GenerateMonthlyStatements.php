@@ -86,7 +86,8 @@ class GenerateMonthlyStatements extends Command
                     $date = str_replace('-"', '/', $orgDate);
                     $newDate = date("YmdHis", strtotime($date));
                     $monthlyTotal = $tenant->unit->monthly_rent + $tenant->unit->garbage_fee + $tenant->unit->security_fee;
-                    $refno = "INV".$newDate." ".$tenant->unit->unit_number." Rent @".$monthlyTotal;
+                    // $refno = "INV".$newDate." ".$tenant->unit->unit_number." Rent @".$monthlyTotal;
+                    $refno = "INV".$newDate;
                     PmsStatement::create([
                         'ref_no' => $refno,
                         'pms_property_id' => $tenant->pms_property_id,
@@ -151,7 +152,8 @@ class GenerateMonthlyStatements extends Command
                     $orgDate = now();
                     $date = str_replace('-"', '/', $orgDate);
                     $newDate = date("YmdHis", strtotime($date));
-                    $refno = "INV".$newDate." ".$vacant->unit_number." Rent @".$vacant->monthly_rent;
+                    // $refno = "INV".$newDate." ".$vacant->unit_number." Rent @".$vacant->monthly_rent;
+                    $refno = "INV".$newDate;
                     PmsStatement::create([
                         'ref_no' => $refno,
                         'pms_property_id' => $vacant->pms_property_id,
@@ -161,6 +163,7 @@ class GenerateMonthlyStatements extends Command
                         'total' => 0, // You can set the default total
                         'paid' => 0, // You can set the default paid amount
                         'balance' => 0, // You can set the default balance
+                        'water_bill' => 0, // You can set the default balance
                     ]);
 
                     $this->info('Statement generated for Property ' . $vacant->pms_property_id . ' and Unit ' . $vacant->id);

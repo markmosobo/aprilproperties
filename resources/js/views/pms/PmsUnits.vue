@@ -161,7 +161,7 @@
         getProperty() {
              axios.get('/api/pmsproperty/'+this.$route.params.id).then((response) => {
      
-             this.unit = response.data.property[0];
+             this.unit = response.data.property;
              console.log("props", this.unit)
     
              });

@@ -112,6 +112,7 @@ Route::get('pmstenant/{id}', [PmsTenantController::class, 'single']);
 Route::get('pmsexpense/{id}', [PmsExpenseController::class, 'single']);
 Route::get('pmsstatement/{id}', [PmsStatementController::class, 'single']);
 Route::get('pmsinvoicethrostatement/{id}', [PmsStatementController::class, 'singleInvoice']);
+Route::get('pmsinvoicedatethrostatement/{id}', [PmsStatementController::class, 'invoiceDate']);
 
 //property statements
 Route::get('pmspropertystatements/{id}', [PmsStatementController::class, 'propertyStatements']);
@@ -129,6 +130,11 @@ Route::get('pmsyearpropertyexpenses/{id}', [PmsExpenseController::class, 'proper
 Route::get('pmsquarterpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyQuarterExpenses']);
 Route::get('pmslastyearpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyLastYearExpenses']);
 Route::get('pmsallpropertyexpenses/{id}', [PmsExpenseController::class, 'propertyAllExpenses']);
+
+//landlord statements
+Route::get('pmslandlordstatements/{id}', [PmsStatementController::class, 'landlordStatements']);
+
+
 //tenant statements
 Route::get('pmstenantstatements/{id}', [PmsStatementController::class, 'tenantStatements']);
 Route::get('pmslastmonthtenantstatements/{id}', [PmsStatementController::class, 'tenantLastMonthStatements']);

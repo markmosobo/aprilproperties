@@ -62,10 +62,12 @@
                       <table id="AllStatementsTable" class="table table-borderless">
                         <thead>
                           <tr>
-                            <th scope="col">Invoice</th>
+                            <th scope="col">H/S No.</th>
                             <th scope="col">Tenant</th>
-                            <th scope="col">Details</th>
                             <th scope="col">Due</th>
+                            <th scope="col">Rent</th>
+                            <th scope="col">Garbage</th>
+                            <th scope="col">Water</th>
                             <th scope="col">Paid</th>
                             <th scope="col">Bal</th>
                             <th scope="col">Status</th>
@@ -75,10 +77,12 @@
                         </thead>
                         <tbody>
                           <tr v-for="statement in statements" :key="statement.id">
-                            <td>{{statement.ref_no}}</td>
+                            <td>{{ statement.unit ? statement.unit.unit_number : 'N/A' }}</td>
                             <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
-                            <td>{{statement.details}}</td>
                             <td>{{formatNumber(statement.total)}}</td>
+                            <td>{{ statement.unit ? formatNumber(statement.unit.monthly_rent) : 'N/A' }}</td>
+                            <td>{{ statement.unit ? formatNumber(statement.unit.garbage_fee) : 'N/A' }}</td>
+                            <td>{{formatNumber(statement.water_bill ?? "N/A")}}</td>
                             <td>{{formatNumber(statement.paid)}}</td>
                             <td>{{formatNumber(statement.balance)}}</td>
                             <td>
@@ -211,7 +215,7 @@
         generatePDF() {
             let pdfName = 'Full Statement';
             var doc = new jsPDF('landscape');
-            const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
+            const maxRowsPerPage = 26; // Adjust this value based on the number of rows you want per page
 
             // Add top-left header
             const rightHeaderText = 'April Properties\nKakamega-Webuye Rd, ACK Building\nTel: 0720 020 401\nP. O. Box 2973-50100, Kakamega\nEmail: propertapril@gmail.com';
@@ -291,8 +295,9 @@
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
-            let columnWidths = [60, 30, 70, 30, 30, 30];
-            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Due', 'Paid', 'Bal'];
+            // let columnWidths = [60, 30, 70, 30, 30, 30];
+            let columnWidths = [60, 30, 30, 30, 30, 30, 30];
+            let columnHeaders = ['H/S NO.', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BAL'];
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -489,7 +494,7 @@
         },
         format_date(value){
           if(value){
-            return moment(String(value)).format('lll')
+            return moment(String(value)).format('DD/MM/YYYY')
           }
         },
         capitalizeFirstLetter(str) {

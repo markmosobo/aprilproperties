@@ -111,7 +111,47 @@
                             placeholder="National ID Number"
                             id="title"
                             name="title"
-                            v-model="form.id_number"
+                            v-model="form.nid"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter title!</div>
+                      </div>
+                   </div>
+
+                </div>
+                <div class="row mb-3"></div>
+                <div class="form-group row">
+                <div class="col-sm-6">
+                    <label for="inputPassword" class="form-label">Commission Percentage</label>
+                    <div class="col-sm-10 input-group">
+                        <input
+                            type="number"
+                            placeholder="Commission Percentage"
+                            id="commission"
+                            name="commission"
+                            v-model="form.commission"
+                            :disabled="disableCommission"                            
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="input-group-append">
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="invalid-feedback">Please enter title!</div>
+                    </div>
+                </div>
+
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Fixed Commission</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="number"
+                            placeholder="Fixed Commission"
+                            id="fixed_commission"
+                            name="fixed_commission"
+                            v-model="form.fixed_commission"
+                            :disabled="disableFixedCommission"
                             class="form-control"
                             required=""
                         />
@@ -180,6 +220,8 @@
           form: {
           role_id: '',
           title: '',
+          commission: '',
+          fixed_commission: ''
           
           },
           message: "",
@@ -190,6 +232,14 @@
           submitting: false,
           submitted: false
        }   
+    },
+    computed: {
+        disableFixedCommission() {
+            return this.form.commission !== '';
+        },
+        disableCommission() {
+            return this.form.fixed_commission !== '';
+        }
     },
     methods: {
        //ID upload

@@ -1,278 +1,238 @@
 <template>
-    <TheMaster>
-
+  <TheMaster>
     <section class="section">
-                                <!-- <img src="/images/apex-logo.jpg" alt="Invoice Logo" style="width: 100%; max-width: 200px; height: auto; margin-bottom: 20px;"> -->
-          <div class="row">
-            <div class="col-lg-6">
-
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">{{tenant}}</h5>
-
-                  <div class="row">
-                    <div class="col-lg-6 col-md-4 label ">Bill to Customer No.<strong> {{tenantId}}</strong></div>
-                    <!-- <div class="col-lg-9 col-md-8">{{form.first_name}} {{form.last_name}}</div> -->
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{ tenant }}</h5>
+              <hr class="mb-4">
+              <div class="row mb-3">
+                <div class="col-lg-12">
+                  <div class="d-flex justify-content-between">
+                    <div class="label">Bill to Tenant No.</div>
+                    <div><strong>{{ tenantId }}</strong></div>
                   </div>
-
-                  <div class="row">
-                    <div class="col-lg-12 col-md-4 label">Invoice No.<strong> {{refNo}}</strong></div>
-                    <!-- <div class="col-lg-9 col-md-8">(254) {{form.phone}}</div> -->
-                  </div>
-
-                  <div class="row">
-                    <div class="col-lg-12 col-md-4 label">Details <strong>{{details}}</strong></div>
-                    <!-- <div class="col-lg-9 col-md-8">{{refNo}}</div> -->
-                  </div>    
-
-                  <div class="row">
-                    <div class="col-lg-12 col-md-4 label">Date Issued <strong>{{formatDate(date)}}</strong></div>
-                    <!-- <div class="col-lg-9 col-md-8">{{form.email}}</div> -->
-                  </div>
-                  <div class="row">
-                    <div class="col-lg-12 col-md-4 label"><strong>Ref No: {{refNo}}</strong></div>
-                    <!-- <div class="col-lg-9 col-md-8">{{refNo}}</div> -->
-                  </div>                                  
-                  <div class="row mb-3"></div>
-                  <div class="col-lg-12 felx mt-4 row">
-                      <div class="col-sm-6 col-lg-6">
-                      <button @click.prevent="viewStatement()" class="btn btn-dark">View Statement</button>
-                      </div>
-                      <div class="col-sm-6 col-lg-6 text-end">
-                      <!-- <button @click="settleTenant()" class="btn btn-primary">Settle</button> -->
-                      </div>
-                  </div>                                   
                 </div>
               </div>
 
-            </div>
-
-            <div class="col-lg-6">
-
-            <div class="card px-2">
-                    <div class="card-body">
-                    <h5 class="card-title">Rent - Invoice</h5>
-                
-                    <form
-                    class="row g-3 needs-validation"
-                    novalidate=""
-                    method="post"
-                    autocomplete="off"
-                    @submit.prevent="submit()"
-                    >
-                    <div class="row mb-3"></div>
-                    <!-- Default Table -->
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th scope="col">Invoice No.</th>
-                          <th scope="col">Rent</th>
-                          <th scope="col">Water</th>
-                          <th scope="col">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>{{refNo}}</td>
-                          <td>{{rentAmount}}</td>
-                          <td>{{waterBillAmount}}</td>  
-                          <td v-if="status == 1" scope="row"><span style="color: green;">Paid</span></td>
-                          <td v-else scope="row"><span style="color: red;">Unpaid</span></td>
-
-                        </tr>
-                        <tr>
-                          <th scope="row">Total KES Incl. Water BILL</th>
-                          <td></td>
-                          <td></td>
-                          <td><strong>KES. {{formatNumber(total)}}</strong></td>
-                        </tr> 
-                      </tbody>
-                    </table>
-                    <!-- End Default Table Example -->       
-                    <div class="row mb-3"></div>
-                    <div class="col-lg-12 felx mt-4 row">
-                        <div class="col-sm-6 col-lg-6">
-                        <button @click.prevent="cancel()" class="btn btn-dark">Cancel</button>
-                        </div>
-                        <div class="col-sm-6 col-lg-6 text-end">
-                
-                        <button @click="printReceipt" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">Print Invoice</button>
-                        </div>
-                    </div>
-                  </form>
-                
-                    </div>
+              <div class="row mb-3">
+                <div class="col-lg-12">
+                  <div class="d-flex justify-content-between">
+                    <div class="label">Invoice No.</div>
+                    <div><strong>{{ refNo }}</strong></div>
+                  </div>
                 </div>
+              </div>
 
-                    </div>
+              <div class="row mb-3">
+                <div class="col-lg-12">
+                  <div class="d-flex justify-content-between">
+                    <div class="label">Date Issued</div>
+                    <div><strong>{{ formatDate(date) }}</strong></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-lg-12">
+                  <div class="d-flex justify-content-between">
+                    <div class="label">Details</div>
+                    <div><strong>{{ details }}</strong></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-4">
+                <div class="col-6">
+                  <button @click.prevent="viewStatement()" class="btn btn-dark w-100">View Statement</button>
+                </div>
+                <div class="col-6 text-end">
+                  <!-- Optional button can be added here -->
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card px-2">
+            <div class="card-body">
+              <h5 class="card-title">Rent - Invoice</h5>
+              <hr class="mb-4">
+              <form class="row g-3 needs-validation" novalidate method="post" autocomplete="off" @submit.prevent="submit()">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Rent</th>
+                      <th scope="col">Security</th>
+                      <th scope="col">Garbage</th>
+                      <th scope="col">Water</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{{ formatNumber(rentAmount) }}</td>
+                      <td>{{ formatNumber(unitSecurityFee) }}</td>
+                      <td>{{ formatNumber(unitGarbageFee) }}</td>
+                      <td>{{ formatNumber(waterBillAmount) }}</td>
+                      <td v-if="status == 1" scope="row"><span style="color: green;">Settled</span></td>
+                      <td v-else scope="row"><span style="color: red;">Unsettled</span></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Total</th>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td><strong>KES. {{ formatNumber(total) }}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div class="row mt-4">
+                  <div class="col-6">
+                    <button @click.prevent="cancel()" class="btn btn-dark w-100">Cancel</button>
+                  </div>
+                  <div class="col-6 text-end">
+                    <button @click="printReceipt" class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Print Invoice</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
-    </TheMaster>
+  </TheMaster>
 </template>
 
 <script>
- import TheMaster from '@/components/dashboard/TheMaster.vue'
- import axios from 'axios';
- import Swal from 'sweetalert2';
- import moment from 'moment';
+import TheMaster from '@/components/dashboard/TheMaster.vue'
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import moment from 'moment';
 
- const toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000
-  });
-  
-  window.toast = toast;
-export default{
-    data(){
-        return {
-            name: '',
-            tenant: '',
-            phoneNumber: '',
-            unitNumber: '',
-            refNo: '',
-            details: '',
-            date: '',
-            status: '',
-            paid: '',
-            balance: '',
-            total: '',
-            statementId: '',
-            tenantId: '',
-            user: [],
-            rentAmount: '',
-            waterBillAmount: '',
-            dateIssued: '',
-        }
+const toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000
+});
+
+window.toast = toast;
+
+export default {
+  data() {
+    return {
+      name: '',
+      tenant: '',
+      phoneNumber: '',
+      unitNumber: '',
+      refNo: '',
+      details: '',
+      date: '',
+      status: '',
+      paid: '',
+      balance: '',
+      total: '',
+      statementId: '',
+      tenantId: '',
+      user: [],
+      rentAmount: '',
+      waterBillAmount: '',
+      dateIssued: '',
+      unitGarbageFee: '',
+      unitSecurityFee: ''
+    }
+  },
+  components: {
+    TheMaster,
+  },
+  methods: {
+    getStatement() {
+      axios.get('/api/pmsstatement/' + this.$route.params.id).then((response) => {
+        this.statement = response.data.pmsstatement[0]
+        this.name = this.statement.property.name;
+        this.firstName = this.statement.tenant.first_name;
+        this.lastName = this.statement.tenant.last_name;
+        this.tenant = this.firstName + " " + this.lastName;
+        this.phoneNumber = this.statement.tenant.phone_number;
+        this.unitNumber = this.statement.tenant.pms_unit_id;
+        this.tenantId = this.statement.pms_tenant_id;
+        this.getUnit(this.unitNumber);
+        this.refNo = this.statement.ref_no;
+        this.details = this.statement.details;
+        this.date = this.statement.created_at;
+        this.status = this.statement.status;
+        this.paid = this.statement.paid;
+        this.balance = this.statement.balance;
+        this.total = this.statement.total;
+        this.payment = this.statement.payment_method;
+        this.statementId = this.statement.id;
+        console.log("statement", this.statement)
+      })
     },
-    components: {
-      TheMaster,
-    }, 
-    methods:
-    {
-      getStatement()
-      {
-          axios.get('/api/pmsstatement/'+this.$route.params.id).then((response) => {
-              this.statement = response.data.pmsstatement[0]
-              this.name = this.statement.property.name;
-              this.firstName = this.statement.tenant.first_name;
-              this.lastName = this.statement.tenant.last_name;
-              this.tenant = this.firstName + " " + this.lastName;
-              this.phoneNumber = this.statement.tenant.phone_number;
-              this.unitNumber = this.statement.tenant.pms_unit_id;
-              this.tenantId = this.statement.pms_tenant_id;
-              this.getUnit(this.unitNumber);
-              this.refNo = this.statement.ref_no;
-              this.details = this.statement.details;
-              this.date = this.statement.created_at;
-              this.status = this.statement.status;
-              this.paid = this.statement.paid;
-              this.balance = this.statement.balance;
-              this.total = this.statement.total;
-              this.payment = this.statement.payment_method;
-              this.statementId = this.statement.id;
-              console.log("statement", this.statement)
-          })
-      },
-      getInvoiceThroStatement()
-      {
-          axios.get('/api/pmsinvoicethrostatement/'+this.$route.params.id).then((response) => {
-              this.invoice = response.data.invoice;
-              this.rentAmount = this.invoice.total;
-              this.waterBillAmount = this.invoice.water_bill;
-              this.dateIssued = this.invoice.created_at;
-              // this.tenant = this.firstName + " " + this.lastName;
-              console.log("invoice", this.invoice)
-          })
-      },
-      getUnit(unitNumber) {
-          axios.get('/api/pmsunit/' + parseInt(unitNumber))
-              .then((response) => {
-                this.unit = response.data.unit[0];
-                this.unitName = this.unit.unit_number;
-                this.unitRent = this.unit.monthly_rent;
-                this.unitSecurityFee = this.unit.security_fee;
-                this.unitGarbageFee = this.unit.garbage_fee;
-                this.unitType = this.unit.type;
-                  console.log("unit", this.unit);
-                  // Further processing of the response data if needed
-              })
-              .catch((error) => {
-                  console.error("Error fetching unit:", error);
-              });
-      },
+    getInvoiceThroStatement() {
+      axios.get('/api/pmsinvoicethrostatement/' + this.$route.params.id).then((response) => {
+        this.invoice = response.data.invoice;
+        this.rentAmount = this.invoice.total;
+        this.waterBillAmount = this.invoice.water_bill;
+        this.dateIssued = this.invoice.created_at;
+        console.log("invoice", this.invoice)
+      })
+    },
+    getUnit(unitNumber) {
+      axios.get('/api/pmsunit/' + parseInt(unitNumber))
+        .then((response) => {
+          this.unit = response.data.unit;
+          this.unitName = this.unit.unit_number;
+          this.unitRent = this.unit.monthly_rent;
+          this.unitSecurityFee = this.unit.security_fee;
+          this.unitGarbageFee = this.unit.garbage_fee;
+          this.unitType = this.unit.type;
+          console.log("unit", this.unit);
+        })
+        .catch((error) => {
+          console.error("Error fetching unit:", error);
+        });
+    },
+    cancel() {
+      this.$router.push('/invoices')
+    },
+    viewStatement() {
+      this.$router.push('/viewstatement/' + this.statementId)
+    },
+    submit() {
+      let self = this;
+      let payload = {
+        paid: this.paid,
+        balance: this.balance
+      };
 
-      cancel()
-      {
-        this.$router.push('/invoices')
-      },
-      viewStatement()
-      {
-        this.$router.push('/viewstatement/'+this.statementId)
-      },
-      settleTenant()
-      {
-         this.$router.push({ 
-            name: 'settlestatement', // Assuming you have named routes
-            params: { 
-              id: this.statementId,
-              tenantId: this.tenantId
-            } 
-          });
-      },
-      submit() {
-       let self = this;  // Store the reference to this
-       let payload = {
-          // mpesa_code: this.form.mpesa_code,
-          // payment_method: this.form.payment_method,
-          paid: this.paid,
-          balance: this.balance
-       };
+      axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
+        .then(function(response) {
+          console.log(response);
+          toast.fire('Success!', 'Invoice updated!', 'success');
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
 
-       axios.put("/api/pmssettlestatement/" + this.$route.params.id, payload)
-          .then(function (response) {
-             console.log(response);
-             // self.step = 1;
-             toast.fire(
-                'Success!',
-                'Invoice updated!',
-                'success'
-             );
-          })
-          .catch(function (error) {
-             console.log(error);
-             // Swal.fire(
-             //    'error!',
-             //    // phone_error + id_error + pass_number,
-             //    'error'
-             // )
-          });
+      this.$router.push('/invoices');
+    },
+    printReceipt() {
+      this.$router.push('/invoices')
 
-       this.$router.push('/invoices');
-      },
-      printReceipt() {
-        // this.submit();
-        this.$router.push('/invoices')
+      const printWindow = window.open("", "_blank");
+      const receiptContent = this.buildReceiptContent();
 
-        // Open a new window for printing
-        const printWindow = window.open("", "_blank");
-
-        // Build the content for printing
-        const receiptContent = this.buildReceiptContent();
-
-        // Write the content to the new window
-        printWindow.document.write(receiptContent);
-
-        // Close the document stream
-        printWindow.document.close();
-
-        // Trigger the print dialog
-        printWindow.print();
-      },
-      buildReceiptContent(refNo) {
-        // Build the HTML content for the receipt
-        const receiptHTML = `
+      printWindow.document.write(receiptContent);
+      printWindow.document.close();
+      printWindow.print();
+    },
+    buildReceiptContent(refNo) {
+      const receiptHTML = `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -382,11 +342,10 @@ export default{
                   <th>Total KES. Incl. Water Bill:</th>
                   <td>KES ${this.formatNumber(this.total)}</td>
                 </tr>
-
               </tfoot>
             </table>
             <div class="receipt-footer">
-              <p>You were invoiced by ${this.user.first_name} ${this.user.last_name}.For MPESA payment:</p>
+              <p>You were invoiced by ${this.user.first_name} ${this.user.last_name}. For MPESA payment:</p>
               <p>MPESA Paybill</p>
               <p>Enter Business Number:86767</p>
               <p>Account No. 7576565</p>
@@ -394,36 +353,31 @@ export default{
           </div>
         </body>
         </html>
+      `;
 
-
-        `;
-
-        return receiptHTML;
-      },
-      formatMonth(value){
-          if(value){
-            return moment(String(value)).format('MMM YYYY');
-          }
-      },
-       formatDate(value){
-          if(value){
-            return moment(String(value)).format('MMMM D, YYYY');
-          }
-      },
-      formatNumber(value) {
-        // Use the toLocaleString method to format the number with commas and decimal places
-        return value.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-      },
+      return receiptHTML;
     },
-    mounted()
-    {
+    formatMonth(value) {
+      if (value) {
+        return moment(String(value)).format('MMM YYYY');
+      }
+    },
+    formatDate(value) {
+      if (value) {
+        return moment(String(value)).format('MM/DD/YYYY');
+      }
+    },
+    formatNumber(value) {
+      return value.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    },
+  },
+  mounted() {
     this.getInvoiceThroStatement();
     this.getStatement();
-      this.user = JSON.parse(localStorage.getItem('user'));
-
-    }
+    this.user = JSON.parse(localStorage.getItem('user'));
+  }
 }
 </script>

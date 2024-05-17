@@ -14,6 +14,10 @@ class Landlord extends Model
         'email',
         'phone_no',
         'id_number',
-        'address'
+        'address',
+        'commission',
+        'fixed_commission',
+        'address',
+        'nid'  
     ];
 }

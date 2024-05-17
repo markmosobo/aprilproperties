@@ -171,7 +171,7 @@
 
       <li v-show="user.role_id == 1" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Manage Users</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-people"></i><span>Manage Users</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="users-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -258,7 +258,7 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-gem"></i><span>Manage Properties</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-building"></i><span>Manage Properties</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -291,7 +291,7 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#tenants-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-gem"></i><span>Manage Tenants</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-people"></i><span>Manage Tenants</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="tenants-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -321,7 +321,7 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#expenses-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-gem"></i><span>Manage Expenses</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-coin"></i><span>Manage Expenses</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="expenses-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -341,6 +341,50 @@
       <!-- End Expenses Nav -->
 
       <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#statements-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-file-earmark-text"></i><span>Manage Statements</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="statements-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <router-link to="/awaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>Awaiting Invoicing</span>
+            </a>
+            </router-link>
+          </li>
+         <li>
+            <router-link to="/invoicestosettle" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>Invoices to Settle</span>
+            </a>
+            </router-link>
+          </li> 
+         <li>
+            <router-link to="/settledinvoices" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>Settled Invoices</span>
+            </a>
+            </router-link>
+          </li>    
+        </ul>
+      </li>
+
+      <li class="nav-item">
         <router-link to="/statements" custom v-slot="{ href, navigate, isActive }">
                   <a
                     :href="href"
@@ -348,8 +392,8 @@
                     class="nav-link"
                     @click="navigate"
                   >
-          <i class="bi bi-grid"></i>
-          <span>Statements</span>
+          <i class="bi bi-file-text"></i>
+          <span>All Statements</span>
         </a>
         </router-link>
       </li>
@@ -362,8 +406,8 @@
                     class="nav-link"
                     @click="navigate"
                   >
-          <i class="bi bi-grid"></i>
-          <span>Invoices</span>
+          <i class="bi bi-receipt"></i>
+          <span>All Invoices</span>
         </a>
         </router-link>
       </li>
