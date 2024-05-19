@@ -107,6 +107,9 @@ import EditStatement from '../views/pms/EditStatement.vue'
 import SettleStatement from '../views/pms/SettleStatement.vue'
 import InvoiceStatement from '../views/pms/InvoiceStatement.vue'
 
+import AwaitingInvoicing from '../views/pms/AwaitingInvoicing.vue'
+import InvoicestoSettle from '../views/pms/InvoicestoSettle.vue'
+import SettledInvoices from '../views/pms/SettledInvoices.vue'
 import PmsInvoices from '../views/pms/PmsInvoices.vue'
 import ViewInvoice from '../views/pms/ViewInvoice.vue'
 import PmsTenantInvoices from '../views/pms/PmsTenantInvoices.vue'
@@ -698,7 +701,25 @@ const routes = [
         component: PmsLandlordStatements,
         beforeEnter : guardMyroute,
     },
-        {
+    {
+        path:'/awaitinginvoicing',
+        name: 'awaitinginvoicing',
+        component: AwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/invoicestosettle',
+        name: 'invoicestosettle',
+        component: InvoicestoSettle,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/settledinvoices',
+        name: 'settledinvoices',
+        component: SettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
         path:'/invoices',
         name: 'invoices',
         component: PmsInvoices,

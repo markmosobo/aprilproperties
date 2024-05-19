@@ -71,9 +71,9 @@ class ListController extends Controller
         $closedproperties = Property::latest()->with('type','images')->where('status',2)->get();
 
         //invoices
-        $awaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->with('property','tenant','unit')->get();
-        $invoicestosettle = PmsStatement::latest()->where('water_bill', !null)->where('status',0)->with('property','tenant','unit')->get();
-        $settledinvoices = PmsStatement::where('water_bill', !null)->where('status',1)->with('property','tenant','unit')->get();
+        $awaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->get();
+        $invoicestosettle = PmsStatement::latest()->whereNotNull('water_bill')->where('status',0)->with('property','tenant','unit')->get();
+        $settledinvoices = PmsStatement::latest()->whereNotNull('water_bill')->where('status',1)->with('property','tenant','unit')->get();
 
         //dashboard count
         $pmsPropertyCount = PmsProperty::all()->count();
