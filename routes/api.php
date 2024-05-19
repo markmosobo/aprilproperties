@@ -113,6 +113,7 @@ Route::get('pmsexpense/{id}', [PmsExpenseController::class, 'single']);
 Route::get('pmsstatement/{id}', [PmsStatementController::class, 'single']);
 Route::get('pmsinvoicethrostatement/{id}', [PmsStatementController::class, 'singleInvoice']);
 Route::get('pmsinvoicedatethrostatement/{id}', [PmsStatementController::class, 'invoiceDate']);
+Route::get('landlordproperty/{id}', [LandlordController::class, 'landlordProperty']);
 
 //property statements
 Route::get('pmspropertystatements/{id}', [PmsStatementController::class, 'propertyStatements']);

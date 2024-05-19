@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Landlord;
+use App\Models\PmsProperty;
 
 class LandlordController extends Controller
 {
@@ -58,6 +59,18 @@ class LandlordController extends Controller
             'status' => true,
             'message' => "retreived",
             'landlord' => $landlord
+        ], 200);
+    }
+
+    public function landlordProperty(Request $request, $id)
+    {
+        $landlord = Landlord::where('id',$id)->first();
+        $landlordproperty = PmsProperty::where('landlord_id', $landlord->id)->with('units')->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "retreived",
+            'landlordproperty' => $landlordproperty
         ], 200);
     }
     

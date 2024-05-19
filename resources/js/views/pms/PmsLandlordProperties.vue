@@ -21,10 +21,10 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">All Landlords <span>| Today</span></h5>
+                      <h5 class="card-title">{{landlord}}'s Managed Properties <span>| Today</span></h5>
                       <p class="card-text">
                    
-                      <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
+                      <router-link to="/add-pmsproperty" custom v-slot="{ href, navigate, isActive }">
                           <a
                             :href="href"
                             :class="{ active: isActive }"
@@ -32,37 +32,41 @@
                             style="background-color: darkgreen; border-color: darkgreen;"
                             @click="navigate"
                           >
-                            Add Landlord
+                            Add Property
                           </a>
                       </router-link>
             
                       </p>
     
-                      <table id="AlllandlordsTable" class="table table-borderless">
+                      <table id="AllPropertiesTable" class="table table-borderless">
                         <thead>
                           <tr>
-                            <th scope="col">Full Name</th>
-                            <th scope="col">Email Address</th>
-                            <th scope="col">Phone No.</th>
+                            <!--<th scope="col">Preview</th>-->
+                            <th scope="col">Name</th>
+                            <th scope="col">Number of Units</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="landlord in landlords" :key="landlord.id">
-                            <td>{{landlord.first_name}} {{landlord.last_name}}</td>
-                            <td>{{landlord.email ?? "N/A"}}</td>
-                            <td>{{landlord.phone_no ?? "N/A"}}</td>
+                          <tr v-for="property in properties" :key="property.id">
+                            <!--<th scope="row"><a href="#">
+                              <img :src="getPhoto() + property.images[0].name" />
+                            </a></th>-->
+                            <!-- <td>{{property["images"][0]["name"]}}</td> -->
+                            <td>{{property.name}}</td>
+                            <td>{{property.units.length}}</td>
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>  -->
-                                  <a @click="navigateTo('/pmslandlordproperties/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Property</a>
-                                   <a @click="navigateTo('/pmslandlordstatements/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>                                           
-                                  <a @click="navigateTo('/edit-pmslandlord/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-                                  <a @click="deleteLandlord(landlord.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a @click="navigateTo('/pmsproperties/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
+                                  <a @click="navigateTo('/pmsunits/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Units</a>
+                                  <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>  
+                                  <a @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a @click="deleteProperty(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                 
                                   </div>
                               </div>
                             </td>
@@ -101,24 +105,88 @@
     export default {
       data(){
         return {
-          landlords: [],
+          properties: [],
           categories: [],
-          landlordtypes: [],
+          landlord: [],
           user: []
         }
       },
       methods: {
         getPhoto()
         {
-            return "/storage/landlords/";
+            return "/storage/properties/";
+        },
+        getLandlord()
+        {
+            axios.get('/api/landlord/'+this.$route.params.id).then((response) => {
+                this.landlord = response.data.landlord
+                this.landlord = this.landlord.first_name + " " + this.landlord.last_name;
+                console.log("user", this.landlord)
+            })
+        },
+        getLandlordProperties()
+        {
+            axios.get('/api/landlordproperty/'+this.$route.params.id).then((response) => {
+                this.properties = response.data.landlordproperty
+                console.log("lprops", response)
+            })
         },
         navigateTo(location){
             this.$router.push(location)
         },
-        deleteLandlord(id){
+
+        featureProperty(id){
+          axios.put('api/featureproperty/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Property has been featured',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
+        },
+        unfeatureProperty(id){
+          axios.put('api/unfeatureproperty/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Property has been unfeatured',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
+        },
+        closeProperty(id){
+          axios.put('api/closeproperty/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Property has been closed',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
+        },
+        reopenProperty(id){
+          axios.put('api/reopenproperty/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Property has been reopened',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
+        },
+        deleteProperty(id){
                 Swal.fire({
                   title: 'Are you sure?',
-                  text: "You won't be able to revert this!",
+                  text: "All units associated with property will be deleted. You won't be able to revert this!",
                   icon: 'warning',
                   showCancelButton: true,
                   confirmButtonColor: '#006400',
@@ -127,10 +195,10 @@
                 }).then((result) => {
                   if (result.isConfirmed) { 
                   //send request to the server
-                  axios.delete('/api/landlord/'+id).then(() => {
+                  axios.delete('/api/pmsproperty/'+id).then(() => {
                   toast.fire(
                     'Deleted!',
-                    'Landlord has been deleted.',
+                    'Property has been deleted.',
                     'success'
                   )
                   this.loadLists();
@@ -147,22 +215,13 @@
                                    
                 })
         },
-        loadLists() {
-             axios.get('api/lists').then((response) => {
-             this.landlords = response.data.lists.landlords;
-             console.log("props", response)
-             setTimeout(() => {
-                  $("#AlllandlordsTable").DataTable();
-              }, 10);
-    
-             });
-          },
       },
       components : {
           TheMaster,
       },
       mounted(){
-        this.loadLists();
+        this.getLandlordProperties();
+        this.getLandlord();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
 
