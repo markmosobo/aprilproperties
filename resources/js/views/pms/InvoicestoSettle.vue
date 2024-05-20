@@ -65,7 +65,7 @@
                             Add Landlord
                           </a>
                       </router-link> -->
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
+                          <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
             
                       </p>
     

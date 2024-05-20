@@ -310,7 +310,7 @@
              //    'error'
              // )
           });
-          this.$router.push('/pmslandlords')
+         this.$router.go(-1);
        }
  
     },

@@ -26,10 +26,6 @@
                           <div class="invalid-feedback" v-if="!form.name">Please enter name</div>
                        </div>
                     </div>
- 
-                </div>
-                <div class="row mb-3"></div>
-                <div class="form-group row">
                    <div class="col-sm-6">
                       <label for="landlord" class="form-label">Landlord*<p>in case landlord is not listed, click <strong @click="addLandlord">here</strong> to add</p></label>
                       <div class="col-sm-10">
@@ -42,16 +38,27 @@
  
                       <div class="invalid-feedback" v-if="!form.landlord_id">Please select a landlord</div>
                       </div>
-                   </div>                
-                  <div class="col-sm-6">
-                      <label for="commission" class="form-label">% of Commission*
-                          <p>the percentage to be deducted from the total rent collected. Click <strong @click="showFixed">here</strong> to add fixed amount</p>
-                      </label>
-                      <div class="col-sm-10">
-                          <input v-if="!showFixedCommission" type="text" placeholder="Write in decimal e.g 0.05" v-model="form.commission" id="commission" name="commission" class="form-control" required />
-                          <input v-else type="text" placeholder="Fixed commission amount" v-model="form.fixed_commission" id="fixedCommission" name="fixedCommission" class="form-control" required />
-                      </div>
-                  </div>
+                   </div>                      
+ 
+                </div>
+                <div class="row mb-3"></div>
+                <div class="form-group row">
+                   <div class="col-sm-6">
+                       <label for="title" class="form-label">Paybill Number*</label>
+                       <div class="col-sm-10">
+                          <input type="text" placeholder="Paybill Number" id="title" v-model="form.paybill_number" name="title" class="form-control"
+                             required />
+                          <div class="invalid-feedback" v-if="!form.name">Please enter name</div>
+                       </div>
+                    </div>              
+                   <div class="col-sm-6">
+                       <label for="title" class="form-label">Account Number*</label>
+                       <div class="col-sm-10">
+                          <input type="text" placeholder="Account Number" id="title" v-model="form.account_number" name="title" class="form-control"
+                             required />
+                          <div class="invalid-feedback" v-if="!form.name">Please enter name</div>
+                       </div>
+                    </div>
                
                    </div>
                    <div class="row mb-3"></div>

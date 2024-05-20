@@ -120,6 +120,46 @@
                    </div>
 
                 </div>
+
+                <div class="row mb-3"></div>
+                <div class="form-group row">
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Commission Percentage</label>
+                      <div class="col-sm-10 input-group">
+                        <input
+                            type="text"
+                            placeholder="Commission"
+                            id="title"
+                            name="title"
+                            v-model="form.commission"
+                            @input="clearFixedCommission"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="input-group-append">
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="invalid-feedback">Please enter title!</div>
+                      </div>
+                   </div>
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Fixed Commission</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="Fixed Commission"
+                            id="title"
+                            name="title"
+                            v-model="form.fixed_commission"
+                            @input="clearCommission"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter title!</div>
+                      </div>
+                   </div>
+
+                </div>
                 
 
              </div>
@@ -178,11 +218,16 @@
     },
     data () {
        return {
-          form: {
-          role_id: '',
-          title: '',
-          
-          },
+         form: {
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone_no: '',
+            address: '',
+            id_number: '',
+            commission: '',
+            fixed_commission: '',
+        },
           message: "",
           successMessage: "",
           loading: false,
@@ -205,6 +250,16 @@
          }
          reader.readAsDataURL(file);
        },
+        clearCommission() {
+            if (this.form.commission) {
+                this.form.fixed_commission = '';
+            }
+        },
+        clearFixedCommission() {
+            if (this.form.fixed_commission) {
+                this.form.commission = '';
+            }
+        },
         getLandlord() {
              axios.get('/api/landlord/'+this.$route.params.id).then((response) => {
      

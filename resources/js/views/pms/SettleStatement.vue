@@ -138,7 +138,7 @@
                     <div class="row mb-3"></div>
                     <div class="col-lg-12 felx mt-4 row">
                         <div class="col-sm-6 col-lg-6">
-                        <button @click.prevent="cancel()" class="btn btn-dark">Cancel</button>
+                        <button @click.prevent="cancel()" class="btn btn-dark">Back</button>
                         </div>
                        <div class="col-sm-6 col-lg-6 text-end">
                             <button @click.prevent="settleReceipt" type="submit" v-if="status == 0 && paid > 0" class="btn btn-darkgreen">Settle</button>
@@ -531,7 +531,8 @@ export default{
       },
       cancel()
       {
-        this.$router.push('/statements')
+        this.$router.go(-1);
+        // this.$router.push('/statements')
       },
 
       checkLastMonthStatement() {
@@ -629,6 +630,34 @@ export default{
     background-color: orange;
     border-color: orange;
     color: #fff; /* Set text color to white */
+}
+.section {
+    padding: 20px;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.label {
+    font-weight: bold;
+    color: #333;
+}
+
+.row.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.row.mt-4 {
+    margin-top: 1rem;
+}
+
+.text-end {
+    text-align: right;
 }
 
 </style>

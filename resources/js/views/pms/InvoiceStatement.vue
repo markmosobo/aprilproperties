@@ -57,7 +57,8 @@ export default {
    },
    methods: {
       prev(){
-         this.$router.push('/statements')
+         // this.$router.push('/statements')
+         this.$router.go(-1);
       },
       submit(){
          axios.put("/api/pmsinvoicestatement/"+this.$route.params.id, this.form)

@@ -466,7 +466,7 @@
         },
       printReceipt() {
         // this.submit();
-        this.$router.push('/invoices')
+         this.$router.go(-1);
 
         // Open a new window for printing
         const printWindow = window.open("", "_blank");
@@ -601,8 +601,8 @@
             <div class="receipt-footer">
               <p>You were invoiced by ${this.user.first_name} ${this.user.last_name}.For MPESA payment:</p>
               <p>MPESA Paybill</p>
-              <p>Enter Business Number:86767</p>
-              <p>Account No. 7576565</p>
+              <p>Enter Business Number:${this.businessNo}</p>
+              <p>Account No: ${this.accountNo}</p>
             </div>
           </div>
         </body>

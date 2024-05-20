@@ -65,7 +65,7 @@
                             Add Landlord
                           </a>
                       </router-link> -->
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
+                          <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
             
                       </p>
     
@@ -106,6 +106,8 @@
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                    <!-- <a @click="openModal(statement)" class="dropdown-item" href="#"><i class="ri-edit-fill mr-2"></i>Edit</a> -->
+
                                   </div>
                               </div>
                             </td>
