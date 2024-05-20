@@ -92,7 +92,7 @@
 
                 <div class="row mt-4">
                   <div class="col-6">
-                    <button @click.prevent="cancel()" class="btn btn-dark w-100">Cancel</button>
+                    <button @click.prevent="cancel()" class="btn btn-dark w-100">Back</button>
                   </div>
                   <div class="col-6 text-end">
                     <button @click="printReceipt" class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Print Invoice</button>
@@ -160,7 +160,9 @@ export default {
         this.phoneNumber = this.statement.tenant.phone_number;
         this.unitNumber = this.statement.tenant.pms_unit_id;
         this.tenantId = this.statement.pms_tenant_id;
+        this.propertyId = this.statement.pms_property_id;
         this.getUnit(this.unitNumber);
+        this.getProperty(this.propertyId);
         this.refNo = this.statement.ref_no;
         this.details = this.statement.details;
         this.date = this.statement.created_at;
@@ -197,8 +199,20 @@ export default {
           console.error("Error fetching unit:", error);
         });
     },
+     getProperty(propertyId) {
+      axios.get('/api/pmsproperty/' + parseInt(propertyId))
+        .then((response) => {
+          this.property = response.data.property;
+          this.paybillNo = this.property.paybill_number;
+          this.accountNo = this.property.account_number;
+          console.log("paybill", this.paybillNo);
+        })
+        .catch((error) => {
+          console.error("Error fetching unit:", error);
+        });
+    },
     cancel() {
-      this.$router.push('/invoices')
+         this.$router.go(-1);
     },
     viewStatement() {
       this.$router.push('/viewstatement/' + this.statementId)
@@ -347,8 +361,8 @@ export default {
             <div class="receipt-footer">
               <p>You were invoiced by ${this.user.first_name} ${this.user.last_name}. For MPESA payment:</p>
               <p>MPESA Paybill</p>
-              <p>Enter Business Number:86767</p>
-              <p>Account No. 7576565</p>
+              <p>Enter Business Number:${this.paybillNo}</p>
+              <p>Account No:${this.accountNo}</p>
             </div>
           </div>
         </body>
