@@ -54,17 +54,30 @@
                     <div class="card-body pb-0">
                       <h5 class="card-title">Invoices to Settle <span>| All statements with invoices to settle</span></h5>
                       <p class="card-text">
-                   
-<!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
+                      <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
+                      <button v-if="invoicestosettlesmsnotsent.length !== 0" class="me-2" @click="navigate">Send Bulk SMS ({{invoicestosettlesmsnotsent.length}} Pending)
+                      </button>
+               
+                      <router-link to="#" custom v-slot="{ href, navigate, isActive }">
                           <a
                             :href="href"
                             :class="{ active: isActive }"
-                            class="btn btn-sm btn-primary rounded-pill"
-                            @click="navigate"
+                            class="btn btn-sm btn-primary rounded-pill me-2"
+                            style="background-color: orange; border-color: orange;"
                           >
-                            Add Landlord
+                            Pending SMS ({{invoicestosettlesmsnotsent.length}}/{{statements.length + awaitinginvoicing.length}})
                           </a>
-                      </router-link> -->
+                      </router-link>
+                      <router-link to="#" custom v-slot="{ href, navigate, isActive }">
+                        <a
+                        :href="href"
+                        :class="{ active: isActive }"
+                        class="btn btn-sm btn-primary rounded-pill"
+                        style="background-color: darkgreen; border-color: darkgreen;"                        
+                        >
+                        Sent SMS ({{invoicestosettlesmssent.length}}/{{statements.length + awaitinginvoicing.length}})
+                        </a>
+                      </router-link>                        
                           <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
             
                       </p>
@@ -138,6 +151,7 @@
     import $ from "jquery";
     import moment from 'moment';
     import jsPDF from 'jspdf';
+    import * as XLSX from 'xlsx';
 
     const toast = Swal.mixin({
         toast: true,
@@ -152,6 +166,9 @@
       data(){
         return {
           statements: [],
+          awaitinginvoicing: [],
+          invoicestosettlesmsnotsent: [],
+          invoicestosettlesmssent: [],
           collectedTotal: 0,
           expensesTotal: 0,
           user: []
@@ -174,6 +191,24 @@
               } 
             });
 
+        },
+        exportToExcel() {
+          const invoicesData = this.statements.map(statement => ({
+            "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
+            "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
+            "DUE": this.formatNumber(statement.total),
+            "RENT": statement.unit ? this.formatNumber(statement.unit.monthly_rent) : 'N/A',
+            "GARBAGE": statement.unit ? this.formatNumber(statement.unit.garbage_fee) : 'N/A',
+            "WATER": this.formatNumber(statement.water_bill ?? "N/A"),
+            "PAID": this.formatNumber(statement.paid),
+            "BALANCE": this.formatNumber(statement.balance),
+          }));
+
+          const worksheet = XLSX.utils.json_to_sheet(invoicesData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "INVOICES TO SETTLE");
+
+          XLSX.writeFile(workbook, "INVOICES TO SETTLE.xlsx");
         },
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
@@ -468,8 +503,11 @@
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.statements = response.data.lists.invoicestosettle;
+             this.awaitinginvoicing = response.data.lists.awaitinginvoicing;
+             this.invoicestosettlesmsnotsent = response.data.lists.invoicestosettlesmsnotsent;
+             this.invoicestosettlesmssent = response.data.lists.invoicestosettlesmssent;
              this.expenses = response.data.lists.pmsexpenses;
-             console.log(this.statements)
+             console.log(response)
              // Calculate the total amount paid
             this.totalAmountPaid = this.calculateTotalAmountPaid();
              setTimeout(() => {

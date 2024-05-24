@@ -73,6 +73,8 @@ class ListController extends Controller
         //invoices
         $awaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->get();
         $invoicestosettle = PmsStatement::latest()->whereNotNull('water_bill')->where('status',0)->with('property','tenant','unit')->get();
+        $invoicestosettlesmsnotsent = PmsStatement::latest()->whereNotNull('water_bill')->where('status',0)->where('sms_status', 0)->with('property','tenant','unit')->get();
+        $invoicestosettlesmssent = PmsStatement::latest()->whereNotNull('water_bill')->where('status',0)->where('sms_status', 1)->with('property','tenant','unit')->get();
         $settledinvoices = PmsStatement::latest()->whereNotNull('water_bill')->where('status',1)->with('property','tenant','unit')->get();
 
         //dashboard count
@@ -123,6 +125,8 @@ class ListController extends Controller
                 'pmsinvoices' => $pmsinvoices,
                 'awaitinginvoicing' => $awaitinginvoicing,
                 'invoicestosettle' => $invoicestosettle,
+                'invoicestosettlesmsnotsent' => $invoicestosettlesmsnotsent,
+                'invoicestosettlesmssent' => $invoicestosettlesmssent,
                 'settledinvoices' => $settledinvoices,
 
                 'pmspropertycount' => $pmsPropertyCount,

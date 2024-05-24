@@ -35,6 +35,7 @@ return new class extends Migration
             $table->string('payment_method')->nullable(); 
             $table->string('mpesa_code')->nullable(); 
             $table->integer('status')->nullable();
+            $table->integer('sms_status')->nullable();
             $table->float('total')->nullable();
             $table->float('paid')->nullable();
             $table->float('balance')->nullable();

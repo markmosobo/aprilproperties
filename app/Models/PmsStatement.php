@@ -26,6 +26,7 @@ class PmsStatement extends Model
         'status',
         'payment_method',
         'mpesa_code',
+        'sms_status'
     ];
 
     public function tenant()
