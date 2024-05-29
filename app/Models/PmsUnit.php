@@ -22,6 +22,8 @@ class PmsUnit extends Model
         'water_deposit',
         'electricity_meter',
         'electricity_deposit',
+        'paybill_number',
+        'account_number',
         'status'
     ];  
 

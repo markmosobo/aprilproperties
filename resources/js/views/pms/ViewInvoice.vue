@@ -193,6 +193,9 @@ export default {
           this.unitSecurityFee = this.unit.security_fee;
           this.unitGarbageFee = this.unit.garbage_fee;
           this.unitType = this.unit.type;
+          //for Victoria apartments
+          this.paybillVictoria = this.unit.paybill_number;
+          this.accountVictoria = this.unit.account_number;
           console.log("unit", this.unit);
         })
         .catch((error) => {
@@ -246,6 +249,9 @@ export default {
       printWindow.print();
     },
     buildReceiptContent(refNo) {
+        // const paybillNumber = this.propertyId === 5 ? this.paybillVictoria : this.paybillNo;
+        // const accountNumber = this.propertyId === 5 ? this.accountVictoria : this.accountNo;
+
       const receiptHTML = `
         <!DOCTYPE html>
         <html lang="en">
@@ -361,8 +367,8 @@ export default {
             <div class="receipt-footer">
               <p>You were invoiced by ${this.user.first_name} ${this.user.last_name}. For MPESA payment:</p>
               <p>MPESA Paybill</p>
-              <p>Enter Business Number:${this.paybillNo}</p>
-              <p>Account No:${this.accountNo}</p>
+              <p>Enter Business Number: ${this.propertyId === 5 ? this.paybillVictoria : this.paybillNo}</p>
+              <p>Account Number: ${this.propertyId === 5 ? this.accountVictoria : this.accountNo}</p>
             </div>
           </div>
         </body>

@@ -79,7 +79,9 @@ class PmsUnitController extends Controller
             'water_meter' => $request->water_meter,
             'water_deposit' => $request->water_deposit ?? 0,
             'electricity_meter' => $request->electricity_meter,
-            'electricity_deposit' => $request->electricity_deposit ?? 0
+            'electricity_deposit' => $request->electricity_deposit ?? 0,
+            'paybill_number' => $request->paybill_number ?? 0,
+            'account_number' => $request->account_number ?? 0
         ]);
         return response()->json([
             'status' => true,

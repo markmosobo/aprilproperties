@@ -184,6 +184,26 @@
                    </div>
 
                 </div>
+                <div class="row mb-3"></div>
+                <div v-if="propertyId == 5" class="form-group row">
+                   <div class="col-sm-6">
+                       <label for="title" class="form-label">Paybill Number*</label>
+                       <div class="col-sm-10">
+                          <input type="text" placeholder="Paybill Number" id="title" v-model="form.paybill_number" name="title" class="form-control"
+                             required />
+                          <div class="invalid-feedback" v-if="!form.name">Please enter name</div>
+                       </div>
+                    </div>              
+                   <div class="col-sm-6">
+                       <label for="title" class="form-label">Account Number*</label>
+                       <div class="col-sm-10">
+                          <input type="text" placeholder="Account Number" id="title" v-model="form.account_number" name="title" class="form-control"
+                             required />
+                          <div class="invalid-feedback" v-if="!form.name">Please enter name</div>
+                       </div>
+                    </div>
+               
+                   </div>
              </div>
              <!--  button -->
              <div class="col-lg-12 felx mt-4 row">
@@ -251,6 +271,7 @@
           water_deposit: '',
           
           },
+          propertyId: '',
           message: "",
           successMessage: "",
           loading: false,
@@ -277,7 +298,8 @@
              axios.get('/api/pmsunit/'+this.$route.params.id).then((response) => {
      
              this.form = response.data.unit;
-             console.log("props", this.form)
+             this.propertyId = this.form.pms_property_id;
+             console.log("props", this.propertyId)
     
              });
         }, 
