@@ -55,7 +55,7 @@
                       <h5 class="card-title">Invoices to Settle <span>| All statements with invoices to settle</span></h5>
                       <p class="card-text">
                       <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
-                      <button v-if="invoicestosettlesmsnotsent.length !== 0" class="me-2" @click="navigate">Send Bulk SMS ({{invoicestosettlesmsnotsent.length}} Pending)
+                      <button v-if="invoicestosettlesmsnotsent.length !== 0" class="me-2" @click="sendSms">Send Bulk SMS ({{invoicestosettlesmsnotsent.length}} Pending)
                       </button>
                
                       <router-link to="#" custom v-slot="{ href, navigate, isActive }">
@@ -171,7 +171,8 @@
           invoicestosettlesmssent: [],
           collectedTotal: 0,
           expensesTotal: 0,
-          user: []
+          user: [],
+          authorizationCode: ''
         }
       },
       methods: {
@@ -192,6 +193,33 @@
             });
 
         },
+        loginUwazii() {
+          var data = JSON.stringify({
+            "username": "April_Properties",
+            "password": "Mosobo*123#"
+          });
+
+          var config = {
+            method: 'post',
+            maxBodyLength: Infinity,
+            url: 'https://restapi.uwaziimobile.com/v1/authorize',
+            headers: { 
+              'Content-Type': 'application/json'
+            },
+            data: data
+          };
+
+          axios(config)
+            .then((response) => {
+              const authorizationCode = response.data.data.authorization_code;
+              this.authorizationCode = authorizationCode; // Save authorizationCode into this.authorizationCode
+              console.log(this.authorizationCode);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        },
+
         exportToExcel() {
           const invoicesData = this.statements.map(statement => ({
             "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
@@ -246,6 +274,45 @@
         },
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        sendSms()
+        {
+          this.loginUwazii();
+          var data = JSON.stringify({
+            "senderID": "Uwazii",
+            "text": "Hello Mark, We send sms to #number#",
+            "dateStart": "2019-12-14",
+            "timeStart": "22:30",
+            "timeStop": "22:30",
+            "phone": "254790659917",
+            "id_group": [
+              17
+            ],
+            "id_group_excluded": [
+              24,
+              26
+            ]
+          });
+
+          var config = {
+            method: 'post',
+          maxBodyLength: Infinity,
+            url: 'https://restapi.uwaziimobile.com/v1/send-bulk',
+            headers: { 
+              'X-Access-Token': this.authorizationCode, 
+              'Content-Type': 'application/json'
+            },
+            data : data
+          };
+
+          axios(config)
+          .then(function (response) {
+            console.log(JSON.stringify(response.data));
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+
         },
         generatePDF() {
             let pdfName = 'Full Statement';
@@ -550,6 +617,7 @@
       },      
       mounted(){
         this.loadLists();
+        // this.loginUwazii();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
 
