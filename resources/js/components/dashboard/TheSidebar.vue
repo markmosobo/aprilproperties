@@ -200,6 +200,37 @@
           </li>                          
         </ul>
       </li>
+      <li v-show="user.role_id == 1" class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#sms-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-people"></i><span>Manage SMS</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="sms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <router-link to="/all-users" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+              <i class="bi bi-circle"></i><span>Send Bulk SMS</span>
+              </a>
+            </router-link>
+          </li>  
+          <li>
+            <router-link to="/roles" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+              <i class="bi bi-circle"></i><span>Send Single SMS</span>
+              </a>
+            </router-link>
+          </li>                          
+        </ul>
+      </li>
       <!-- End Components Nav --> 
 
 <!--       <li v-show="user.role_id == 1" class="nav-item">

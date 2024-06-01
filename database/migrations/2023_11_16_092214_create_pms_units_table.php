@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('water_meter')->nullable();
             $table->string('electricity_meter')->nullable();
             $table->float('electricity_deposit')->nullable();
+            $table->string('paybill_number')->nullable();
+            $table->string('account_number')->nullable();
             $table->integer('status')->default(0);
             $table->foreign('pms_property_id')
             ->references('id')
