@@ -307,18 +307,22 @@
             const data = JSON.stringify({
               "senderID": "Uwazii",
               "text": "Hello Mark, We send sms to #number#",
-              "dateStart": this.formattedDate,
-              "timeStart": "22:30",
-              "timeStop": "22:30",
-              "phone": "254790659917",
-              "id_group": [17],
-              "id_group_excluded": [24, 26]
+              "type": "sms",
+              "beginDate": this.formattedDate,
+              "beginTime": "01:40",
+              "lifetime": 555,
+              "delivery": false,
+              "number": [
+                "254790659917"
+              ],
+              // "id_group": [17],
+              // "id_group_excluded": [24, 26]
             });
 
             const config = {
               method: 'post',
               maxBodyLength: Infinity,
-              url: 'https://restapi.uwaziimobile.com/v1/send-bulk',
+              url: 'https://restapi.uwaziimobile.com/v1/send',
               headers: {
                 'X-Access-Token': this.accessToken,
                 'Content-Type': 'application/json'

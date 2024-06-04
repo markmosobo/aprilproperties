@@ -1,5 +1,5 @@
 <template>
-    <main>
+    <main class="background-image">
       <div class="container">
         <section
           class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4"
@@ -159,3 +159,20 @@
     }
   });
   </script>
+
+<style scoped>
+.background-image {
+  background-image: url('@/assets/img/april.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  width: 100%;
+}
+
+.container {
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+</style>
