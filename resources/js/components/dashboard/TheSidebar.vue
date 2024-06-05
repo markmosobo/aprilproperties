@@ -205,8 +205,8 @@
           <i class="bi bi-people"></i><span>Manage SMS</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="sms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <router-link to="/all-users" custom v-slot="{ href, navigate, isActive }">
+ <!--          <li>
+            <router-link to="/bulksms" custom v-slot="{ href, navigate, isActive }">
                 <a
                   :href="href"
                   :class="{ active: isActive }"
@@ -216,16 +216,16 @@
               <i class="bi bi-circle"></i><span>Send Bulk SMS</span>
               </a>
             </router-link>
-          </li>  
+          </li> -->  
           <li>
-            <router-link to="/roles" custom v-slot="{ href, navigate, isActive }">
+            <router-link to="/sms" custom v-slot="{ href, navigate, isActive }">
                 <a
                   :href="href"
                   :class="{ active: isActive }"
                   class="nav-link"
                   @click="navigate"
                 >
-              <i class="bi bi-circle"></i><span>Send Single SMS</span>
+              <i class="bi bi-circle"></i><span>Send SMS</span>
               </a>
             </router-link>
           </li>                          

@@ -115,6 +115,9 @@ import PmsInvoices from '../views/pms/PmsInvoices.vue'
 import ViewInvoice from '../views/pms/ViewInvoice.vue'
 import PmsTenantInvoices from '../views/pms/PmsTenantInvoices.vue'
 
+import BulkSms from '../views/sms/BulkSms.vue'
+import Sms from '../views/sms/Sms.vue'
+
 function guardMyroute(to, from, next)
 {
  var isAuthenticated= false;
@@ -779,7 +782,20 @@ const routes = [
         name: 'settlestatement',
         component: SettleStatement,
         beforeEnter : guardMyroute,
-    },                              
+    },
+    {
+        path:'/bulksms',
+        name: 'bulksms',
+        component: BulkSms,
+        beforeEnter : guardMyroute,
+    
+    },
+    {
+        path:'/sms',
+        name: 'sms',
+        component: Sms,
+        beforeEnter : guardMyroute,
+    }                              
 ];
 
 const router = createRouter({
