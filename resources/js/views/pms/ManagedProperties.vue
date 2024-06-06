@@ -203,8 +203,6 @@
         },
         loadLists() {
              axios.get('api/lists').then((response) => {
-             this.categories = response.data.lists.categories;
-             this.propertytypes = response.data.lists.propertytypes;
              this.properties = response.data.lists.pmsproperties;
              console.log("props", this.properties)
              setTimeout(() => {

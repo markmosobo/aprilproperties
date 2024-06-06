@@ -93,7 +93,7 @@
         getUnit() {
              axios.get('/api/pmsunit/'+this.$route.params.id).then((response) => {
      
-             this.form = response.data.unit[0];
+             this.form = response.data.unit;
              console.log("props", this.form)
     
              });
