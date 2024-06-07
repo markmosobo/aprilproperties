@@ -215,7 +215,9 @@
         generatePDF() {
             let pdfName = 'Full Statement';
             var doc = new jsPDF('landscape');
-            const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
+            // const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
+            const firstPageMaxRows = 13; // Rows for the first page
+            const subsequentPagesMaxRows = 30; // Rows for subsequent pages
 
             // Add top-left header
             const rightHeaderText = 'April Properties\nKakamega-Webuye Rd, ACK Building\nTel: 0720 020 401\nP. O. Box 2973-50100, Kakamega\nEmail: propertapril@gmail.com';
@@ -303,6 +305,8 @@
 
             let currentPage = 1;
             let currentRow = 0;
+            let maxRowsPerPage = firstPageMaxRows; // Set initial max rows for the first page
+
 
             this.statements.forEach((statement, index) => {
                 if (currentRow >= maxRowsPerPage) {
@@ -310,6 +314,8 @@
                     headerYPos = 20;
                     currentRow = 0;
                     currentPage++;
+                    maxRowsPerPage = subsequentPagesMaxRows; // Set max rows for subsequent pages
+
                     xPos = 20;
                     for (let i = 0; i < columnWidths.length; i++) {
                         doc.rect(xPos, headerYPos, columnWidths[i], cellHeight, 'F');
@@ -369,10 +375,14 @@
 
 
             // Call the function to add expenses to the PDF with pagination
-            let totalPages = this.addExpensesToPDF(this.expenses, doc);
+            if (this.expenses && this.expenses.length > 0) {
+                // Call the function to add expenses to the PDF with pagination
+                let totalPages = this.addExpensesToPDF(this.expenses, doc);
+                totalPages = this.addExpensesToPDF(this.expenses, doc);
+            }
             // Save the PDF
             // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
-            let fileName = 'Full Statement' + '_Total_Pages_' + totalPages + '.pdf';
+            let fileName = 'Full Statement' + '_Total_Pages_' + currentPage + '.pdf';
 
             doc.save(fileName);
         },

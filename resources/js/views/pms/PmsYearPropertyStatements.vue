@@ -168,6 +168,16 @@
         {
           axios.get('/api/pmsproperty/'+ this.$route.params.id).then((response) => {
             this.property = response.data.property;
+            this.commission = this.property.landlord.commission;
+            this.fixedCommission = this.property.landlord.fixed_commission;
+            if(this.commission !== null)
+            {
+              this.propertyCommission = this.commission
+            }
+            else
+            {
+              this.propertyCommission = this.fixedCommission;
+            }
             console.log("dat", this.property)
           }).catch(() => {
               console.log('error')
@@ -222,7 +232,7 @@
         generatePDF() {
             let pdfName = 'Full Statement';
             var doc = new jsPDF('landscape');
-            const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
+            const maxRowsPerPage = 26; // Adjust this value based on the number of rows you want per page
 
             // Add top-left header
             const rightHeaderText = 'April Properties\nKakamega-Webuye Rd, ACK Building\nTel: 0720 020 401\nP. O. Box 2973-50100, Kakamega\nEmail: propertapril@gmail.com';
@@ -269,15 +279,15 @@
             // doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
             // doc.text('Generated on: ' + new Date().toLocaleString(), 20, imageY + imageHeight + 20);
 
-            const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = roundedCommission/100*this.totalPaid;
+            // const roundedCommission = Math.round(this.property.commission * 100);
+            const commissionTotal = this.propertyCommission/100*this.totalPaid;
 
             const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
             doc.setFontSize(14);
             doc.setTextColor(44, 62, 80);
-            doc.text(roundedCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
+            doc.text(this.propertyCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
 
 
 
@@ -302,8 +312,9 @@
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
-            let columnWidths = [60, 30, 70, 30, 30, 30];
-            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Due', 'Paid', 'Bal'];
+            // let columnWidths = [60, 30, 70, 30, 30, 30];
+            let columnWidths = [45, 60, 25, 25, 25, 25, 25, 25];
+            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BAL'];
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -317,6 +328,19 @@
 
             let currentPage = 1;
             let currentRow = 0;
+
+            const trimTextToFit = (doc, text, maxWidth, cellPadding) => {
+                let trimmedText = text;
+                while (doc.getStringUnitWidth(trimmedText) * doc.internal.getFontSize() / doc.internal.scaleFactor > maxWidth - 2 * cellPadding) {
+                    trimmedText = trimmedText.substring(0, trimmedText.length - 1);
+                    if (trimmedText.length === 0) break;
+                }
+                if (text !== trimmedText) {
+                    trimmedText = trimmedText.substring(0, trimmedText.length - 3) + '...';
+                }
+                return trimmedText;
+            };
+
 
             this.statements.forEach((statement, index) => {
                 if (currentRow >= maxRowsPerPage) {
@@ -338,27 +362,38 @@
                 xPos = 20;
                 for (let i = 0; i < columnWidths.length; i++) {
                     doc.rect(xPos, yPos, columnWidths[i], cellHeight);
+                    let text = '';
                     switch (i) {
                         case 0:
-                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            text = statement.unit ? statement.unit.unit_number : 'N/A';
+
                             break;
                         case 1:
-                            let statusText = statement.status == 1 ? 'Settled' : 'Not Settled';
-                            doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            text = statement.tenant ? `${statement.tenant.first_name} ${statement.tenant.last_name}` : 'Vacant';
+
+
                             break;
                         case 2:
-                            doc.text(statement.details, xPos + cellPadding, yPos + cellHeight - cellPadding);
-                            break;
-                        case 3:
                             doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 3:
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.monthly_rent) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
                         case 4:
-                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.garbage_fee) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 5:
-                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(this.formatNumber(statement.water_bill ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 6:
+                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 7:
+                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;        
                     }
+                    text = trimTextToFit(doc, text, columnWidths[i], cellPadding); // Trim the text to fit the column width
+                    doc.text(text, xPos + cellPadding, yPos + cellHeight - cellPadding);
                     xPos += columnWidths[i];
                 }
                 currentRow++;
@@ -380,7 +415,7 @@
             let totalPages = this.addExpensesToPDF(this.expenses, doc);
             // Save the PDF
             // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
-            let fileName = this.property.name+" "+this.formatYear(new Date)+' Rent Statement' + '_Total_Pages_' + totalPages + '.pdf';
+            let fileName = this.property.name+" "+this.formatMonth(new Date)+' Rent Statement' + '_Total_Pages_' + totalPages + '.pdf';
 
             doc.save(fileName);
         },
@@ -421,7 +456,7 @@
 
             let currentPage = 1;
             let currentRow = 0;
-            const maxRowsPerPage = 28; // Adjust this value based on the number of rows you want per page
+            const maxRowsPerPage = 5; // Adjust this value based on the number of rows you want per page
 
             // Iterate through expenses and add them to the PDF with dynamic borders
             expenses.forEach((expense, index) => {

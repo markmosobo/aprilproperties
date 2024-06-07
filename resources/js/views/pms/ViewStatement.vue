@@ -255,7 +255,7 @@ export default {
           })
         },
         cancel() {
-            this.$router.push('/statements')
+          this.$router.go(-1);
         },
         viewInvoice()
         {

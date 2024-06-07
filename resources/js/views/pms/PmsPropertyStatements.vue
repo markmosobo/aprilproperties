@@ -152,7 +152,8 @@
           propertytypes: [],
           user: [],
           dueTotal: 0, // Variable to store the sum of the "Due" column
-          propertyId: this.$route.params.id
+          propertyId: this.$route.params.id,
+          propertyCommission: ''
 
         }
       },
@@ -161,7 +162,17 @@
         {
           axios.get('/api/pmsproperty/'+ this.$route.params.id).then((response) => {
             this.property = response.data.property;
-            console.log("dat", this.property)
+            this.commission = this.property.landlord.commission;
+            this.fixedCommission = this.property.landlord.fixed_commission;
+            if(this.commission !== null)
+            {
+              this.propertyCommission = this.commission
+            }
+            else
+            {
+              this.propertyCommission = this.fixedCommission;
+            }
+            console.log("dat", this.propertyCommission)
           }).catch(() => {
               console.log('error')
           })
@@ -199,7 +210,7 @@
           return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
         },
         invoiceTenant(id){
-            this.$router.push('invoicestatement/'+id)
+            this.$router.push('/invoicestatement/'+id)
         },
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)
@@ -262,15 +273,15 @@
             // doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
             // doc.text('Generated on: ' + new Date().toLocaleString(), 20, imageY + imageHeight + 20);
 
-            const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = roundedCommission/100*this.totalPaid;
+            // const roundedCommission = Math.round(this.property.commission * 100);
+            const commissionTotal = this.propertyCommission/100*this.totalPaid;
 
             const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
             doc.setFontSize(14);
             doc.setTextColor(44, 62, 80);
-            doc.text(roundedCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
+            doc.text(this.propertyCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
 
 
 
@@ -296,8 +307,8 @@
             let cellPadding = 2;
             let lineHeight = 5;
             // let columnWidths = [60, 30, 70, 30, 30, 30];
-            let columnWidths = [60, 30, 30, 30, 30, 30, 30];
-            let columnHeaders = ['H/S NO.', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BAL'];
+            let columnWidths = [50, 60, 25, 25, 25, 25, 25, 25];
+            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BAL'];
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -334,24 +345,34 @@
                     doc.rect(xPos, yPos, columnWidths[i], cellHeight);
                     switch (i) {
                         case 0:
-                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.unit ? statement.unit.unit_number : 'N/A', xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 1:
-                            let statusText = statement.status == 1 ? 'Settled' : 'Not Settled';
-                            doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(
+                                statement.tenant ? `${statement.tenant.first_name} ${statement.tenant.last_name}` : 'Vacant',
+                                xPos + cellPadding,
+                                yPos + cellHeight - cellPadding
+                            );
+
                             break;
                         case 2:
-                            doc.text(statement.details, xPos + cellPadding, yPos + cellHeight - cellPadding);
-                            break;
-                        case 3:
                             doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 3:
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.monthly_rent) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
                         case 4:
-                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.garbage_fee) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 5:
-                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(this.formatNumber(statement.water_bill ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 6:
+                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 7:
+                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;        
                     }
                     xPos += columnWidths[i];
                 }
