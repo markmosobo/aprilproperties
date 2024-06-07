@@ -289,8 +289,11 @@
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
-            let columnWidths = [60, 30, 70, 30, 30, 30];
-            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Total', 'Paid', 'Bal'];
+            // let columnWidths = [60, 30, 70, 30, 30, 30];
+            // let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER'];
+            let columnWidths = [20, 60, 25, 25, 25, 25, 25, 25, 30]; // Adjusted column widths for 9 columns
+            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BALANCE', 'DATE PAID']; // Example headers
+
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -332,32 +335,39 @@
                     doc.rect(xPos, yPos, columnWidths[i], cellHeight);
                     switch (i) {
                         case 0:
-                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                           const unitNumber = statement.unit ? statement.unit.unit_number : 'N/A';
+const truncatedText = unitNumber.length > 4 ? unitNumber.slice(0, 4) + '...' : unitNumber;
+doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+
                             break;
                         case 1:
-                        let statusText;
-
-                        if (statement.status === 1) {
-                            statusText = 'Settled';
-                        } else if (statement.status === 0) {
-                            statusText = 'Not Settled';
-                        } else {
-                            statusText = 'Vacant';
-                        }
-                            doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(
+                                statement.tenant ? `${statement.tenant.first_name} ${statement.tenant.last_name}` : 'Vacant',
+                                xPos + cellPadding,
+                                yPos + cellHeight - cellPadding
+                            );
                             break;
                         case 2:
-                            doc.text(statement.details, xPos + cellPadding, yPos + cellHeight - cellPadding);
-                            break;
-                        case 3:
                             doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 3:
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.monthly_rent) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
                         case 4:
-                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.garbage_fee) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 5:
-                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(this.formatNumber(statement.water_bill ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 6:
+                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            break;
+                        case 7:
+                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            break;
+                        case 8:
+                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            break;    
                     }
                     xPos += columnWidths[i];
                 }
@@ -377,7 +387,7 @@
             // Call the function to add expenses to the PDF with pagination
             if (this.expenses && this.expenses.length > 0) {
                 // Call the function to add expenses to the PDF with pagination
-                let totalPages = this.addExpensesToPDF(this.expenses, doc);
+                let totalPages = '';
                 totalPages = this.addExpensesToPDF(this.expenses, doc);
             }
             // Save the PDF
