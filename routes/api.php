@@ -148,6 +148,10 @@ Route::get('pmsalltenantstatements/{id}', [PmsStatementController::class, 'tenan
 //tenant invoices
 Route::get('pmstenantinvoices/{id}', [PmsInvoiceController::class, 'tenantInvoices']);
 
+//property invoices
+Route::get('propertyawaitinginvoicing/{id}', [PmsInvoiceController::class, 'propAwaitingInvoicing']);
+Route::get('propertyinvoicestosettle/{id}', [PmsInvoiceController::class, 'propInvoicestoSettle']);
+Route::get('propertysettledinvoices/{id}', [PmsInvoiceController::class, 'propSettledInvoices']);
 
 Route::put('property/{id}', [PropertyController::class, 'update']);
 Route::put('category/{id}', [CategoryController::class, 'update']);

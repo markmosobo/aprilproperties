@@ -62,31 +62,36 @@
                       <table id="AllStatementsTable" class="table table-borderless">
                         <thead>
                           <tr>
-                            <th scope="col">Invoice</th>
+                            <th scope="col">H/S No.</th>
                             <th scope="col">Tenant</th>
-                            <th scope="col">Details</th>
                             <th scope="col">Due</th>
+                            <th scope="col">Rent</th>
+                            <th scope="col">Garbage</th>
+                            <th scope="col">Water</th>
                             <th scope="col">Paid</th>
                             <th scope="col">Bal</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Date</th>
+                            <!-- <th scope="col">Date</th> -->
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="statement in statements" :key="statement.id">
-                            <td>{{statement.ref_no}}</td>
+                          <tr v-for="statement in rentingstatements" :key="statement.id">
+                            <td>{{ statement.unit_number ?? 'N/A' }}</td>
                             <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
-                            <td>{{statement.details}}</td>
                             <td>{{formatNumber(statement.total)}}</td>
+                            <td>{{ statement.unit ? formatNumber(statement.unit.monthly_rent) : 'N/A' }}</td>
+                            <td>{{ statement.unit ? formatNumber(statement.unit.garbage_fee) : 'N/A' }}</td>
+                            <td>{{formatNumber(statement.water_bill ?? "N/A")}}</td>
                             <td>{{formatNumber(statement.paid)}}</td>
                             <td>{{formatNumber(statement.balance)}}</td>
                             <td>
-                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
-                              <span v-else-if="statement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
-                              <span v-else class="badge bg-info text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
+                              <span v-if="statement.status == 0 && statement.water_bill == null" class="badge bg-info text-dark"><i class="bi bi-clipboard2-x"></i> Not Invoiced</span>
+                              <span v-else-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
+                              <span v-else-if="statement.status == 0 && statement.water_bill !== null" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
+                              <span v-else class="badge bg-dark text-light"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
                             </td>
-                            <td>{{format_date(statement.created_at)}}</td>
+                            <!-- <td>{{format_date(statement.created_at)}}</td> -->
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -94,7 +99,7 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
-                                  <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
+                                  <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   </div>
                               </div>
@@ -108,6 +113,40 @@
                         Bal: {{ formatNumber(calculateTotal('balance')) }}
                       </strong>
                       </div>    
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="invoiceTenantModal" tabindex="-1" aria-labelledby="invoiceTenantModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="invoiceTenantModalLabel">Invoice Tenant</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>Are you sure you want to invoice the tenant?</p>
+                            <p v-if="selectedStatement && selectedStatement.tenant">
+                              <strong>Tenant Name:</strong> {{ selectedStatement.tenant.first_name }} {{ selectedStatement.tenant.last_name }}
+                            </p>
+                            <p v-else>
+                              <strong>Tenant Name:</strong> N/A
+                            </p>
+                            <p v-if="selectedStatement">
+                              <strong>Amount Due:</strong> {{ formatNumber(selectedStatement.total) }}
+                            </p>
+                            <p v-else>
+                              <strong>Amount Due:</strong> N/A
+                            </p>
+                            <p>
+                              <strong>Water Bill:</strong><input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
+                            </p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">Invoice Tenant</button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
     
                   </div>
@@ -143,12 +182,18 @@
         return {
           property: [],
           statements: [],
+          rentingstatements: [],
           expenses: [],
           categories: [],
           propertytypes: [],
           user: [],
           dueTotal: 0, // Variable to store the sum of the "Due" column
-          propertyId: this.$route.params.id
+          propertyId: this.$route.params.id,
+          propertyCommission: '',
+          selectedStatement: {}, // Initialize as an empty object
+          form: {
+            water_bill : ''
+          }
 
         }
       },
@@ -165,6 +210,7 @@
         getPropertyStatements() {
              axios.get('/api/pmspropertystatements/'+this.$route.params.id).then((response) => {
              this.statements = response.data.pmspropertystatements;
+             this.rentingstatements = response.data.pmspropertyrentingstatements;
              console.log("props", response)
              setTimeout(() => {
                   $("#AllStatementsTable").DataTable();
@@ -194,8 +240,41 @@
 
           return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
         },
-        invoiceTenant(id){
-            this.$router.push('invoicestatement/'+id)
+        invoiceTenant(statement) {
+          this.selectedStatement = statement;
+          const modal = new bootstrap.Modal(document.getElementById('invoiceTenantModal'));
+          modal.show();
+        },
+        confirmInvoiceTenant() {
+          if (this.selectedStatement && this.selectedStatement.id) {
+            // Implement your logic to invoice the tenant here
+            console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
+            axios.put("/api/pmsinvoicestatement/"+this.selectedStatement.id, this.form)
+           .then(function (response) {
+              console.log(response);
+              // this.step = 1;
+              toast.fire(
+                 'Success!',
+                 'Tenant invoiced!',
+                 'success'
+              )
+           })
+           .catch(function (error) {
+              console.log(error);
+              // Swal.fire(
+              //    'error!',
+              //    // phone_error + id_error + pass_number,
+              //    'error'
+              // )
+           });
+            // Close the modal after invoicing
+            const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
+            modal.hide();
+            //reset form
+            this.form.water_bill = '';
+            this.getPropertyStatements();
+
+          }
         },
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)
@@ -211,7 +290,9 @@
         generatePDF() {
             let pdfName = 'Full Statement';
             var doc = new jsPDF('landscape');
-            const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
+            // const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
+            const firstPageMaxRows = 13; // Rows for the first page
+            const subsequentPagesMaxRows = 30; // Rows for subsequent pages
 
             // Add top-left header
             const rightHeaderText = 'April Properties\nKakamega-Webuye Rd, ACK Building\nTel: 0720 020 401\nP. O. Box 2973-50100, Kakamega\nEmail: propertapril@gmail.com';
@@ -233,7 +314,6 @@
             doc.setTextColor(44, 62, 80);
             doc.text(headerText, headerX, headerY, { align: 'right' });
 
-
             // Add image at the top
             const imageUrl = '/images/apex-logo.png'; // Replace with the URL of your image
             const imageWidth = 50; // Adjust the width of the image as needed
@@ -242,7 +322,7 @@
             const imageY = 20;
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
-            // Add title
+           // Add title
             const titleText = (this.property.name+" "+this.formatMonth(new Date)+' Rent Statement').toUpperCase();
             const titleFontSize = 18;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
@@ -253,20 +333,22 @@
             doc.setTextColor(44, 62, 80); // Set text color to a dark shade
             doc.text(titleText, titleX, titleY);
 
+
+
             // // Add subtitle with date information
             // doc.setFontSize(14);
             // doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
             // doc.text('Generated on: ' + new Date().toLocaleString(), 20, imageY + imageHeight + 20);
 
             const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = roundedCommission/100*this.totalPaid;
+            const commissionTotal = this.propertyCommission/100*this.totalPaid;
 
             const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
             doc.setFontSize(14);
             doc.setTextColor(44, 62, 80);
-            doc.text(roundedCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
+            doc.text(this.propertyCommission +'% Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
 
 
 
@@ -284,15 +366,20 @@
             doc.text('Net Remission: ' + 'KES ' + this.formatNumber(netRemissionTotal) , 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
-            doc.setFontSize(12);
+            // Set font size for the table headers and data
+            const tableFontSize = 8;
+            doc.setFontSize(tableFontSize);
             doc.setTextColor(0);
 
             let headerYPos = imageY + imageHeight + 45;
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
-            let columnWidths = [60, 30, 70, 30, 30, 30];
-            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Due', 'Paid', 'Bal'];
+            // let columnWidths = [60, 30, 70, 30, 30, 30];
+            // let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER'];
+            let columnWidths = [20, 60, 20, 20, 20, 20, 20, 20, 30]; // Adjusted column widths for 9 columns
+            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BALANCE', 'DATE PAID']; // Example headers
+
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -304,8 +391,11 @@
                 xPos += columnWidths[i];
             }
 
+
             let currentPage = 1;
             let currentRow = 0;
+            let maxRowsPerPage = firstPageMaxRows; // Set initial max rows for the first page
+
 
             this.statements.forEach((statement, index) => {
                 if (currentRow >= maxRowsPerPage) {
@@ -313,6 +403,8 @@
                     headerYPos = 20;
                     currentRow = 0;
                     currentPage++;
+                    maxRowsPerPage = subsequentPagesMaxRows; // Set max rows for subsequent pages
+
                     xPos = 20;
                     for (let i = 0; i < columnWidths.length; i++) {
                         doc.rect(xPos, headerYPos, columnWidths[i], cellHeight, 'F');
@@ -329,24 +421,39 @@
                     doc.rect(xPos, yPos, columnWidths[i], cellHeight);
                     switch (i) {
                         case 0:
-                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                           const unitNumber = statement.unit ? statement.unit.unit_number : 'N/A';
+                           const truncatedText = unitNumber.length > 4 ? unitNumber.slice(0, 4) + '...' : unitNumber;
+                           doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+
                             break;
                         case 1:
-                            let statusText = statement.status == 1 ? 'Settled' : 'Not Settled';
-                            doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(
+                                statement.tenant ? `${statement.tenant.first_name} ${statement.tenant.last_name}` : 'Vacant',
+                                xPos + cellPadding,
+                                yPos + cellHeight - cellPadding
+                            );
                             break;
                         case 2:
-                            doc.text(statement.details, xPos + cellPadding, yPos + cellHeight - cellPadding);
-                            break;
-                        case 3:
                             doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 3:
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.monthly_rent) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
                         case 4:
-                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.unit ? this.formatNumber(statement.unit.garbage_fee) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 5:
-                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(this.formatNumber(statement.water_bill ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
+                        case 6:
+                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            break;
+                        case 7:
+                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            break;
+                        case 8:
+                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            break;    
                     }
                     xPos += columnWidths[i];
                 }
@@ -363,13 +470,16 @@
 
 
 
-
-
             // Call the function to add expenses to the PDF with pagination
-            let totalPages = this.addExpensesToPDF(this.expenses, doc);
+            if (this.expenses && this.expenses.length > 0) {
+                // Call the function to add expenses to the PDF with pagination
+                let totalPages = '';
+                totalPages = this.addExpensesToPDF(this.expenses, doc);
+            }
             // Save the PDF
             // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
-            let fileName = this.property.name+" "+this.formatMonth(new Date)+' Rent Statement' + '_Total_Pages_' + totalPages + '.pdf';
+
+            let fileName = this.property.name+" "+this.formatMonth(new Date)+' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
 
             doc.save(fileName);
         },
@@ -459,7 +569,7 @@
   
             doc.setFontSize(10);
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
-              
+
             return currentPage; // Return the total number of pages used for expenses
         },
         formatMonth(dateString) {

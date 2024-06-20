@@ -87,12 +87,15 @@ class GenerateMonthlyStatements extends Command
                     $newDate = date("YmdHis", strtotime($date));
                     $monthlyTotal = $tenant->unit->monthly_rent + $tenant->unit->garbage_fee + $tenant->unit->security_fee;
                     // $refno = "INV".$newDate." ".$tenant->unit->unit_number." Rent @".$monthlyTotal;
-                    $refno = "INV".$newDate;
+                    $refno = "INV" . $newDate . $tenant->id;
+
+                    // $refno = "INV".$newDate;
                     PmsStatement::create([
                         'ref_no' => $refno,
                         'pms_property_id' => $tenant->pms_property_id,
                         'pms_tenant_id' => $tenant->id,
                         'pms_unit_id' => $unitId,
+                        'unit_number' => $tenant->unit->unit_number,
                         'details' => "Rent-".$tenant->unit->unit_number."-".$formattedDate,
                         'status' => 0, // status for rented units
                         'total' => $monthlyTotal, // You can set the default total
@@ -102,6 +105,7 @@ class GenerateMonthlyStatements extends Command
 
                     $this->info('Statement generated for Property ' . $tenant->pms_property_id . ' and Tenant ' . $tenant->id);
                 }
+
             }
             //generate overpaid tenant statements
             // foreach ($overpaidtenants as $tenant) {
@@ -153,11 +157,15 @@ class GenerateMonthlyStatements extends Command
                     $date = str_replace('-"', '/', $orgDate);
                     $newDate = date("YmdHis", strtotime($date));
                     // $refno = "INV".$newDate." ".$vacant->unit_number." Rent @".$vacant->monthly_rent;
-                    $refno = "INV".$newDate;
+                    // $refno = "INV".$newDate;
+                    $refno = "INV" . $newDate . $vacant->id;
+
+
                     PmsStatement::create([
                         'ref_no' => $refno,
                         'pms_property_id' => $vacant->pms_property_id,
                         'pms_unit_id' => $vacant->pms_unit_id,
+                        'unit_number' => $vacant->unit_number,
                         'details' => "Rent-".$vacant->unit_number."-".$formattedDate,
                         'status' => 2, // status for vacant units
                         'total' => 0, // You can set the default total

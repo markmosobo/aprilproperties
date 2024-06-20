@@ -115,6 +115,10 @@ import PmsInvoices from '../views/pms/PmsInvoices.vue'
 import ViewInvoice from '../views/pms/ViewInvoice.vue'
 import PmsTenantInvoices from '../views/pms/PmsTenantInvoices.vue'
 
+import PropertyAwaitingInvoicing from '../views/pms/PropertyAwaitingInvoicing.vue'
+import PropertyInvoicesToSettle from '../views/pms/PropertyInvoicesToSettle.vue'
+import PropertySettledInvoices from '../views/pms/PropertySettledInvoices.vue'
+
 import BulkSms from '../views/sms/BulkSms.vue'
 import Sms from '../views/sms/Sms.vue'
 
@@ -733,6 +737,24 @@ const routes = [
         path:'/settledinvoices',
         name: 'settledinvoices',
         component: SettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertyawaitinginvoicing/:id',
+        name: 'propertyawaitinginvoicing',
+        component: PropertyAwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertyinvoicestosettle/:id',
+        name: 'propertyinvoicestosettle',
+        component: PropertyInvoicesToSettle,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertysettledinvoices/:id',
+        name: 'propertysettledinvoices',
+        component: PropertySettledInvoices,
         beforeEnter : guardMyroute,
     },
     {

@@ -93,6 +93,7 @@ class PmsStatementController extends Controller
                 $pmsstatement->update([
                     'paid' => $request->paid,
                     'balance' => $request->balance,
+                    'paid_at' => $request->paid_at,
                     'status' => 1,
                 ]);  
                 //update status on invoice
@@ -108,6 +109,7 @@ class PmsStatementController extends Controller
             {
                 $pmsstatement->update([
                     'paid' => $request->paid,
+                    'paid_at' => $request->paid_at,
                     'balance' => $request->balance,
                     'status' => 0,
                 ]);
@@ -171,11 +173,16 @@ class PmsStatementController extends Controller
     public function propertyStatements(Request $request, $id)
     {
         $pmspropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereMonth('created_at', Carbon::now()->month)->get();
+        $pmspropertyrentingstatements = PmsStatement::with('tenant','property','unit')
+        ->where('pms_tenant_id', '!=', null)
+        ->where('pms_property_id', $id)
+        ->whereMonth('created_at', Carbon::now()->month)->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmspropertystatements' => $pmspropertystatements
+            'pmspropertystatements' => $pmspropertystatements,
+            'pmspropertyrentingstatements' => $pmspropertyrentingstatements
         ], 200);
     }
 

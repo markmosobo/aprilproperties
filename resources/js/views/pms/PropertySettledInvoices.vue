@@ -52,7 +52,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">All Statements <span>| All Statements</span></h5>
+                      <h5 class="card-title">Settled Invoices - {{property.name}} <span>| Statements with settled invoices</span></h5>
                       <p class="card-text">
                    
 <!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
@@ -79,9 +79,8 @@
                             <th scope="col">Garbage</th>
                             <th scope="col">Water</th>
                             <th scope="col">Paid</th>
-                            <th scope="col">Bal</th>
+                            <th scope="col">Paid On</th>
                             <th scope="col">Status</th>
-                            <!-- <th scope="col">Date</th> -->
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -94,11 +93,12 @@
                             <td>{{ statement.unit ? formatNumber(statement.unit.garbage_fee) : 'N/A' }}</td>
                             <td>{{formatNumber(statement.water_bill ?? "N/A")}}</td>
                             <td>{{formatNumber(statement.paid)}}</td>
-                            <td>{{formatNumber(statement.balance)}}</td>
+                            <td>{{format_date(statement.paid_at)}}</td>
                             <td>
-                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
-                              <span v-else-if="statement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
-                              <span v-else class="badge bg-info text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
+                              <span v-if="statement.status == 0 && statement.water_bill == null" class="badge bg-info text-dark"><i class="bi bi-clipboard2-x"></i> Not Invoiced</span>
+                              <span v-else-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
+                              <span v-else-if="statement.status == 0 && statement.water_bill !== null" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
+                              <span v-else class="badge bg-dark text-light"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
                             </td>
                             <!-- <td>{{format_date(statement.created_at)}}</td> -->
                             <td>
@@ -108,8 +108,8 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
-                                  <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
-                                  <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a @click="printReceipt(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print Receipt</a>
+                  
                                   </div>
                               </div>
                             </td>
@@ -155,10 +155,29 @@
     export default {
       data(){
         return {
-          statements: [],
-          collectedTotal: 0,
-          expensesTotal: 0,
-          user: []
+            statements: [],
+            collectedTotal: 0,
+            expensesTotal: 0,
+            user: [],
+            property: '',
+            name: '',
+            tenant: '',
+            phoneNumber: '',
+            unitNumber: '',
+            refNo: '',
+            details: '',
+            date: '',
+            status: '',
+            paid: '',
+            balance: '',
+            total: '',
+            statementId: '',
+            waterBill: '',
+            unitRent: '',
+            unitSecurityFee: '',
+            unitGarbageFee: '',
+            unitName: '',
+            payment: ''
         }
       },
       methods: {
@@ -219,9 +238,7 @@
         generatePDF() {
             let pdfName = 'Full Statement';
             var doc = new jsPDF('landscape');
-            // const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
-            const firstPageMaxRows = 13; // Rows for the first page
-            const subsequentPagesMaxRows = 30; // Rows for subsequent pages
+            const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
 
             // Add top-left header
             const rightHeaderText = 'April Properties\nKakamega-Webuye Rd, ACK Building\nTel: 0720 020 401\nP. O. Box 2973-50100, Kakamega\nEmail: propertapril@gmail.com';
@@ -293,11 +310,8 @@
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
-            // let columnWidths = [60, 30, 70, 30, 30, 30];
-            // let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER'];
-            let columnWidths = [20, 60, 25, 25, 25, 25, 25, 25, 30]; // Adjusted column widths for 9 columns
-            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BALANCE', 'DATE PAID']; // Example headers
-
+            let columnWidths = [60, 30, 70, 30, 30, 30];
+            let columnHeaders = ['Invoiced On', 'Status', 'Detail', 'Total', 'Paid', 'Bal'];
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -312,8 +326,6 @@
 
             let currentPage = 1;
             let currentRow = 0;
-            let maxRowsPerPage = firstPageMaxRows; // Set initial max rows for the first page
-
 
             this.statements.forEach((statement, index) => {
                 if (currentRow >= maxRowsPerPage) {
@@ -321,8 +333,6 @@
                     headerYPos = 20;
                     currentRow = 0;
                     currentPage++;
-                    maxRowsPerPage = subsequentPagesMaxRows; // Set max rows for subsequent pages
-
                     xPos = 20;
                     for (let i = 0; i < columnWidths.length; i++) {
                         doc.rect(xPos, headerYPos, columnWidths[i], cellHeight, 'F');
@@ -339,39 +349,32 @@
                     doc.rect(xPos, yPos, columnWidths[i], cellHeight);
                     switch (i) {
                         case 0:
-                           const unitNumber = statement.unit ? statement.unit.unit_number : 'N/A';
-const truncatedText = unitNumber.length > 4 ? unitNumber.slice(0, 4) + '...' : unitNumber;
-doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
-
+                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 1:
-                            doc.text(
-                                statement.tenant ? `${statement.tenant.first_name} ${statement.tenant.last_name}` : 'Vacant',
-                                xPos + cellPadding,
-                                yPos + cellHeight - cellPadding
-                            );
+                        let statusText;
+
+                        if (statement.status === 1) {
+                            statusText = 'Settled';
+                        } else if (statement.status === 0) {
+                            statusText = 'Not Settled';
+                        } else {
+                            statusText = 'Vacant';
+                        }
+                            doc.text(statusText, xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 2:
-                            doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(statement.details, xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 3:
-                            doc.text(statement.unit ? this.formatNumber(statement.unit.monthly_rent) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 4:
-                            doc.text(statement.unit ? this.formatNumber(statement.unit.garbage_fee) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 5:
-                            doc.text(this.formatNumber(statement.water_bill ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
-                        case 6:
-                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
-                            break;
-                        case 7:
-                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
-                            break;
-                        case 8:
-                            doc.text(this.format_date(statement.updated_at), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
-                            break;    
                     }
                     xPos += columnWidths[i];
                 }
@@ -389,14 +392,10 @@ doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
 
 
             // Call the function to add expenses to the PDF with pagination
-            if (this.expenses && this.expenses.length > 0) {
-                // Call the function to add expenses to the PDF with pagination
-                let totalPages = '';
-                totalPages = this.addExpensesToPDF(this.expenses, doc);
-            }
+            let totalPages = this.addExpensesToPDF(this.expenses, doc);
             // Save the PDF
             // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
-            let fileName = 'Full Statement' + '_Total_Pages_' + currentPage + '.pdf';
+            let fileName = 'Full Statement' + '_Total_Pages_' + totalPages + '.pdf';
 
             doc.save(fileName);
         },
@@ -489,10 +488,199 @@ doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
 
             return currentPage; // Return the total number of pages used for expenses
         },
+        printReceipt(statement) {
+            console.log("alone",statement);
+            this.name = statement.property.name;
+            this.firstName = statement.tenant.first_name;
+            this.lastName = statement.tenant.last_name;
+            this.tenant = this.firstName + " " + this.lastName;
+            this.phoneNumber = statement.tenant.phone_number;
+            this.unitNumber = statement.tenant.pms_unit_id;
+            this.tenantId = statement.pms_tenant_id;
+            // this.getUnit(this.unitNumber);
+            this.refNo = statement.ref_no;
+            this.details = statement.details;
+            this.date = statement.created_at;
+            this.status = statement.status;
+            this.paid = statement.paid;
+            this.balance = statement.balance;
+            this.total = statement.total;
+            this.payment = statement.payment_method;
+            this.statementId = statement.id;
+            this.waterBill = statement.water_bill;
+            //unit info
+            this.unitName = statement.unit.unit_number;
+            this.unitRent = statement.unit.monthly_rent;
+            this.unitSecurityFee = statement.unit.security_fee;
+            this.unitGarbageFee = statement.unit.garbage_fee;
+            this.unitType = statement.unit.type;
+
+            // Open a new window for printing
+            const printWindow = window.open("", "_blank");
+
+            // Build the content for printing
+            const receiptContent = this.buildReceiptContent();
+
+            // Write the content to the new window
+            printWindow.document.write(receiptContent);
+
+            // Close the document stream
+            printWindow.document.close();
+
+            // Trigger the print dialog
+            printWindow.print();
+        },
+        buildReceiptContent(refNo) {
+            // Determine whether to include the row
+            const showGarbageFeeRow = this.unitGarbageFee !== 0;
+            const showSecurityFeeRow = this.unitSecurityFee !== 0;
+            // Build the HTML content for the receipt
+            const receiptHTML = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Receipt Of Payment</title>
+                  <style>
+                    body {
+                      font-family: Arial, sans-serif;
+                      margin: 0;
+                      padding: 0;
+                      background-color: #f5f5f5;
+                    }
+                    .receipt {
+                      max-width: 600px;
+                      margin: 20px auto;
+                      padding: 20px;
+                      background-color: #fff;
+                      border: 2px solid #ccc;
+                      border-radius: 10px;
+                    }
+                    .receipt-header {
+                      text-align: center;
+                      margin-bottom: 20px;
+                    }
+                    .receipt-header h1 {
+                      margin: 10px 0;
+                      color: #333;
+                    }
+                    .receipt-info {
+                      margin-bottom: 20px;
+                    }
+                    .receipt-info p {
+                      margin: 5px 0;
+                      color: #555;
+                    }
+                    .receipt-table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin-bottom: 20px;
+                    }
+                    .receipt-table th, .receipt-table td {
+                      padding: 8px;
+                      border-bottom: 1px solid #ccc;
+                    }
+                    .receipt-table th {
+                      text-align: left;
+                      background-color: #f2f2f2;
+                      color: #333;
+                    }
+                    .receipt-table td {
+                      text-align: left;
+                      color: #666;
+                    }
+                    .receipt-footer {
+                      text-align: center;
+                    }
+                    .receipt-footer p {
+                      margin: 5px 0;
+                      color: #777;
+                    }
+                  </style>
+                </head>
+                <body>
+                  <div class="receipt">
+                    <div class="receipt-header">
+                      <h1>April Properties</h1>
+                      <p>Kakamega-Webuye Rd, ACK Building</p>
+                      <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+                    </div>
+                    <div class="receipt-info">
+                      <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+                      <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
+                      <p><strong>Rent Month:</strong> ${this.formatMonth(this.date)}</p>
+                      <p><strong>Tenant:</strong> ${this.tenant}</p>
+                      <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
+                      <p><strong>Payment Mode:</strong> ${this.payment}</p>
+                    </div>
+                    <table class="receipt-table">
+                      <thead>
+                        <tr>
+                          <th>Description</th>
+                          <th>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Rent Payment</td>
+                          <td>KES ${this.formatNumber(this.unitRent)}</td>
+                        </tr>
+                        <tr>
+                          <td>Water Bill</td>
+                          <td>KES ${this.formatNumber(this.waterBill)}</td>
+                        </tr>
+                        <!-- Conditionally include garbage collection fee row -->
+                          ${showGarbageFeeRow ? `
+                          <tr>
+                            <td>Garbage Collection Fee</td>
+                            <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
+                          </tr>
+                          ` : ''}
+                          </tr>
+                          <!-- Conditionally include security fee row -->
+                          ${showSecurityFeeRow ? `
+                          <tr>
+                            <td>Security Fee</td>
+                            <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
+                          </tr>
+                          ` : ''}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th>Total:</th>
+                          <td>KES ${this.formatNumber(this.total)}</td>
+                        </tr>
+                        <tr>
+                          <th>Paid:</th>
+                          <td>KES ${this.formatNumber(this.paid)}</td>
+                        </tr>
+                        <tr>
+                          <th>Balance:</th>
+                          <td>KES ${this.formatNumber(this.balance)}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                    <div class="receipt-footer">
+                      <p>You were served by ${this.user.first_name} ${this.user.last_name}. Thank you for your payment.</p>
+                      <p>This receipt acknowledges the payment received for the above property management services.</p>
+                    </div>
+                  </div>
+                </body>
+                </html>
+            `;
+
+            return receiptHTML;
+        },
+        formatMonth(value) {
+            if (value) {
+                return moment(String(value)).format('MMM YYYY');
+            }
+        },
         loadLists() {
-             axios.get('api/lists').then((response) => {
-             this.statements = response.data.lists.statements;
-             this.expenses = response.data.lists.pmsexpenses;
+             axios.get('/api/propertysettledinvoices/'+this.$route.params.id).then((response) => {
+             this.statements = response.data.propertysettledinvoices;
+             // this.expenses = response.data.lists.pmsexpenses;
              console.log(this.statements)
              // Calculate the total amount paid
             this.totalAmountPaid = this.calculateTotalAmountPaid();
@@ -501,6 +689,45 @@ doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
               }, 10);
     
              });
+        },
+        getUnit(unitNumber) {
+            axios.get('/api/pmsunit/' + parseInt(unitNumber))
+                .then((response) => {
+                    this.unit = response.data.unit;
+                    this.unitName = this.unit.unit_number;
+                    this.unitRent = this.unit.monthly_rent;
+                    this.unitSecurityFee = this.unit.security_fee;
+                    this.unitGarbageFee = this.unit.garbage_fee;
+                    this.unitType = this.unit.type;
+                    console.log("unit", this.unit);
+                    // Further processing of the response data if needed
+                })
+                .catch((error) => {
+                    console.error("Error fetching unit:", error);
+                });
+        },
+        getProperty()
+        {
+          axios.get('/api/pmsproperty/'+ this.$route.params.id).then((response) => {
+            this.property = response.data.property;
+            this.commission = this.property.landlord.commission;
+            this.fixedCommission = this.property.landlord.fixed_commission;
+            if(this.commission !== null)
+            {
+              this.propertyCommission = this.commission
+            }
+            else
+            {
+              this.propertyCommission = this.fixedCommission;
+            }
+            // else
+            // {
+            //   this.propertyCommission = '';
+            // }
+            console.log("commission", this.propertyCommission)
+          }).catch(() => {
+              console.log('error')
+          })
         },
         calculateTotalAmountPaid() {
         if (!this.expenses || this.expenses.length === 0) {
@@ -536,6 +763,7 @@ doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
       },      
       mounted(){
         this.loadLists();
+        this.getProperty();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
 

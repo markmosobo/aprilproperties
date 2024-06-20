@@ -18,6 +18,7 @@ class PmsStatement extends Model
         'pms_property_id',
         'pms_tenant_id',
         'pms_unit_id',
+        'unit_number',
         'details',
         'total',
         'paid',
@@ -26,7 +27,8 @@ class PmsStatement extends Model
         'status',
         'payment_method',
         'mpesa_code',
-        'sms_status'
+        'sms_status',
+        'paid_at'
     ];
 
     public function tenant()
