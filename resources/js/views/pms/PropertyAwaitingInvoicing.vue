@@ -54,18 +54,33 @@
                     <div class="card-body pb-0">
                       <h5 class="card-title">Awaiting Invoicing - {{property.name}} <span>| Property statements awaiting invoicing</span></h5>
                       <p class="card-text">
-                   
-<!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
-                          <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="btn btn-sm btn-primary rounded-pill"
-                            @click="navigate"
-                          >
-                            Add Landlord
-                          </a>
-                      </router-link> -->
-                          <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
+                        <div class="row">
+                          <div class="col d-flex">
+                            <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>                        
+                            <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
+                          </div>
+                          <div class="col-auto d-flex justify-content-end">
+                          <div class="btn-group" role="group">
+                              <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ri-add-line"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>
+                                    <a @click="navigateTo('/propertyawaitinginvoicing/'+property.id)" class="dropdown-item" href="#">
+                                      <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
+                                    </a>
+                                    <a @click="navigateTo('/propertyinvoicestosettle/'+property.id)" class="dropdown-item" href="#">
+                                      <i class="ri-file-edit-fill mr-2"></i>Invoices to Settle
+                                    </a>
+                                    <a @click="navigateTo('/propertysettledinvoices/'+property.id)" class="dropdown-item" href="#">
+                                      <i class="ri-bank-card-fill mr-2"></i>Settled Invoices
+                                    </a>
+   
+                                    <a @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                              </div>
+                            </div>
+                          </div>
+                      </div>  
             
                       </p>
     
@@ -78,10 +93,8 @@
                             <th scope="col">Rent</th>
                             <th scope="col">Garbage</th>
                             <th scope="col">Water</th>
-                            <th scope="col">Paid</th>
-                            <th scope="col">Bal</th>
+                            <th scope="col">Generated On</th>
                             <th scope="col">Status</th>
-                            <!-- <th scope="col">Date</th> -->
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -93,8 +106,7 @@
                             <td>{{ statement.unit ? formatNumber(statement.unit.monthly_rent) : 'N/A' }}</td>
                             <td>{{ statement.unit ? formatNumber(statement.unit.garbage_fee) : 'N/A' }}</td>
                             <td>{{formatNumber(statement.water_bill ?? "N/A")}}</td>
-                            <td>{{formatNumber(statement.paid)}}</td>
-                            <td>{{formatNumber(statement.balance)}}</td>
+                            <td>{{format_date(statement.created_at)}}</td>
                             <td>
                               <span v-if="statement.status == 0 && statement.water_bill == null" class="badge bg-info text-dark"><i class="bi bi-clipboard2-x"></i> Not Invoiced</span>
                               <span v-else-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
@@ -179,6 +191,7 @@
     import $ from "jquery";
     import moment from 'moment';
     import jsPDF from 'jspdf';
+    import * as XLSX from 'xlsx';
 
     const toast = Swal.mixin({
         toast: true,
@@ -579,6 +592,30 @@
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
 
             return currentPage; // Return the total number of pages used for expenses
+        },
+        exportToExcel() {
+          const invoicesData = this.statements.map(statement => ({
+            "PROPERTY": statement.property ? statement.property.name : 'N/A',
+            "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
+            "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
+            "DUE": this.formatNumber(statement.total),
+            "RENT": statement.unit ? this.formatNumber(statement.unit.monthly_rent) : 'N/A',
+            "GARBAGE": statement.unit ? this.formatNumber(statement.unit.garbage_fee) : 'N/A',
+            "WATER": this.formatNumber(statement.water_bill ?? "N/A"),
+            "PAID": this.formatNumber(statement.paid),
+            "BALANCE": this.formatNumber(statement.balance),
+            "GENERATED ON": this.format_date(statement.created_at ?? "N/A"),
+          }));
+
+          const worksheet = XLSX.utils.json_to_sheet(invoicesData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "AWAITING INVOICING");
+
+          // Customize the filename with a timestamp
+          const timestamp = new Date().toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "_");
+          const filename = `AWAITING_INVOICING_${timestamp}.xlsx`;
+          
+          XLSX.writeFile(workbook, filename);
         },
         loadLists() {
              axios.get('/api/propertyawaitinginvoicing/'+this.$route.params.id).then((response) => {

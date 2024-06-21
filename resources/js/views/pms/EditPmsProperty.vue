@@ -81,6 +81,83 @@
 
                 </div>
             </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="addLandlordModal" tabindex="-1" aria-labelledby="adLandlordModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="adLandlordModalLabel">Add Landlord</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-6">
+                              <strong>First Name:</strong>
+                              <input type="text" name="first_name" v-model="landlord.first_name" class="form-control">
+                              <div v-if="errors.first_name" class="text-danger">{{ errors.first_name }}</div>
+                            </div>
+                            <div class="col-sm-6">
+                              <strong>Last Name:</strong>
+                              <input type="text" name="last_name" v-model="landlord.last_name" class="form-control">
+                              <div v-if="errors.last_name" class="text-danger">{{ errors.last_name }}</div>
+                            </div>
+                        </div>      
+                    </p>
+                    
+                    <p>
+                      <strong>Email Address:</strong>
+                      <input type="text" name="email" v-model="landlord.email" class="form-control">
+                      <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
+                    </p>
+
+                    <p>
+                      <strong>Phone Number:</strong>
+                      <input type="text" name="phone_no" v-model="landlord.phone_no" class="form-control">
+                      <div v-if="errors.phone_no" class="text-danger">{{ errors.phone_no }}</div>
+                    </p>
+
+                    <p>
+                      <strong>Physical Address:</strong>
+                      <input type="text" name="address" v-model="landlord.address" class="form-control">
+                      <div v-if="errors.address" class="text-danger">{{ errors.address }}</div>
+                    </p>
+
+                    <p>
+                      <strong>ID Number:</strong>
+                      <input type="text" name="id_number" v-model="landlord.id_number" class="form-control">
+                      <div v-if="errors.id_number" class="text-danger">{{ errors.id_number }}</div>
+                    </p>
+
+
+                    <p>
+                        <div class="row">
+                            <div class="col-sm-6">
+                              <strong>Commission:  <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="This is the commission percentage e.g 8"></i>
+                              </strong>
+                              <input type="number" name="first_name" v-model="landlord.commission"
+                              :disabled="disableCommission" class="form-control">
+                            </div>
+                            <div class="col-sm-6">
+                              <strong>Fixed Commission:<i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="This is the agreed commission amount e.g 12000"></i>
+                              </strong>
+                              <input type="number" name="last_name" v-model="landlord.fixed_commission"
+                               :disabled="disableFixedCommission" class="form-control">
+                            </div>
+                        </div>      
+                    </p>
+                    
+
+
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="submitLandlord">Submit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
  
           </form>
  
@@ -119,19 +196,85 @@ export default {
          property_status: '',
          
          },
-         showFixedCommission: false,
+         errors:{
+            first_name: '',
+            last_name: '',
+            email: '',
+            phone_no: '',
+            address: '',
+            id_number: '',
+            commission: '',
+            fixed_commission: ''
+         },
+         landlord:{
+            first_name: '',
+             last_name: '',
+             email: '',
+             phone_no: '',
+             address: '',
+             id_number: '',
+             commission: '',
+             fixed_commission: '',
+         },         
          landlords: [],
          submitting: false,
          submitted: false
       }   
    },
    methods: {
-      addLandlord(){
-        this.$router.push('/add-pmslandlord')
-      },
-       showFixed() {
-          this.showFixedCommission = true;
-      },
+      submitLandlord() {
+          // Validate
+          if (!this.landlord.first_name) {
+            this.errors.first_name = 'First name is required.';
+            return;
+          }
+          if (!this.landlord.last_name) {
+            this.errors.last_name = 'Last name is required.';
+            return;
+          }
+
+          axios.post("/api/landlords", this.landlord)
+            .then((response) => {
+              console.log(response);
+              // this.step = 1;
+              toast.fire(
+                'Success!',
+                'Landlord added!',
+                'success'
+              );
+              // Close the modal after saving landlord
+              const modal = bootstrap.Modal.getInstance(document.getElementById('addLandlordModal'));
+              modal.hide();
+              // Reset landlord
+              this.landlord.first_name = '';
+              this.landlord.last_name = '';
+              this.landlord.email = '';
+              this.landlord.phone_no = '';
+              this.landlord.address = '';
+              this.landlord.id_number = '';
+              this.landlord.commission = '';
+              this.landlord.fixed_commission = '';
+              // Reset errors
+              this.errors.first_name = '';
+              this.errors.last_name = '';
+              this.errors.email = '';
+              this.errors.phone_no = '';
+              this.errors.address = '';
+              this.errors.id_number = '';
+              this.errors.commission = '';
+              this.errors.fixed_commission = '';
+              this.loadLists(); // Ensure this is called correctly
+            })
+            .catch((error) => {
+              console.log(error);
+              // Swal.fire(
+              //    'error!',
+              //    // phone_error + id_error + pass_number,
+              //    'error'
+              // )
+            });
+        },
+
       async submitForm() {
             if (this.validateForm()) {
                 this.submitting = true;
@@ -174,6 +317,22 @@ export default {
           }
           return isValid;
       },
+      addLandlord()
+      {
+        this.landlord.first_name = ''; // Reset the form field
+        this.errors.first_name = ''; // Reset the error message
+
+        this.landlord.last_name = ''; // Reset the form field
+        this.errors.last_name = ''; // Reset the error message
+
+        this.landlord.phone_no = ''; // Reset the form field
+        this.errors.phone_no = ''; // Reset the error message
+
+        // Show the modal after fetching data
+        const modal = new bootstrap.Modal(document.getElementById('addLandlordModal'));
+        modal.show();
+      },
+
       getProperty() {
              axios.get('/api/pmsproperty/'+this.$route.params.id).then((response) => {
      
@@ -197,6 +356,14 @@ export default {
       this.form.created_by = this.user.id;
       this.form.phone_number = this.user.phone
       console.log("user",this.user)
-   }
+   },
+   computed: {
+        disableFixedCommission() {
+            return this.landlord.commission !== '';
+        },
+        disableCommission() {
+            return this.landlord.fixed_commission !== '';
+        }
+    },
 }
 </script>

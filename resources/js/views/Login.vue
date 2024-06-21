@@ -85,7 +85,9 @@
                       </div>
                       <div class="col-12">
                         <button class="btn btn-success rounded-pill w-100" type="submit">
-                          Login
+                          <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true">
+                          </span>
+                          <span>Login</span>
                         </button>
                       </div>
                       <div class="col-12">
@@ -123,15 +125,18 @@
         form: {
           email: '',
           password: ''
-        }
+        },
+        loading: false
       }
     },
     methods: {
       login_user(){
+        this.loading = true; // Set loading to true
         axios.post('api/login', this.form).then((response) => {
           console.log(response);
           this.form.email = '';
           this.form.password = '';
+          this.loading = false; // Set loading to false
           if(response["data"]["status"] == "error")
          {
            Swal.fire({
@@ -154,6 +159,7 @@
          }
         }).catch((error) => {
           console.log(error)
+          this.loading = false;
         })
       }
     }

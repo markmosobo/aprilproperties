@@ -65,8 +65,34 @@
                             Add Landlord
                           </a>
                       </router-link> -->
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
-            
+                      <div class="row">
+                        <div class="col d-flex">
+                          <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
+                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Invoice</button>
+                          <button v-if="statements.length !== 0" @click="generatePDF">Generate Rent Statement</button>
+                        </div>
+                        <div class="col-auto d-flex justify-content-end">
+                        <div class="btn-group" role="group">
+                            <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="ri-add-line"></i>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                              <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>
+                                  <a @click="navigateTo('/propertyawaitinginvoicing/'+property.id)" class="dropdown-item" href="#">
+                                    <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
+                                  </a>
+                                  <a @click="navigateTo('/propertyinvoicestosettle/'+property.id)" class="dropdown-item" href="#">
+                                    <i class="ri-file-edit-fill mr-2"></i>Invoices to Settle
+                                  </a>
+                                  <a @click="navigateTo('/propertysettledinvoices/'+property.id)" class="dropdown-item" href="#">
+                                    <i class="ri-bank-card-fill mr-2"></i>Settled Invoices
+                                  </a>
+ 
+                                  <a @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       </p>
     
                       <table id="AllStatementsTable" class="table table-borderless">
@@ -142,6 +168,7 @@
     import $ from "jquery";
     import moment from 'moment';
     import jsPDF from 'jspdf';
+    import * as XLSX from 'xlsx';
 
     const toast = Swal.mixin({
         toast: true,
@@ -234,6 +261,188 @@
         },
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        printInvoice(){
+            // Open a new window for printing
+            const printWindow = window.open("", "_blank");
+
+            // Build the content for printing
+            const invoiceContent = this.buildInvoiceContent();
+
+            // Write the content to the new window
+            printWindow.document.write(invoiceContent);
+
+            // Close the document stream
+            printWindow.document.close();
+
+            // Trigger the print dialog
+            printWindow.print();
+        },
+        buildInvoiceContent(refNo) {
+            // Determine whether to include the row
+            const showGarbageFeeRow = this.unitGarbageFee !== 0;
+            const showSecurityFeeRow = this.unitSecurityFee !== 0;
+            // Build the HTML content for the receipt
+            const receiptHTML = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Receipt Of Payment</title>
+                  <style>
+                    body {
+                      font-family: Arial, sans-serif;
+                      margin: 0;
+                      padding: 0;
+                      background-color: #f5f5f5;
+                    }
+                    .receipt {
+                      max-width: 600px;
+                      margin: 20px auto;
+                      padding: 20px;
+                      background-color: #fff;
+                      border: 2px solid #ccc;
+                      border-radius: 10px;
+                    }
+                    .receipt-header {
+                      text-align: center;
+                      margin-bottom: 20px;
+                    }
+                    .receipt-header h1 {
+                      margin: 10px 0;
+                      color: #333;
+                    }
+                    .receipt-info {
+                      margin-bottom: 20px;
+                    }
+                    .receipt-info p {
+                      margin: 5px 0;
+                      color: #555;
+                    }
+                    .receipt-table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin-bottom: 20px;
+                    }
+                    .receipt-table th, .receipt-table td {
+                      padding: 8px;
+                      border-bottom: 1px solid #ccc;
+                    }
+                    .receipt-table th {
+                      text-align: left;
+                      background-color: #f2f2f2;
+                      color: #333;
+                    }
+                    .receipt-table td {
+                      text-align: left;
+                      color: #666;
+                    }
+                    .receipt-footer {
+                      text-align: center;
+                    }
+                    .receipt-footer p {
+                      margin: 5px 0;
+                      color: #777;
+                    }
+                  </style>
+                </head>
+                <body>
+                  <div class="receipt">
+                    <div class="receipt-header">
+                      <h1>April Properties</h1>
+                      <p>Kakamega-Webuye Rd, ACK Building</p>
+                      <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+                    </div>
+                    <div class="receipt-info">
+                      <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+                      <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
+                      <p><strong>Rent Month:</strong> ${this.formatMonth(this.date)}</p>
+                      <p><strong>Tenant:</strong> ${this.tenant}</p>
+                      <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
+                      <p><strong>Payment Mode:</strong> ${this.payment}</p>
+                    </div>
+                    <table class="receipt-table">
+                      <thead>
+                        <tr>
+                          <th>Description</th>
+                          <th>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Rent Payment</td>
+                          <td>KES ${this.formatNumber(this.unitRent)}</td>
+                        </tr>
+                        <tr>
+                          <td>Water Bill</td>
+                          <td>KES ${this.formatNumber(this.waterBill)}</td>
+                        </tr>
+                        <!-- Conditionally include garbage collection fee row -->
+                          ${showGarbageFeeRow ? `
+                          <tr>
+                            <td>Garbage Collection Fee</td>
+                            <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
+                          </tr>
+                          ` : ''}
+                          </tr>
+                          <!-- Conditionally include security fee row -->
+                          ${showSecurityFeeRow ? `
+                          <tr>
+                            <td>Security Fee</td>
+                            <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
+                          </tr>
+                          ` : ''}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th>Total:</th>
+                          <td>KES ${this.formatNumber(this.total)}</td>
+                        </tr>
+                        <tr>
+                          <th>Paid:</th>
+                          <td>KES ${this.formatNumber(this.paid)}</td>
+                        </tr>
+                        <tr>
+                          <th>Balance:</th>
+                          <td>KES ${this.formatNumber(this.balance)}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                    <div class="receipt-footer">
+                      <p>You were served by ${this.user.first_name} ${this.user.last_name}. Thank you for your payment.</p>
+                      <p>This receipt acknowledges the payment received for the above property management services.</p>
+                    </div>
+                  </div>
+                </body>
+                </html>
+            `;
+
+            return receiptHTML;
+        },
+        exportToExcel() {
+          const invoicesData = this.statements.map(statement => ({
+            "PROPERTY": statement.property ? statement.property.name : 'N/A',
+            "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
+            "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
+            "DUE": this.formatNumber(statement.total),
+            "RENT": statement.unit ? this.formatNumber(statement.unit.monthly_rent) : 'N/A',
+            "GARBAGE": statement.unit ? this.formatNumber(statement.unit.garbage_fee) : 'N/A',
+            "WATER": this.formatNumber(statement.water_bill ?? "N/A"),
+            "PAID": this.formatNumber(statement.paid),
+            "BALANCE": this.formatNumber(statement.balance),
+            "PAID ON": this.format_date(statement.paid_at ?? "N/A"),
+          }));
+
+          const worksheet = XLSX.utils.json_to_sheet(invoicesData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "SETTLED INVOICES");
+
+          // Customize the filename with a timestamp
+          const timestamp = new Date().toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "_");
+          const filename = `SETTLED_INVOICES_${timestamp}.xlsx`;
+          
+          XLSX.writeFile(workbook, filename);
         },
         generatePDF() {
             let pdfName = 'Full Statement';
@@ -714,7 +923,7 @@
             this.fixedCommission = this.property.landlord.fixed_commission;
             if(this.commission !== null)
             {
-              this.propertyCommission = this.commission
+              this.propertyCommission = ((this.commission/100) * this.totalPaid).toFixed(2);
             }
             else
             {
