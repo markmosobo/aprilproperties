@@ -373,7 +373,7 @@
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#invoices-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-file-earmark-text"></i><span>Manage Statements</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-file-earmark-text"></i><span>Manage Invoices</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="invoices-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -415,7 +415,7 @@
         </ul>
       </li>
 
-      <li class="nav-item">
+<!--       <li class="nav-item">
         <router-link to="/statements" custom v-slot="{ href, navigate, isActive }">
                   <a
                     :href="href"
@@ -441,7 +441,7 @@
           <span>All Invoices</span>
         </a>
         </router-link>
-      </li>
+      </li> -->
 
     </ul>
 

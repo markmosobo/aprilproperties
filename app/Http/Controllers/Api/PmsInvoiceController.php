@@ -16,11 +16,28 @@ class PmsInvoiceController extends Controller
     {
         $tenant = PmsTenant::findOrFail($id);
         $pmstenantinvoices = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $tenant->id)->whereMonth('created_at', Carbon::now()->month)->get();
+        $pmslastmonthtenantinvoices = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $tenant->id)->whereBetween('created_at',
+        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+        $pmslastninetytenantinvoices = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $tenant->id)->whereBetween('created_at',
+        [Carbon::now()->subDays(89)->startOfDay(), Carbon::now()->endOfDay()])->get();
+        $pmsquartertenantinvoices = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $tenant->id)->whereBetween('created_at',
+        [Carbon::now()->startOfQuarter(), Carbon::now()->endOfDay()])->get();
+        $pmsyeartenantinvoices = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $tenant->id)->whereBetween('created_at',
+        [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])->get();
+        $pmslastyeartenantinvoices = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $tenant->id)->whereBetween('created_at',
+        [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()])->get();
+        $pmsalltenantinvoices = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $tenant->id)->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmstenantinvoices' => $pmstenantinvoices
+            'pmstenantinvoices' => $pmstenantinvoices,
+            'pmslastmonthtenantinvoices' => $pmslastmonthtenantinvoices,
+            'pmslastninetytenantinvoices' => $pmslastninetytenantinvoices,
+            'pmsquartertenantinvoices' => $pmsquartertenantinvoices,
+            'pmsyeartenantinvoices' => $pmsyeartenantinvoices,
+            'pmslastyeartenantinvoices' => $pmslastyeartenantinvoices,
+            'pmsalltenantinvoices' => $pmsalltenantinvoices,
         ], 200);
     }
 

@@ -96,7 +96,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{tenantName}}'s Invoices <span>| This Month</span></h5>
+                      <h5 class="card-title">{{tenantName}}'s Invoices <span>| All Time</span></h5>
                       <p class="card-text">
                    
                           <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
@@ -345,6 +345,7 @@
           tenantName: '',
           tenantUnit: '',
           tenantProperty: '',
+          tenantIdNumber: '',
           paymentMethod: '',
           accountNo: '',
           paybillNo: '',
@@ -394,6 +395,7 @@
             this.fName = this.tenant.first_name;
             this.lName = this.tenant.last_name;
             this.tenantName = this.fName + " " + this.lName;
+            this.tenantIdNumber = this.tenant.id_number;
             this.tenantProperty = this.tenant.property.name;
             this.tenantPropertyId = this.tenant.property.id;
             this.getProperty(this.tenantPropertyId);
@@ -649,7 +651,7 @@
         },   
         getTenantStatements() {
              axios.get('/api/pmstenantinvoices/'+this.$route.params.id).then((response) => {
-             this.statements = response.data.pmstenantinvoices;
+             this.statements = response.data.pmsalltenantinvoices;
              if(this.totalDue == this.totalPaid) {
                this.paymentMethod = 'SETTLED'; 
              } 
@@ -822,8 +824,8 @@
                   </div>
                 </div>
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong>${this.currentMonth}</p>
-                  <p><strong>Printed On:</strong>  ${new Date().toLocaleString()}</p>
+                  <p><strong>Invoice For:</strong>All Time</p>
+                  <p><strong>Prnited On:</strong>  ${new Date().toLocaleString()}</p>
                   
                 </div>
                 <div class="additional-info">
@@ -1329,7 +1331,7 @@
 
           // Customize the filename with a timestamp
           const timestamp = new Date().toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "_");
-          const filename = `${this.tenantName}_${this.currentMonth}_INVOICES_${timestamp}.xlsx`;
+          const filename = `${this.tenantName}_ALL_INVOICES_${timestamp}.xlsx`;
           
           XLSX.writeFile(workbook, filename);
         },
@@ -1350,7 +1352,7 @@
             doc.text(rightHeaderText, rightheaderX, rightheaderY, { align: 'left' });
 
             // Add top-right header
-            const headerText = 'Generated on: ' + new Date().toLocaleString()+'\n'+'Tenant: '+this.tenantName+'\n'+'ID Number: '+this.tenant.id_number + '\n'+'Phone: '+this.tenant.phone_number+'\n'+this.tenant.property.name+'\n'+this.tenant.unit.unit_number;
+            const headerText = 'Generated on: ' + new Date().toLocaleString()+'\n'+'Tenant: '+this.tenantName+'\n'+'ID Number: '+this.tenantIdNumber + '\n'+'Phone: '+this.tenant.phone_number+'\n'+this.tenantProperty+'\n'+this.tenantUnit;
             const headerFontSize = 12;
             const headerX = doc.internal.pageSize.width - 20; // Adjust the X coordinate
             const headerY = 10;
@@ -1368,7 +1370,7 @@
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
             // Add title
-            const titleText = (this.tenantName + " " + this.currentMonth + ' Rent Statement').toUpperCase();
+            const titleText = (this.tenantName + " " + 'Full' + ' Rent Statement').toUpperCase();
             const titleFontSize = 16;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -1517,7 +1519,7 @@
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
 
             // Save the PDF
-            let fileName = this.tenantName + " " + this.formatMonth(new Date()) + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
+            let fileName = this.tenantName + " " + 'Full' + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
             doc.save(fileName);
         },
       //   generatePDF() {
@@ -1699,6 +1701,7 @@
         this.updateTime(); // Set the initial time
         setInterval(this.updateTime, 1000); // Update the time every second
         this.currentMonth = this.getCurrentMonth(); // Set the initial date
+        this.currentYear = new Date().getFullYear();
 
       },
       computed: {

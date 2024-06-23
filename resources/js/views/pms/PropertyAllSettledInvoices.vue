@@ -184,6 +184,49 @@
                       </strong>
                       </div>     
                     </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="invoiceTenantModal" tabindex="-1" aria-labelledby="invoiceTenantModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="invoiceTenantModalLabel">Invoice Tenant</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>#{{selectedStatement.ref_no}}</p>
+                            <p v-if="selectedStatement && selectedStatement.tenant">
+                              <strong>Tenant Name:</strong> {{ selectedStatement.tenant.first_name }} {{ selectedStatement.tenant.last_name }}
+                            </p>
+                            <p v-else>
+                              <strong>Tenant Name:</strong> N/A
+                            </p>
+                            <p v-if="selectedStatement">
+                              <strong>Amount Due:</strong> {{ formatNumber(selectedStatement.total) }}
+                            </p>
+                            <p v-else>
+                              <strong>Amount Due:</strong> N/A
+                            </p>
+                            <p>
+                              <strong>Water Bill:</strong>
+                              <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
+                              <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
+                            </p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">
+                              <span v-if="loading">
+                                <i class="fa fa-spinner fa-spin"></i> Invoicing...
+                              </span>
+                              <span v-else>
+                                Invoice Tenant
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
     
                   </div>
                 </div><!-- End Top Selling -->
@@ -254,6 +297,14 @@
             landlordAddress: '',
             logoBase64: '',
             propertyId: '',
+            selectedStatement: {}, // Initialize as an empty object
+            form: {
+              water_bill : ''
+            },
+            errors: {
+              water_bill: ''
+            },
+            loading: false,
 
 
         }

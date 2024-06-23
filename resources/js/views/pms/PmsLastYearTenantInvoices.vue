@@ -96,7 +96,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{tenantName}}'s Invoices <span>| This Month</span></h5>
+                      <h5 class="card-title">{{tenantName}}'s Invoices <span>| Last Year ({{lastYear}})</span></h5>
                       <p class="card-text">
                    
                           <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
@@ -649,7 +649,7 @@
         },   
         getTenantStatements() {
              axios.get('/api/pmstenantinvoices/'+this.$route.params.id).then((response) => {
-             this.statements = response.data.pmstenantinvoices;
+             this.statements = response.data.pmslastyeartenantinvoices;
              if(this.totalDue == this.totalPaid) {
                this.paymentMethod = 'SETTLED'; 
              } 
@@ -822,8 +822,9 @@
                   </div>
                 </div>
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong>${this.currentMonth}</p>
-                  <p><strong>Printed On:</strong>  ${new Date().toLocaleString()}</p>
+                  <p><strong>Invoice For:</strong></p>
+                  <p><strong></strong> ${this.lastYear}</p>
+                  <p><strong>Prnited On:</strong>  ${new Date().toLocaleString()}</p>
                   
                 </div>
                 <div class="additional-info">
@@ -1329,7 +1330,7 @@
 
           // Customize the filename with a timestamp
           const timestamp = new Date().toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "_");
-          const filename = `${this.tenantName}_${this.currentMonth}_INVOICES_${timestamp}.xlsx`;
+          const filename = `${this.tenantName}_${this.lastYear}_INVOICES_${timestamp}.xlsx`;
           
           XLSX.writeFile(workbook, filename);
         },
@@ -1368,7 +1369,7 @@
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
             // Add title
-            const titleText = (this.tenantName + " " + this.currentMonth + ' Rent Statement').toUpperCase();
+            const titleText = (this.tenantName + " " + this.lastYear + ' Rent Statement').toUpperCase();
             const titleFontSize = 16;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -1517,7 +1518,7 @@
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
 
             // Save the PDF
-            let fileName = this.tenantName + " " + this.formatMonth(new Date()) + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
+            let fileName = this.tenantName + " " + this.lastYear + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
             doc.save(fileName);
         },
       //   generatePDF() {
@@ -1699,6 +1700,7 @@
         this.updateTime(); // Set the initial time
         setInterval(this.updateTime, 1000); // Update the time every second
         this.currentMonth = this.getCurrentMonth(); // Set the initial date
+        this.lastYear = new Date().getFullYear() - 1;
 
       },
       computed: {

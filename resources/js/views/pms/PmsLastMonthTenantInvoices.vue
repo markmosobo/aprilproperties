@@ -96,7 +96,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{tenantName}}'s Invoices <span>| This Month</span></h5>
+                      <h5 class="card-title">{{tenantName}}'s Invoices <span>| Last Month ({{lastMonth}})</span></h5>
                       <p class="card-text">
                    
                           <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
@@ -365,6 +365,7 @@
           total: '',
           waterBill: '',
           isAmountValid: true,
+          lastMonth: '',
           lastmonthstatement: [],
           lastmonthBalance: '',
           overPayment: false,
@@ -638,6 +639,19 @@
           const options = { month: 'short', year: 'numeric' }; // 'short' for abbreviated month name, 'numeric' for year
           return now.toLocaleDateString('en-US', options);
         },  
+        setLastMonth() {
+          const date = new Date();
+          date.setMonth(date.getMonth() - 1); // Get last month
+
+          const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+          ];
+          const month = monthNames[date.getMonth()];
+          const year = date.getFullYear();
+
+          this.lastMonth = `${month} ${year}`;
+        },
         getProperty()
         {
             axios.get('/api/pmsproperty/'+this.tenantPropertyId).then((response) => {
@@ -649,7 +663,7 @@
         },   
         getTenantStatements() {
              axios.get('/api/pmstenantinvoices/'+this.$route.params.id).then((response) => {
-             this.statements = response.data.pmstenantinvoices;
+             this.statements = response.data.pmslastmonthtenantinvoices;
              if(this.totalDue == this.totalPaid) {
                this.paymentMethod = 'SETTLED'; 
              } 
@@ -822,8 +836,8 @@
                   </div>
                 </div>
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong>${this.currentMonth}</p>
-                  <p><strong>Printed On:</strong>  ${new Date().toLocaleString()}</p>
+                  <p><strong>Invoice for:</strong>${this.lastMonth}</p>
+                  <p><strong>Printed On: </strong>  ${new Date().toLocaleString()}</p>
                   
                 </div>
                 <div class="additional-info">
@@ -1329,7 +1343,7 @@
 
           // Customize the filename with a timestamp
           const timestamp = new Date().toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "_");
-          const filename = `${this.tenantName}_${this.currentMonth}_INVOICES_${timestamp}.xlsx`;
+          const filename = `${this.tenantName}_${this.lastMonth}_INVOICES_${timestamp}.xlsx`;
           
           XLSX.writeFile(workbook, filename);
         },
@@ -1368,7 +1382,7 @@
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
             // Add title
-            const titleText = (this.tenantName + " " + this.currentMonth + ' Rent Statement').toUpperCase();
+            const titleText = (this.tenantName + " " + this.lastMonth + ' Rent Statement').toUpperCase();
             const titleFontSize = 16;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -1517,7 +1531,7 @@
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
 
             // Save the PDF
-            let fileName = this.tenantName + " " + this.formatMonth(new Date()) + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
+            let fileName = this.tenantName + " " + this.lastMonth + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
             doc.save(fileName);
         },
       //   generatePDF() {
@@ -1692,6 +1706,7 @@
       mounted(){
         this.getTenant();
         this.getTenantStatements();
+        this.setLastMonth();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
         this.loadLogo();        

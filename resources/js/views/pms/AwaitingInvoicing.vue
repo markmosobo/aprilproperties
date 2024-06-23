@@ -52,20 +52,48 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Awaiting Invoicing <span>| All statements awaiting invoicing</span></h5>
+                      <h5 class="card-title">Awaiting Invoicing <span>| {{statements.length}} awaiting invoicing</span></h5>
                       <p class="card-text">
                    
-<!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
-                          <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="btn btn-sm btn-primary rounded-pill"
-                            @click="navigate"
-                          >
-                            Add Landlord
-                          </a>
-                      </router-link> -->
-                          <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
+                        <div class="row">
+                          <div class="col d-flex">
+                            <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>  
+                            <router-link to="#" custom v-slot="{ href, navigate, isActive }">
+                                <a
+                                  :href="href"
+                                  :class="{ active: isActive }"
+                                  v-if="statements.length !== 0"
+                                  class="btn btn-sm btn-primary rounded-pill me-2"
+                                  style="background-color: darkorange; border-color: darkorange;"
+                                >
+                                  ({{statements.length}}) Remaining
+                                </a>
+                            </router-link>                      
+                            <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
+                          </div>
+                          <div class="col-auto d-flex justify-content-end">
+                          <div class="btn-group" role="group">
+                              <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ri-add-line"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <a @click="navigateTo('/awaitinginvoicing')" class="dropdown-item" href="#">
+                                      <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
+                                    </a>
+                                    <a @click="navigateTo('/invoicestosettle')" class="dropdown-item" href="#">
+                                      <i class="ri-file-edit-fill mr-2"></i>Invoices to Settle
+                                    </a>
+                                    <a @click="navigateTo('/settledinvoices')" class="dropdown-item" href="#">
+                                      <i class="ri-bank-card-fill mr-2"></i>Settled Invoices
+                                    </a>
+   
+                                     <a @click="navigateTo('/managedproperties' )" class="dropdown-item" href="#"><i class="ri-building-fill mr-2"></i>Properties</a>
+                                     <a @click="navigateTo('/pmstenants' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Tenants</a>
+                                    <a @click="navigateTo('/pmslandlords' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Landlords</a>
+                              </div>
+                            </div>
+                          </div>
+                        </div> 
             
                       </p>
     
@@ -93,9 +121,10 @@
                             <td>{{formatNumber(statement.balance)}}</td>
                             <td>{{format_date(statement.created_at)}}</td>                            
                             <td>
-                              <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
-                              <span v-else-if="statement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
-                              <span v-else class="badge bg-info text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
+                              <span v-if="statement.status == 0 && statement.water_bill == null" class="badge bg-info text-dark"><i class="bi bi-clipboard2-x"></i> Not Invoiced</span>
+                              <span v-else-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
+                              <span v-else-if="statement.status == 0 && statement.water_bill !== null" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
+                              <span v-else class="badge bg-dark text-light"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
                             </td>
                             <td>
                               <div class="btn-group" role="group">
@@ -140,6 +169,7 @@
     import $ from "jquery";
     import moment from 'moment';
     import jsPDF from 'jspdf';
+    import * as XLSX from 'xlsx';
 
     const toast = Swal.mixin({
         toast: true,
@@ -163,7 +193,7 @@
         navigateTo(location){
             this.$router.push(location)
         },
-         invoiceTenant(id){
+        invoiceTenant(id){
             this.$router.push('invoicestatement/'+id)
         },
         settleTenant(id, tenantId){
@@ -213,6 +243,30 @@
         },
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        exportToExcel() {
+          const invoicesData = this.statements.map(statement => ({
+            "PROPERTY": statement.property ? statement.property.name : 'N/A',
+            "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
+            "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
+            "DUE": this.formatNumber(statement.total),
+            "RENT": statement.unit ? this.formatNumber(statement.unit.monthly_rent) : 'N/A',
+            "GARBAGE": statement.unit ? this.formatNumber(statement.unit.garbage_fee) : 'N/A',
+            "WATER": this.formatNumber(statement.water_bill ?? "N/A"),
+            "PAID": this.formatNumber(statement.paid),
+            "BALANCE": this.formatNumber(statement.balance),
+            "GENERATED ON": this.format_date(statement.created_at ?? "N/A"),
+          }));
+
+          const worksheet = XLSX.utils.json_to_sheet(invoicesData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "AWAITING INVOICING");
+
+          // Customize the filename with a timestamp
+          const timestamp = new Date().toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "_");
+          const filename = `AWAITING_INVOICING_${timestamp}.xlsx`;
+          
+          XLSX.writeFile(workbook, filename);
         },
         generatePDF() {
             let pdfName = 'Full Statement';

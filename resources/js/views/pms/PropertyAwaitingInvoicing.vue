@@ -278,53 +278,53 @@
           modal.show();
         },
         confirmInvoiceTenant() {
-      // Validate water_bill
-      if (!this.form.water_bill) {
-        this.errors.water_bill = 'Water bill is required.';
-        return;
-      }
+          // Validate water_bill
+          if (!this.form.water_bill) {
+            this.errors.water_bill = 'Water bill is required.';
+            return;
+          }
 
-      if (this.selectedStatement && this.selectedStatement.id) {
-        // Show loading spinner
-        this.loading = true;
-        this.successMessage = '';
+          if (this.selectedStatement && this.selectedStatement.id) {
+            // Show loading spinner
+            this.loading = true;
+            this.successMessage = '';
 
-        // Implement your logic to invoice the tenant here
-        console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
-        axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
-          .then(response => {
-            console.log(response);
-            this.successMessage = 'Tenant invoiced!';
-            toast.fire(
-              'Success!',
-              'Tenant invoiced!',
-              'success'
-            );
-          })
-          .catch(error => {
-            console.log(error);
-            // Handle the error appropriately
-            toast.fire(
-              'Error!',
-              'An error occurred while invoicing the tenant.',
-              'error'
-            );
-          })
-          .finally(() => {
-            // Hide loading spinner
-            this.loading = false;
+            // Implement your logic to invoice the tenant here
+            console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
+            axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
+              .then(response => {
+                console.log(response);
+                this.successMessage = 'Tenant invoiced!';
+                toast.fire(
+                  'Success!',
+                  'Tenant invoiced!',
+                  'success'
+                );
+              })
+              .catch(error => {
+                console.log(error);
+                // Handle the error appropriately
+                toast.fire(
+                  'Error!',
+                  'An error occurred while invoicing the tenant.',
+                  'error'
+                );
+              })
+              .finally(() => {
+                // Hide loading spinner
+                this.loading = false;
 
-            // Close the modal after invoicing
-            const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
-            modal.hide();
+                // Close the modal after invoicing
+                const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
+                modal.hide();
 
-            // Reset form
-            this.form.water_bill = '';
-            this.form.cash = '';
-            this.loadLists();
-          });
-      }
-    },
+                // Reset form
+                this.form.water_bill = '';
+                this.form.cash = '';
+                this.loadLists();
+              });
+          }
+        },
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)
             this.$router.push({ 

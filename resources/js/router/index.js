@@ -113,7 +113,14 @@ import InvoicestoSettle from '../views/pms/InvoicestoSettle.vue'
 import SettledInvoices from '../views/pms/SettledInvoices.vue'
 import PmsInvoices from '../views/pms/PmsInvoices.vue'
 import ViewInvoice from '../views/pms/ViewInvoice.vue'
+//tenant invoices
 import PmsTenantInvoices from '../views/pms/PmsTenantInvoices.vue'
+import PmsLastMonthTenantInvoices from '../views/pms/PmsLastMonthTenantInvoices.vue'
+import PmsLastNinetyTenantInvoices from '../views/pms/PmsLastNinetyTenantInvoices.vue'
+import PmsYearTenantInvoices from '../views/pms/PmsYearTenantInvoices.vue'
+import PmsQuarterTenantInvoices from '../views/pms/PmsQuarterTenantInvoices.vue'
+import PmsLastYearTenantInvoices from '../views/pms/PmsLastYearTenantInvoices.vue'
+import PmsAllTenantInvoices from '../views/pms/PmsAllTenantInvoices.vue'
 
 import PropertyAwaitingInvoicing from '../views/pms/PropertyAwaitingInvoicing.vue'
 import PropertyInvoicesToSettle from '../views/pms/PropertyInvoicesToSettle.vue'
@@ -816,6 +823,42 @@ const routes = [
         path:'/pmstenantinvoices/:id',
         name: 'pmstenantinvoices',
         component: PmsTenantInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmslastmonthtenantinvoices/:id',
+        name: 'pmslastmonthtenantinvoices',
+        component: PmsLastMonthTenantInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmslastninetytenantinvoices/:id',
+        name: 'pmslastninetytenantinvoices',
+        component: PmsLastNinetyTenantInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmsyeartenantinvoices/:id',
+        name: 'pmsyeartenantinvoices',
+        component: PmsYearTenantInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmsquartertenantinvoices/:id',
+        name: 'pmsquartertenantinvoices',
+        component: PmsQuarterTenantInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmslastyeartenantinvoices/:id',
+        name: 'pmslastyeartenantinvoices',
+        component: PmsLastYearTenantInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmsalltenantinvoices/:id',
+        name: 'pmsalltenantinvoices',
+        component: PmsAllTenantInvoices,
         beforeEnter : guardMyroute,
     },
     {
