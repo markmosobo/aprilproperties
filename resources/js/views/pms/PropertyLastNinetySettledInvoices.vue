@@ -85,7 +85,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Settled Invoices - {{property.name}} <span>| This Month</span></h5>
+                      <h5 class="card-title">Settled Invoices - {{property.name}} <span>| Last 90 Days</span></h5>
                       <p class="card-text">
                    
 <!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
@@ -347,11 +347,10 @@
             // Trigger the print dialog
             printWindow.print();
         },
-        buildInvoiceContent() {
+        buildInvoiceContent(refNo) {
           // Determine whether to include the row
           const showExpensesDeductionRow = this.expenses !== 0;
           const logoBase64 = this.logoBase64;
-          const watermarkText = 'Unpaid';
           // Build the HTML content for the receipt
           const receiptHTML = `
             <!DOCTYPE html>
@@ -377,17 +376,6 @@
                   display: flex;
                   flex-direction: column;
                 }
-                 .watermark {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%) rotate(-45deg);
-                    font-size: 80px;
-                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
-                    white-space: nowrap;
-                    z-index: 0;
-                    pointer-events: none; /* Prevents watermark from interfering with other elements */
-                  }
                 .receipt-header {
                   display: flex;
                   justify-content: space-between;
@@ -437,7 +425,6 @@
               </style>
             </head>
             <body>
-            <div class="watermark">${watermarkText}</div>
               <div class="receipt">
                 <div class="receipt-header">
                   <div class="company-logo">
@@ -456,6 +443,7 @@
                   <p><strong></strong> ${this.currentMonth}</p>
                   <p><strong></strong>  ${new Date().toLocaleString()}</p>
                   
+                  <p><strong>Payment Status:</strong> Unsettled</p>
                 </div>
                 <table class="receipt-table">
                   <thead>
@@ -1015,11 +1003,11 @@
           return `${day}/${month}/${year}`;
         },
         loadLists() {
-             axios.get('/api/propertysettledinvoices/'+this.$route.params.id).then((response) => {
+             axios.get('/api/propertylastninetysettledinvoices/'+this.$route.params.id).then((response) => {
                 //settled invoices
-             this.statements = response.data.propertymonthsettledinvoices;
+             this.statements = response.data.propertylastninetysettledinvoices;
              //all invoices (unsettled & vacants too)
-             this.allstatements = response.data.propertymonthinvoices;
+             this.allstatements = response.data.propertylastninetyinvoices;
              console.log("all",this.allstatements)
              // Calculate the total amount paid
              setTimeout(() => {
@@ -1073,8 +1061,8 @@
         },
         getPropertyExpenses()
         {
-          axios.get('/api/pmspropertyexpenses/'+ this.$route.params.id).then((response) => {
-            this.expenses = response.data.pmspropertyexpenses;
+          axios.get('/api/pmslastninetypropertyexpenses/'+ this.$route.params.id).then((response) => {
+            this.expenses = response.data.pmslastninetypropertyexpenses;
             // this.commission = this.property.landlord.commission;
             // this.fixedCommission = this.property.landlord.fixed_commission;
             this.totalAmountPaid = this.calculateTotalAmountPaid();

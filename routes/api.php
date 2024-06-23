@@ -151,7 +151,14 @@ Route::get('pmstenantinvoices/{id}', [PmsInvoiceController::class, 'tenantInvoic
 //property invoices
 Route::get('propertyawaitinginvoicing/{id}', [PmsInvoiceController::class, 'propAwaitingInvoicing']);
 Route::get('propertyinvoicestosettle/{id}', [PmsInvoiceController::class, 'propInvoicestoSettle']);
+
 Route::get('propertysettledinvoices/{id}', [PmsInvoiceController::class, 'propSettledInvoices']);
+Route::get('propertylastmonthsettledinvoices/{id}', [PmsInvoiceController::class, 'propLastMonthSettledInvoices']);
+Route::get('propertylastninetysettledinvoices/{id}', [PmsInvoiceController::class, 'propLastNinetySettledInvoices']);
+Route::get('propertyyearsettledinvoices/{id}', [PmsInvoiceController::class, 'propYearSettledInvoices']);
+Route::get('propertyquartersettledinvoices/{id}', [PmsInvoiceController::class, 'propQuarterSettledInvoices']);
+Route::get('propertylastyearsettledinvoices/{id}', [PmsInvoiceController::class, 'propLastYearSettledInvoices']);
+Route::get('propertyallsettledinvoices/{id}', [PmsInvoiceController::class, 'propAllSettledInvoices']);
 
 Route::put('property/{id}', [PropertyController::class, 'update']);
 Route::put('category/{id}', [CategoryController::class, 'update']);

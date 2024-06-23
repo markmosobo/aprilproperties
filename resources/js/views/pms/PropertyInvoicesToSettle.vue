@@ -52,7 +52,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Invoices to Settle - {{property.name}} <span>| Statements with invoices to settle</span></h5>
+                      <h5 class="card-title">Invoices to Settle - {{property.name}} <span>| {{statements.length}} invoices to settle</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
@@ -63,14 +63,15 @@
                             <router-link to="#" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
+                                  v-if="statements.length !== 0"
                                   :class="{ active: isActive }"
                                   class="btn btn-sm btn-primary rounded-pill me-2"
-                                  style="background-color: orange; border-color: orange;"
+                                  style="background-color: darkorange; border-color: darkorange;"
                                 >
-                                  Pending SMS ({{invoicestosettlesmsnotsent.length}}/{{statements.length + awaitinginvoicing.length}})
+                                   ({{statements.length}}) Remaining
                                 </a>
                             </router-link>
-                            <router-link to="#" custom v-slot="{ href, navigate, isActive }">
+<!--                             <router-link to="#" custom v-slot="{ href, navigate, isActive }">
                               <a
                               :href="href"
                               :class="{ active: isActive }"
@@ -79,7 +80,7 @@
                               >
                               Sent SMS ({{invoicestosettlesmssent.length}}/{{statements.length + awaitinginvoicing.length}})
                               </a>
-                            </router-link>                        
+                            </router-link>  -->                       
                             <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
                           </div>
                           <div class="col-auto d-flex justify-content-end">
@@ -100,6 +101,8 @@
                                     </a>
    
                                     <a @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                    <a @click="navigateTo('/managedproperties' )" class="dropdown-item" href="#"><i class="ri-building-fill mr-2"></i>Properties</a>
+                                    <a @click="navigateTo('/pmslandlords' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Landlords</a>
                               </div>
                             </div>
                           </div>
@@ -427,9 +430,9 @@
             const modal = bootstrap.Modal.getInstance(document.getElementById('settleTenantModal'));
             modal.hide();
             //reset form
-            this.form.amount_paid = '';
-            this.loadLists();
-
+            this.form.cash = '';
+            this.form.payment_method = 'Mpesa';
+            this.loadLists()
           }
         },
         submit() {

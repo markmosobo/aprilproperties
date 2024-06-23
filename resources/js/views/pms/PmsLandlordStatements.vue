@@ -149,7 +149,8 @@
           landlord: [],
           user: [],
           dueTotal: 0, // Variable to store the sum of the "Due" column
-          propertyId: this.$route.params.id
+          propertyId: this.$route.params.id,
+          landlordName: ''
 
         }
       },

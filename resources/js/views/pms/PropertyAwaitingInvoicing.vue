@@ -52,11 +52,22 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Awaiting Invoicing - {{property.name}} <span>| Property statements awaiting invoicing</span></h5>
+                      <h5 class="card-title">Awaiting Invoicing - {{property.name}} <span>| {{statements.length}} awaiting invoicing</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
-                            <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>                        
+                            <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>  
+                            <router-link to="#" custom v-slot="{ href, navigate, isActive }">
+                                <a
+                                  :href="href"
+                                  :class="{ active: isActive }"
+                                  v-if="statements.length !== 0"
+                                  class="btn btn-sm btn-primary rounded-pill me-2"
+                                  style="background-color: darkorange; border-color: darkorange;"
+                                >
+                                  ({{statements.length}}) Remaining
+                                </a>
+                            </router-link>                      
                             <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
                           </div>
                           <div class="col-auto d-flex justify-content-end">
@@ -77,6 +88,8 @@
                                     </a>
    
                                     <a @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                     <a @click="navigateTo('/managedproperties' )" class="dropdown-item" href="#"><i class="ri-building-fill mr-2"></i>Properties</a>
+                                    <a @click="navigateTo('/pmslandlords' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Landlords</a>
                               </div>
                             </div>
                           </div>
@@ -167,7 +180,14 @@
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">Invoice Tenant</button>
+                              <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">
+                              <span v-if="loading">
+                                <i class="fa fa-spinner fa-spin"></i> Invoicing...
+                              </span>
+                              <span v-else>
+                                Invoice Tenant
+                              </span>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -217,6 +237,7 @@
           errors: {
             water_bill: ''
           },
+          loading: false,
         }
       },
       methods: {
@@ -257,41 +278,53 @@
           modal.show();
         },
         confirmInvoiceTenant() {
-           // Validate water_bill
-          if (!this.form.water_bill) {
-            this.errors.water_bill = 'Water bill is required.';
-            return;
-          }
-          if (this.selectedStatement && this.selectedStatement.id) {
-            // Implement your logic to invoice the tenant here
-            console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
-            axios.put("/api/pmsinvoicestatement/"+this.selectedStatement.id, this.form)
-           .then(function (response) {
-              console.log(response);
-              // this.step = 1;
-              toast.fire(
-                 'Success!',
-                 'Tenant invoiced!',
-                 'success'
-              )
-           })
-           .catch(function (error) {
-              console.log(error);
-              // Swal.fire(
-              //    'error!',
-              //    // phone_error + id_error + pass_number,
-              //    'error'
-              // )
-           });
+      // Validate water_bill
+      if (!this.form.water_bill) {
+        this.errors.water_bill = 'Water bill is required.';
+        return;
+      }
+
+      if (this.selectedStatement && this.selectedStatement.id) {
+        // Show loading spinner
+        this.loading = true;
+        this.successMessage = '';
+
+        // Implement your logic to invoice the tenant here
+        console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
+        axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
+          .then(response => {
+            console.log(response);
+            this.successMessage = 'Tenant invoiced!';
+            toast.fire(
+              'Success!',
+              'Tenant invoiced!',
+              'success'
+            );
+          })
+          .catch(error => {
+            console.log(error);
+            // Handle the error appropriately
+            toast.fire(
+              'Error!',
+              'An error occurred while invoicing the tenant.',
+              'error'
+            );
+          })
+          .finally(() => {
+            // Hide loading spinner
+            this.loading = false;
+
             // Close the modal after invoicing
             const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
             modal.hide();
-            //reset form
-            this.form.water_bill = '';
-            this.loadLists();
 
-          }
-        },
+            // Reset form
+            this.form.water_bill = '';
+            this.form.cash = '';
+            this.loadLists();
+          });
+      }
+    },
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)
             this.$router.push({ 

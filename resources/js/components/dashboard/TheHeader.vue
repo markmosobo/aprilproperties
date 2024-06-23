@@ -65,9 +65,9 @@
               </li>
   
               <li>
-                <a class="dropdown-item d-flex align-items-center" href="#">
+                <a @click.prevent="logout" class="dropdown-item d-flex align-items-center" href="#">
                   <i class="bi bi-box-arrow-right"></i>
-                  <span @click.prevent="logout">Sign Out</span>
+                  <span>Sign Out</span>
                 </a>
               </li>
   

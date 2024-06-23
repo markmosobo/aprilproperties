@@ -117,7 +117,14 @@ import PmsTenantInvoices from '../views/pms/PmsTenantInvoices.vue'
 
 import PropertyAwaitingInvoicing from '../views/pms/PropertyAwaitingInvoicing.vue'
 import PropertyInvoicesToSettle from '../views/pms/PropertyInvoicesToSettle.vue'
+//settled invoices
 import PropertySettledInvoices from '../views/pms/PropertySettledInvoices.vue'
+import PropertyLastMonthSettledInvoices from '../views/pms/PropertyLastMonthSettledInvoices.vue'
+import PropertyLastNinetySettledInvoices from '../views/pms/PropertyLastNinetySettledInvoices.vue'
+import PropertyYearSettledInvoices from '../views/pms/PropertyYearSettledInvoices.vue'
+import PropertyQuarterSettledInvoices from '../views/pms/PropertyQuarterSettledInvoices.vue'
+import PropertyLastYearSettledInvoices from '../views/pms/PropertyLastYearSettledInvoices.vue'
+import PropertyAllSettledInvoices from '../views/pms/PropertyAllSettledInvoices.vue'
 
 import BulkSms from '../views/sms/BulkSms.vue'
 import Sms from '../views/sms/Sms.vue'
@@ -755,6 +762,42 @@ const routes = [
         path:'/propertysettledinvoices/:id',
         name: 'propertysettledinvoices',
         component: PropertySettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertylastmonthsettledinvoices/:id',
+        name: 'propertylastmonthsettledinvoices',
+        component: PropertyLastMonthSettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertylastninetysettledinvoices/:id',
+        name: 'propertylastninetysettledinvoices',
+        component: PropertyLastNinetySettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertyyearsettledinvoices/:id',
+        name: 'propertyyearsettledinvoices',
+        component: PropertyYearSettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertyquartersettledinvoices/:id',
+        name: 'propertyquartersettledinvoices',
+        component: PropertyQuarterSettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertylastyearsettledinvoices/:id',
+        name: 'propertylastyearsettledinvoices',
+        component: PropertyLastYearSettledInvoices,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/propertyallsettledinvoices/:id',
+        name: 'propertyallsettledinvoices',
+        component: PropertyAllSettledInvoices,
         beforeEnter : guardMyroute,
     },
     {

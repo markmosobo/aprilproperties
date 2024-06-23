@@ -23,18 +23,35 @@
                     <div class="card-body pb-0">
                       <h5 class="card-title">All Landlords <span>| Today</span></h5>
                       <p class="card-text">
+                        <div class="row">
+                          <div class="col d-flex">
                    
-                      <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
-                          <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="btn btn-sm btn-primary rounded-pill"
-                            style="background-color: darkgreen; border-color: darkgreen;"
-                            @click="navigate"
-                          >
-                            Add Landlord
-                          </a>
-                      </router-link>
+                   
+                            <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
+                                <a
+                                  :href="href"
+                                  :class="{ active: isActive }"
+                                  class="btn btn-sm btn-primary rounded-pill"
+                                  style="background-color: darkgreen; border-color: darkgreen;"
+                                  @click="navigate"
+                                >
+                                  Add Landlord
+                                </a>
+                            </router-link>
+                          </div>
+                          <div class="col-auto d-flex justify-content-end">
+                          <div class="btn-group" role="group">
+                              <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ri-add-line"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                     <a @click="navigateTo('/managedproperties' )" class="dropdown-item" href="#"><i class="ri-building-fill mr-2"></i>Properties</a>
+                                     <a @click="navigateTo('/pmstenants' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Tenants</a>
+                                    <a @click="navigateTo('/pmslandlords' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Landlords</a>
+                                </div>
+                              </div>
+                            </div>
+                        </div>   
             
                       </p>
     
