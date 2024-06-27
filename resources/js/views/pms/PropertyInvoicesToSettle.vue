@@ -89,7 +89,7 @@
                                 <i class="ri-add-line"></i>
                               </button>
                               <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>
+                                <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoices</a>
                                     <a @click="navigateTo('/propertyawaitinginvoicing/'+property.id)" class="dropdown-item" href="#">
                                       <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
                                     </a>

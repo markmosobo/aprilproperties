@@ -67,6 +67,8 @@ Route::post('tenants', [PmsTenantController::class, 'store']);
 Route::post('pmsexpenses', [PmsExpenseController::class, 'store']);
 Route::post('pmsstatements', [PmsStatementController::class, 'store']);
 Route::post('pmsunits/{id}', [PmsUnitController::class, 'store']);
+//create invoice
+Route::post('pmsinvoicestatement', [PmsStatementController::class, 'createInvoice']);
 
 Route::get('users', [UserController::class, 'index']);
 Route::get('properties', [PropertyController::class, 'index']);
@@ -250,3 +252,12 @@ Route::put('activateuser/{id}',[UserController::class,'activate']);
 Route::put('deactivateuser/{id}',[UserController::class,'deactivate']);
 
 Route::post('/posts/media/upload', [PropertyController::class, 'storePropertyPic'])->name('posts.media.upload');
+
+//send sms
+Route::post('sendsms', [SearchController::class, 'sendSms'])->name('sendsms');
+Route::post('sendtenantsms', [SearchController::class, 'sendTenantSms'])->name('sendTenantsms');
+Route::post('sendlandlordsms', [SearchController::class, 'sendLandlordSms'])->name('sendLandlordsms');
+
+//generate invoices
+Route::post('/generate-monthly-statements', [PmsStatementController::class, 'generateMonthlyStatements']);
+

@@ -522,7 +522,7 @@
        {
             axios.get('/api/pmsunit/'+this.form.pms_unit_id).then((response) => {
      
-             this.unitinfo = response.data.unit[0];
+             this.unitinfo = response.data.unit;
                this.deposit = parseInt(this.unitinfo.deposit);
                this.monthly_rent = parseInt(this.unitinfo.monthly_rent);
                this.garbage_fee = parseInt(this.unitinfo.garbage_fee);

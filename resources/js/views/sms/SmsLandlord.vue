@@ -13,7 +13,7 @@
                   style="background-color: darkgreen; border-color: darkgreen;"
                   @click="toTenants"
                 >
-                  To Tenant(s)
+                  To Landlord(s)
                 </a>
 
              <div class="row m-auto p-auto justify-content- g-3 needs-validation" novalidate="" autocomplete="off">
@@ -29,35 +29,35 @@
                       class="form-control"
                    />
                    <div class="col-sm-12">
-                      <label for="inputPassword" class="form-label">Tenant*</label>
+                      <label for="inputPassword" class="form-label">Landlord*</label>
                       <div class="col-sm-10">
                           <div class="multiselect-searchable">
-                            <input type="text" v-model="searchTenantQuery" placeholder="Search Tenants..." class="search-input" />
+                            <input type="text" v-model="searchLandlordQuery" placeholder="Search Landlords..." class="search-input" />
                             <div class="row mb-3"></div>                            
-                            <select v-model="form.selectedTenants" multiple class="form-select" id="tenant">
-                              <option value="" disabled>Select Tenant(s)</option>
-                              <option v-for="tenant in filteredTenants" :key="tenant.id" :value="tenant.phone_number">
-                                {{ tenant.phone_number }} - {{ tenant.first_name }} {{ tenant.last_name }} - {{ tenant.property.name }} - {{ tenant.unit.unit_number }}
+                            <select v-model="form.selectedLandlords" multiple class="form-select" id="landlord">
+                              <option value="" disabled>Select Landlord(s)</option>
+                              <option v-for="landlord in filteredLandlords" :key="landlord.id" :value="landlord.phone_number">
+                                {{ landlord.phone_no }} - {{ landlord.first_name }} {{ landlord.last_name }}
                               </option>
                             </select>
                             
                           </div>
-                        <div class="invalid-feedback" v-if="!selectedTenants">Please select tenant!</div>
+                        <div class="invalid-feedback" v-if="!selectedLandlords">Please select landlord!</div>
                       </div>
                    </div>
-                  <div v-if="form.selectedTenants.length > 0" class="form-group row mt-3">
+                  <div v-if="form.selectedLandlords.length > 0" class="form-group row mt-3">
                     <div class="col-sm-12">
-                      <button class="btn btn-sm btn-primary" style="background-color: green; border-color: green;" type="button" @click="toggleSelectedTenants">
-                        {{ showSelectedTenants ? 'Hide' : 'Show' }} Selected Tenants ({{ form.selectedTenants.length }})
+                      <button class="btn btn-sm btn-primary" style="background-color: green; border-color: green;" type="button" @click="toggleSelectedLandlords">
+                        {{ showSelectedLandlords ? 'Hide' : 'Show' }} Selected Landlords ({{ form.selectedLandlords.length }})
                       </button>
-                      <div v-show="showSelectedTenants" class="selected-tenants mt-2">
+                      <div v-show="showSelectedLandlords" class="selected-tenants mt-2">
                         <ul class="list-group">
-                          <li v-for="(tenant, index) in form.selectedTenants" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ tenant }}
-                            <button class="btn btn-danger btn-sm" @click="removeTenant(index)">Remove</button>
+                          <li v-for="(landlord, index) in form.selectedLandlords" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ landlord }}
+                            <button class="btn btn-danger btn-sm" @click="remove(index)">Remove</button>
                           </li>
                         </ul>
-                        <button class="btn btn-danger btn-sm mt-2" @click="clearAllTenants">Clear All</button>
+                        <button class="btn btn-danger btn-sm mt-2" @click="clearAllLandlords">Clear All</button>
                       </div>
                     </div>
                   </div> 
@@ -132,23 +132,22 @@
          total: '',
          form:
          {
-           selectedTenants: [],
+           selectedLandlords: [],
            message: ''
          },
           step: 1, 
           propunits: [],
-          tenants: [],
+          landlords: [],
           depositRent: [],
           unitNumber: '',
-          tenantId: null, // Initialize tenantId
+          landlordId: null, // Initialize tenantId
           user: [],
           deposit: '',
           monthly_rent: '',
           refNo: '',
           propertyName: '',
-          searchTenantQuery: '',
-          showTenantDiv: true, // Add this data property
-          showSelectedTenants: false,
+          searchLandlordQuery: '',
+          showSelectedLandlords: false,
 
 
        }   
@@ -161,18 +160,14 @@
           // this.step++;
           this.submit();          
        },
-      toTenants() {
-          this.showTenantDiv = true; // Hide the div when "To Tenants" is clicked
-          this.showLandlordDiv = false; // Hide the div when "To Tenants" is clicked
+       toggleSelectedLandlords() {
+        this.showSelectedLandlords = !this.showSelectedLandlords;
       },
-       toggleSelectedTenants() {
-        this.showSelectedTenants = !this.showSelectedTenants;
+      removeLandlord(index) {
+        this.form.selectedLandlords.splice(index, 1);
       },
-      removeTenant(index) {
-        this.form.selectedTenants.splice(index, 1);
-      },
-      clearAllTenants() {
-        this.form.selectedTenants = [];
+      clearAllLandlords() {
+        this.form.selectedLandlords = [];
       },
       formatMonth(value){
           if(value){
@@ -288,10 +283,10 @@
               const payload = {
                   'token': this.accessToken,
                   'message': this.form.message,  // Use the dueAmount from statement
-                  'number': this.formatPhoneNumber(this.form.selectedTenants.toString()) // Format the phone number
+                  'number': this.formatPhoneNumber(this.form.selectedLandlords.toString()) // Format the phone number
               };
 
-              axios.post('/api/sendtenantsms', payload)
+              axios.post('/api/sendlandlordsms', payload)
               .then((response) => {
                   console.log("sms status", payload);
               })
@@ -326,7 +321,7 @@
           axios.get('api/lists').then((response) => {
           this.units = response.data.lists.units;
           this.properties = response.data.lists.pmsproperties;
-          this.landlords = response.data.lists.landlords;
+          this.landlords = response.data.lists.smslandlords;
           this.tenants = response.data.lists.pmstenants;
           console.log(response)
  
@@ -334,11 +329,11 @@
        },
        validateForm() {
           let isValid = true;
-          if (!this.form.selectedTenants) {
+          if (!this.form.selectedLandlords) {
               isValid = false;
-              document.getElementById('tenant').classList.add('is-invalid');
+              document.getElementById('landlord').classList.add('is-invalid');
           } else {
-              document.getElementById('tenant').classList.remove('is-invalid');
+              document.getElementById('landlord').classList.remove('is-invalid');
           }
           if (!this.form.message) {
               isValid = false;
@@ -485,22 +480,11 @@
         },
         filteredLandlords() {
              return this.landlords.filter((landlord) => {
-             const searchTerm = this.searchTenantQuery.toLowerCase();
+             const searchTerm = this.searchLandlordQuery.toLowerCase();
              const fullName = `${landlord.first_name} ${landlord.last_name}`.toLowerCase();
              return (
               fullName.includes(searchTerm) ||
               landlord.phone_no.includes(searchTerm)
-            );
-          });
-        },
-        filteredTenants() {
-             return this.tenants.filter((tenant) => {
-             const searchTerm = this.searchTenantQuery.toLowerCase();
-             const fullName = `${tenant.first_name} ${tenant.last_name}`.toLowerCase();
-             return (
-              fullName.includes(searchTerm)
-               // ||
-              // tenant.phone_number.includes(searchTerm)
             );
           });
         },

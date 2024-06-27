@@ -96,23 +96,12 @@
                     </div>
     
                       <div class="card-body pb-0">
-                        <h5 class="card-title">Awaiting Invoicing <span>| {{ statements.length }} awaiting invoicing this month</span></h5>
+                        <h5 class="card-title">Awaiting Invoicing <span>| {{ statements.length }} awaiting invoicing in the last year</span></h5>
                         <p class="card-text">
-                          <div class="row">
+                          <div class="row" v-if="statements.length !== 0">
                             <div class="col d-flex">
-                              <button v-if="statements.length !== 0" class="me-2" @click="exportToExcel">Export</button>
+                              <button class="me-2" @click="exportToExcel">Export</button>
                               <router-link to="#" custom v-slot="{ href, navigate, isActive }">
-                                <a
-                                  :href="href"
-                                  :class="{ active: isActive }"
-                                   @click="openModal"
-                                  class="btn btn-sm btn-primary rounded-pill me-2"
-                                  style="background-color: darkgreen; border-color: darkgreen;"
-                                >
-                                  Create Invoice
-                                </a>
-                              </router-link>
-                              <router-link v-if="statements.length !== 0" to="#" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
                                   :class="{ active: isActive }"
@@ -162,24 +151,8 @@
                           </div>
                         </p>
 
-                        <!-- Display "Generate Invoices" button when statements.length is zero -->
-                        <div v-if="!loading">
-                          <div v-if="statements.length === 0" class="text-center" style="margin-bottom: 20px;">
-                            <!-- <button class="btn btn-primary" @click="generateInvoices">Generate Invoices</button> -->
-                            <button class="btn btn-success rounded-pill" type="submit">
-                            <span v-if="generating">
-                              <i class="fa fa-spinner fa-spin"></i> Generating invoices for {{currentMonth}}...
-                            </span>
-                            <span @click="generateInvoices" v-else>
-                              Generate Invoices for {{currentMonth}}
-                            </span>
-                          </button>
-                          </div>
-                        </div>
-
-
                         <!-- Display table when statements.length is not zero -->
-                        <div v-if="statements.length !== 0">
+                        <div>
                           <table id="AllStatementsTable" class="table table-borderless">
                             <thead>
                               <tr>
@@ -241,10 +214,6 @@
                             </strong>
                           </div>
                         </div>
-
-                        <div v-else class="text-center">
-                          <i class="fa fa-spinner fa-spin"></i> Loading...
-                        </div>
                       </div>
 
                     <!-- Modal -->
@@ -289,60 +258,6 @@
                         </div>
                       </div>
                     </div>
-
-                    <!-- Add InvoiceModal -->
-                    <div class="modal fade" id="addInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="addInvoiceModalLabel" aria-hidden="true">
-                      <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="addInvoiceModalLabel">Create Invoice</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="closeModal">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
-                          </div>
-                          <div class="modal-body">
-                            <!-- Modal body content -->
-                            <div class="modal-body">
-                              <p>
-                                <strong>Tenant Name:*</strong> 
-                                <select v-model="form.pms_tenant_id" class="form-control">
-                                  <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">{{ tenant.first_name }} {{ tenant.last_name }}</option>
-                                </select>
-                              <div v-if="errors.tenant" class="text-danger">{{ errors.tenant }}</div>
-                              </p>
-
-                               <!-- Display selected tenant details -->
-                              <div v-if="selectedTenant">
-                                <p><strong>Selected Tenant:</strong></p>
-                                <p><strong></strong> {{ selectedTenant.first_name }} {{ selectedTenant.last_name }}</p>
-                                <p><strong></strong> {{ selectedTenant.phone_number }}</p>
-                                <p><strong></strong> {{ selectedTenant.property.name }}</p>
-                                <p><strong></strong> {{ selectedTenant.unit.unit_number }}</p>
-                                <!-- Display other details as needed -->
-                              </div>
-                              <p>
-                                <strong>Rent Month:*</strong>
-                                <select v-model="form.rentMonth" class="form-control">
-                                  <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
-                                </select>
-                                <div v-if="errors.rentmonth" class="text-danger">{{ errors.rentmonth }}</div>
-                              </p>
-                <!--               <p>
-                                <strong>Water Bill:</strong>(optional)
-                                <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
-                                <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
-                              </p> -->
-                            </div>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="closeModal">Close</button>
-                            <!-- Additional buttons or actions -->
-                            <button type="button" @click="createInvoice" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">Save</button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                 
     
                   </div>
                 </div><!-- End Top Selling -->
@@ -379,124 +294,24 @@
       data(){
         return {
           statements: [],
-          tenants: [],
-          months: [],
           collectedTotal: 0,
           expensesTotal: 0,
           user: [],
           selectedStatement: {}, // Initialize as an empty object
           currentMonth: '',
           form: {
-            water_bill : '',
-            rentMonth: '',
-            pms_tenant_id: ''
+            water_bill : ''
           },
           errors: {
-            water_bill: '',
-            tenant: '',
-            rentmonth: ''
+            water_bill: ''
           },
-          loading: true,
-          generating: false,
+          loading: false,
         }
       },
       methods: {
         navigateTo(location){
             this.$router.push(location)
         },
-        createInvoice()
-        {
-          // Validate tenant
-          if (!this.form.pms_tenant_id) {
-            this.errors.tenant = 'Tenant name is required.';
-            return;
-          }
-
-          // Validate water_bill
-          if (!this.form.rentMonth) {
-            this.errors.rentmonth = 'Rent month is required.';
-            return;
-          }
-          console.log(this.form)
-          axios.post("/api/pmsinvoicestatement", this.form)
-              .then(response => {
-                this.successMessage = 'Tenant invoice created!';
-                toast.fire(
-                  'Success!',
-                  'Invoice created!',
-                  'success'
-                );
-              })
-              .catch(error => {
-                console.log(error);
-                // Handle the error appropriately
-                toast.fire(
-                  'Error!',
-                  'An error occurred while creating the invoice.',
-                  'error'
-                );
-              })
-              .finally(() => {
-                // Hide loading spinner
-                this.loading = false;
-
-                // Close the modal after invoicing
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addInvoiceModal'));
-                modal.hide();
-
-                // Reset form
-                this.form.pms_tenant_id = '';
-                this.form.rentMonth = '';
-                this.form.water_bill = '';
-                this.loadLists();
-
-              });
-
-        },
-        generateMonthsArray() {
-          const date = new Date();
-          const currentYear = date.getFullYear();
-          const monthsArray = [];
-
-          const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-          ];
-
-          for (let i = 0; i < 12; i++) {
-            monthsArray.push(`${monthNames[i]} ${currentYear}`);
-          }
-
-          return monthsArray;
-        },
-         openModal() {
-          // $('#addInvoiceModal').modal('show'); // Show the modal using jQuery
-          const modal = new bootstrap.Modal(document.getElementById('addInvoiceModal'));
-          modal.show();
-        },
-        closeModal() {
-          // $('#addInvoiceModal').modal('hide'); // Hide the modal using jQuery
-          const modal = bootstrap.Modal.getInstance(document.getElementById('addInvoiceModal'));
-          modal.hide();
-        },
-        async generateInvoices() {
-          this.generating = true; // Set loading to true
-          try {
-            const response = await axios.post('/api/generate-monthly-statements');
-            toast.fire(
-              'Success!',
-              response.data.message,
-              'success'
-            );
-            this.loadLists();
-          } catch (error) {
-            console.error('Error generating statement:', error);
-            // alert('Failed to generate monthly statement.');
-          } finally {
-            this.generating = false; // Set loading to false
-          }
-        },
-
         invoiceTenant(statement) {
           this.selectedStatement = statement;
           this.form.water_bill = ''; // Reset the form field
@@ -993,9 +808,8 @@
           return `${months[monthIndex]} ${year}`;
         },
         loadLists() {
-             axios.get('/api/lists').then((response) => {
-             this.statements = response.data.lists.awaitinginvoicing;
-             this.tenants = response.data.lists.pmstenants;
+             axios.get('api/lists').then((response) => {
+             this.statements = response.data.lists.lastyearawaitinginvoicing;
              this.expenses = response.data.lists.pmsexpenses;
              console.log(this.statements)
              // Calculate the total amount paid
@@ -1036,15 +850,10 @@
         // Computed property to calculate total balance
         totalBalance() {
           return this.calculateTotal('balance');
-        },
-        selectedTenant() {
-          // Find the selected tenant object based on selected ID
-          return this.tenants.find(tenant => tenant.id === this.form.pms_tenant_id);
         }
       },      
       mounted(){
         this.loadLists();
-        this.months = this.generateMonthsArray();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
         this.currentMonth = this.getCurrentMonth();

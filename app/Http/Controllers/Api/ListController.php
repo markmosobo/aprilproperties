@@ -27,6 +27,7 @@ use App\Models\PmsTenant;
 use App\Models\PmsExpense;
 use App\Models\PmsStatement;
 use App\Models\Invoice;
+use Carbon\Carbon;
 
 class ListController extends Controller
 {
@@ -52,6 +53,7 @@ class ListController extends Controller
         $contacts = Contact::all();
         $sociallinks = SocialLink::all();
         $landlords = Landlord::all();
+        $smslandlords = Landlord::whereNotNull('phone_no')->get();
         $units = PmsUnit::all();
         $statements = PmsStatement::with('property', 'tenant','unit')->latest()->get();
         $pmsinvoices = Invoice::with('property', 'tenant')->latest()->get();
@@ -71,7 +73,18 @@ class ListController extends Controller
         $closedproperties = Property::latest()->with('type','images')->where('status',2)->get();
 
         //invoices
-        $awaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->get();
+        $awaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereMonth('created_at', Carbon::now()->month)->get();
+        $lastmonthawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereBetween('created_at',
+        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+        $lastninetyawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereBetween('created_at',
+        [Carbon::now()->subDays(89)->startOfDay(), Carbon::now()->endOfDay()])->get();
+        $quarterawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereBetween('created_at',
+        [Carbon::now()->startOfQuarter(), Carbon::now()->endOfDay()])->get();
+        $yearawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereBetween('created_at',
+        [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])->get();
+        $lastyearawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereBetween('created_at',
+        [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()])->get();
+        $allawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->get();
         $invoicestosettle = PmsStatement::latest()->whereNotNull('water_bill')->where('status',0)->with('property','tenant','unit')->get();
         $invoicestosettlesmsnotsent = PmsStatement::latest()->whereNotNull('water_bill')->where('status',0)->where('sms_status', 0)->with('property','tenant','unit')->get();
         $invoicestosettlesmssent = PmsStatement::latest()->whereNotNull('water_bill')->where('status',0)->where('sms_status', 1)->with('property','tenant','unit')->get();
@@ -117,6 +130,7 @@ class ListController extends Controller
                 'closedproperties' => $closedproperties,
                 'openproperties' => $openproperties,
                 'landlords' => $landlords,
+                'smslandlords' => $smslandlords,
                 'pmsproperties' => $pmsproperties,
                 'units' => $units,
                 'pmstenants' => $pmstenants,
@@ -124,6 +138,12 @@ class ListController extends Controller
                 'statements' => $statements,
                 'pmsinvoices' => $pmsinvoices,
                 'awaitinginvoicing' => $awaitinginvoicing,
+                'lastmonthawaitinginvoicing' => $lastmonthawaitinginvoicing,
+                'lastninetyawaitinginvoicing' => $lastninetyawaitinginvoicing,
+                'quarterawaitinginvoicing' => $quarterawaitinginvoicing,
+                'yearawaitinginvoicing' => $yearawaitinginvoicing,
+                'lastyearawaitinginvoicing' => $lastyearawaitinginvoicing,
+                'allawaitinginvoicing' => $allawaitinginvoicing,
                 'invoicestosettle' => $invoicestosettle,
                 'invoicestosettlesmsnotsent' => $invoicestosettlesmsnotsent,
                 'invoicestosettlesmssent' => $invoicestosettlesmssent,

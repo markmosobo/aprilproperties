@@ -109,6 +109,12 @@ import SettleStatement from '../views/pms/SettleStatement.vue'
 import InvoiceStatement from '../views/pms/InvoiceStatement.vue'
 
 import AwaitingInvoicing from '../views/pms/AwaitingInvoicing.vue'
+import LastMonthAwaitingInvoicing from '../views/pms/LastMonthAwaitingInvoicing.vue'
+import LastNinetyAwaitingInvoicing from '../views/pms/LastNinetyAwaitingInvoicing.vue'
+import QuarterAwaitingInvoicing from '../views/pms/QuarterAwaitingInvoicing.vue'
+import YearAwaitingInvoicing from '../views/pms/YearAwaitingInvoicing.vue'
+import LastYearAwaitingInvoicing from '../views/pms/LastYearAwaitingInvoicing.vue'
+import AllAwaitingInvoicing from '../views/pms/AllAwaitingInvoicing.vue'
 import InvoicestoSettle from '../views/pms/InvoicestoSettle.vue'
 import SettledInvoices from '../views/pms/SettledInvoices.vue'
 import PmsInvoices from '../views/pms/PmsInvoices.vue'
@@ -135,6 +141,7 @@ import PropertyAllSettledInvoices from '../views/pms/PropertyAllSettledInvoices.
 
 import BulkSms from '../views/sms/BulkSms.vue'
 import Sms from '../views/sms/Sms.vue'
+import SmsLandlord from '../views/sms/SmsLandlord.vue'
 
 function guardMyroute(to, from, next)
 {
@@ -742,6 +749,42 @@ const routes = [
         beforeEnter : guardMyroute,
     },
     {
+        path:'/lastmonthawaitinginvoicing',
+        name: 'lastmonthawaitinginvoicing',
+        component: LastMonthAwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/lastninetyawaitinginvoicing',
+        name: 'lastninetyawaitinginvoicing',
+        component: LastNinetyAwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/quarterawaitinginvoicing',
+        name: 'quarterawaitinginvoicing',
+        component: QuarterAwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/yearawaitinginvoicing',
+        name: 'yearawaitinginvoicing',
+        component: YearAwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/lastyearawaitinginvoicing',
+        name: 'lastyearawaitinginvoicing',
+        component: LastYearAwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/allawaitinginvoicing',
+        name: 'allawaitinginvoicing',
+        component: AllAwaitingInvoicing,
+        beforeEnter : guardMyroute,
+    },
+    {
         path:'/invoicestosettle',
         name: 'invoicestosettle',
         component: InvoicestoSettle,
@@ -902,6 +945,12 @@ const routes = [
         path:'/sms',
         name: 'sms',
         component: Sms,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/smslandlord',
+        name: 'smslandlord',
+        component: SmsLandlord,
         beforeEnter : guardMyroute,
     }                              
 ];

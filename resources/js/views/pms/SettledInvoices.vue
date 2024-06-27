@@ -52,22 +52,38 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Settled Invoices <span>| All statements with settled invoices</span></h5>
-                      <p class="card-text">
-                   
-<!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
-                          <a
-                            :href="href"
-                            :class="{ active: isActive }"
-                            class="btn btn-sm btn-primary rounded-pill"
-                            @click="navigate"
-                          >
-                            Add Landlord
-                          </a>
-                      </router-link> -->
-                          <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
-            
-                      </p>
+                      <h5 class="card-title">Settled Invoices <span>| {{statements.length}} settled invoices</span></h5>
+                        <p class="card-text">
+                            <div class="row">
+                              <div class="col d-flex">
+                                <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>                       
+                              <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
+                              </div>
+                              <div class="col-auto d-flex justify-content-end">
+                              <div class="btn-group" role="group">
+                                  <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="ri-add-line"></i>
+                                  </button>
+                                  <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                        <a @click="navigateTo('/awaitinginvoicing')" class="dropdown-item" href="#">
+                                          <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
+                                        </a>
+                                        <a @click="navigateTo('/invoicestosettle')" class="dropdown-item" href="#">
+                                          <i class="ri-file-edit-fill mr-2"></i>Invoices to Settle
+                                        </a>
+                                        <a @click="navigateTo('/settledinvoices')" class="dropdown-item" href="#">
+                                          <i class="ri-bank-card-fill mr-2"></i>Settled Invoices
+                                        </a>
+       
+                                         <a @click="navigateTo('/managedproperties' )" class="dropdown-item" href="#"><i class="ri-building-fill mr-2"></i>Properties</a>
+                                         <a @click="navigateTo('/pmstenants' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Tenants</a>
+                                        <a @click="navigateTo('/pmslandlords' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Landlords</a>
+                                  </div>
+                                </div>
+                              </div>
+                            </div> 
+                
+                        </p>
     
                       <table id="AllStatementsTable" class="table table-borderless">
                         <thead>
@@ -78,7 +94,7 @@
                             <th scope="col">Due</th>
                             <th scope="col">Paid</th>
                             <th scope="col">Bal</th>
-                            <th scope="col">Transaction On</th>                            
+                            <th scope="col">Paid On</th>                            
                             <th scope="col">Status</th>
                             <th scope="col">Action</th>
                           </tr>
@@ -91,7 +107,7 @@
                             <td>{{formatNumber(statement.total)}}</td>
                             <td>{{formatNumber(statement.paid)}}</td>
                             <td>{{formatNumber(statement.balance)}}</td>
-                            <td>{{format_date(statement.created_at)}}</td>                            
+                            <td>{{format_date(statement.paid_at)}}</td>                            
                             <td>
                               <span v-if="statement.status == 1" class="badge bg-success"><i class="bi bi-clipboard2-check"></i> Settled</span>
                               <span v-else-if="statement.status == 0" class="badge bg-warning text-dark"><i class="bi bi-clipboard2-x"></i> Not Settled</span>
@@ -106,6 +122,7 @@
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a>
                                   </div>
                               </div>
                             </td>
@@ -138,6 +155,8 @@
     import $ from "jquery";
     import moment from 'moment';
     import jsPDF from 'jspdf';
+    import * as XLSX from 'xlsx';
+    import aprilLogo from '@/assets/img/apex-logo.png';
 
     const toast = Swal.mixin({
         toast: true,
@@ -154,7 +173,13 @@
           statements: [],
           collectedTotal: 0,
           expensesTotal: 0,
-          user: []
+          user: [],
+          selectedStatement: {}, // Initialize as an empty object
+          property: '',
+          logoBase64: '',
+          paymentMethod: '',
+          accountNo: '',
+          paybillNo: '',
         }
       },
       methods: {
@@ -211,6 +236,243 @@
         },
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        loadLogo() {
+          fetch(aprilLogo)
+            .then(response => response.blob())
+            .then(blob => {
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                this.logoBase64 = reader.result;
+                // console.log(this.logoBase64)
+              };
+            })
+            .catch(error => {
+              console.error('Error converting image to base64:', error);
+            });
+        },
+        print(statement) {
+            console.log("merc",statement);
+            this.name = statement.property.name;
+            this.firstName = statement.tenant.first_name;
+            this.lastName = statement.tenant.last_name;
+            this.tenant = this.firstName + " " + this.lastName;
+            this.phoneNumber = statement.tenant.phone_number;
+            this.unitNumber = statement.tenant.pms_unit_id;
+            this.tenantId = statement.pms_tenant_id;
+            this.propertyId = statement.pms_property_id;
+            this.getProperty(this.propertyId);
+            this.refNo = statement.ref_no;
+            this.details = statement.details;
+            this.date = statement.created_at;
+            this.status = statement.status;
+            this.paid = statement.paid;
+            this.balance = statement.balance;
+            this.invoiceDate = statement.updated_at;
+            this.payDate = statement.paid_at;
+            this.total = statement.total;
+            this.payment = statement.payment_method;
+            this.statementId = statement.id;
+            this.waterBill = statement.water_bill;
+            if(this.total == this.paid) {
+               this.paymentMethod = 'SETTLED'; 
+             } 
+             else{
+                this.paymentMethod = 'NOT SETTLED'
+             }
+            //unit info
+            this.unitName = statement.unit.unit_number;
+            this.unitRent = statement.unit.monthly_rent;
+            this.unitSecurityFee = statement.unit.security_fee;
+            this.unitGarbageFee = statement.unit.garbage_fee;
+            this.unitType = statement.unit.type;
+
+            // Open a new window for printing
+            const printWindow = window.open("", "_blank");
+
+            // Build the content for printing
+            const receiptContent = this.buildPrintContent();
+
+            // Write the content to the new window
+            printWindow.document.write(receiptContent);
+
+            // Close the document stream
+            printWindow.document.close();
+
+            // Trigger the print dialog
+            printWindow.print();
+        },
+        buildPrintContent() {
+          // Determine whether to include the row
+          const showExpensesDeductionRow = this.expenses !== 0;
+          const logoBase64 = this.logoBase64;
+          const watermarkText = this.paymentMethod;
+          // Build the HTML content for the receipt
+          const receiptHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Invoice Of Payment - ${this.refNo}</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f5f5f5;
+                }
+                .receipt {
+                  max-width: 600px;
+                  margin: 20px auto;
+                  padding: 20px;
+                  background-color: #fff;
+                  border: 2px solid #ccc;
+                  display: flex;
+                  flex-direction: column;
+                }
+                 .watermark {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 80px;
+                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
+                    white-space: nowrap;
+                    z-index: 0;
+                    pointer-events: none; /* Prevents watermark from interfering with other elements */
+                  }
+                .receipt-header {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 50px;
+                }
+                .company-info {
+                  text-align: left;
+                }
+                .company-info img {
+                  max-width: 150px;
+                  height: auto;
+                }
+                .receipt-info {
+                  margin-bottom: 50px;
+                }
+                .receipt-info p {
+                  margin: 5px 0;
+                  color: #555;
+                }
+                 .additional-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                }
+                .additional-info p {
+                  margin: 8px 0;
+                }
+                .payment-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                  text-align: center;
+                }
+                .payment-info p {
+                  margin: 8px 0;
+                }
+                .receipt-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 50px;
+                }
+                .receipt-table th, .receipt-table td {
+                  padding: 8px;
+                  border-bottom: 1px solid #ccc;
+                }
+                .receipt-table th {
+                  text-align: left;
+                  background-color: #f2f2f2;
+                  color: #333;
+                }
+                .receipt-table td {
+                  text-align: left;
+                  color: #666;
+                }
+                .receipt-footer {
+                  text-align: center;
+                  margin-top: auto;
+                }
+                .receipt-footer p {
+                  margin: 5px 0;
+                  color: #777;
+                }
+              </style>
+            </head>
+            <body>
+            <div class="watermark">${watermarkText}</div>
+              <div class="receipt">
+                <div class="receipt-header">
+                  <div class="company-logo">
+                    <img src="${logoBase64}" alt="Company Logo" style="max-width: 150px; height: auto;">
+                  </div>
+                  <div class="company-info">
+                    <p>Kakamega-Webuye Rd, ACK Building</p>
+                    <p>Phone: (0720) 020-401 </p>
+                    <p> Email: propertapril@gmail.com</p>
+                    <p> Website: www.aprilproperties.co.ke</p>
+                  </div>
+                </div>
+                <div class="receipt-info">
+                  <p><strong>#${this.refNo}</strong></p>
+                  <p><strong>Invoice Date:</strong> ${this.format_date(this.invoiceDate ?? 'N/A')}</p>
+                  <p><strong>Payment Date:</strong>  ${this.format_date(this.payDate ?? 'N/A')}</p>
+                  <p><strong>Payment Mode:</strong> ${this.payment ?? 'N/A'}</p>
+                  
+                </div>
+                <div class="additional-info">
+                    <p><strong>Invoiced To</strong></p>
+                    <p><strong></strong> ${this.tenant}</p>
+                    <p><strong></strong> ${this.name} - ${this.unitName}</p>
+                    <p><strong></strong> ${this.details}</p>
+                </div>
+                <table class="receipt-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total Rent Due (Incl. Water Bill)</td>
+                      <td>KES ${this.formatNumber(this.total)}</td>
+                    </tr>
+                    <tr>
+                      <td>Total Amount Paid</td>
+                      <td>KES ${this.formatNumber(this.paid)}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>Total Balance:</th>
+                      <td>KES ${this.formatNumber(this.balance)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div class="payment-info">
+                  <p><strong>Payment Options:</strong></p>
+                  <p>Bank Transfer: Account Number 123456789</p>
+                  <p>Mobile Money: Paybill - ${this.paybillNo ?? 'N/A'} Account Number - ${this.accountNo ?? 'N/A'}</p>
+                </div>
+                <div class="receipt-footer">
+                  <p>Generated on ${new Date().toLocaleString()}</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `;
+
+          return receiptHTML;
         },
         generatePDF() {
             let pdfName = 'Full Statement';
@@ -465,6 +727,33 @@
 
             return currentPage; // Return the total number of pages used for expenses
         },
+        exportToExcel() {
+          const invoicesData = this.statements.map(statement => ({
+            "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
+            "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
+            "DUE": this.formatNumber(statement.total),
+            "RENT": statement.unit ? this.formatNumber(statement.unit.monthly_rent) : 'N/A',
+            "GARBAGE": statement.unit ? this.formatNumber(statement.unit.garbage_fee) : 'N/A',
+            "WATER": this.formatNumber(statement.water_bill ?? "N/A"),
+            "PAID": this.formatNumber(statement.paid),
+            "BALANCE": this.formatNumber(statement.balance),
+          }));
+
+          const worksheet = XLSX.utils.json_to_sheet(invoicesData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, "SETTLED INVOICES");
+
+          XLSX.writeFile(workbook, "SETTLED INVOICES.xlsx");
+        },
+        getProperty()
+        {
+            axios.get('/api/pmsproperty/'+this.propertyId).then((response) => {
+                this.property = response.data.property
+                this.accountNo = response.data.property.account_number
+                this.paybillNo = response.data.property.paybill_number
+                console.log("property", response)
+            })
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.statements = response.data.lists.settledinvoices;
@@ -512,6 +801,7 @@
       },      
       mounted(){
         this.loadLists();
+        this.loadLogo();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
 

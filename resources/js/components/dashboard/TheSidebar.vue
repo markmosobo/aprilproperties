@@ -225,10 +225,22 @@
                   class="nav-link"
                   @click="navigate"
                 >
-              <i class="bi bi-circle"></i><span>Send SMS</span>
+              <i class="bi bi-circle"></i><span>SMS Tenant</span>
               </a>
             </router-link>
-          </li>                          
+          </li> 
+<!--           <li>
+            <router-link to="/smslandlord" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+              <i class="bi bi-circle"></i><span>SMS Landlord</span>
+              </a>
+            </router-link>
+          </li>  -->                         
         </ul>
       </li>
       <!-- End Components Nav --> 

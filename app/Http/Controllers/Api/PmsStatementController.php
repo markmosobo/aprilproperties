@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PmsStatement;
+use App\Models\PmsTenant;
+use App\Models\PmsUnit;
 use App\Models\Invoice;
 use App\Models\Landlord;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Artisan;
 
 class PmsStatementController extends Controller
 {
@@ -190,11 +193,17 @@ class PmsStatementController extends Controller
     {
         $pmslastmonthpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+        $pmslastmonthpropertyrentingstatements = PmsStatement::with('tenant','property','unit')
+        ->where('pms_tenant_id', '!=', null)
+        ->where('pms_property_id', $id)
+        ->whereBetween('created_at',
+        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmslastmonthpropertystatements' => $pmslastmonthpropertystatements
+            'pmslastmonthpropertystatements' => $pmslastmonthpropertystatements,
+            'pmslastmonthpropertyrentingstatements' => $pmslastmonthpropertyrentingstatements,
         ], 200);
     }
 
@@ -202,11 +211,17 @@ class PmsStatementController extends Controller
     {
         $pmslastninetypropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->subDays(89)->startOfDay(), Carbon::now()->endOfDay()])->get();
+        $pmslastninetypropertyrentingstatements = PmsStatement::with('tenant','property','unit')
+        ->where('pms_tenant_id', '!=', null)
+        ->where('pms_property_id', $id)
+        ->whereBetween('created_at',
+        [Carbon::now()->subDays(89)->startOfDay(), Carbon::now()->endOfDay()])->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmslastninetypropertystatements' => $pmslastninetypropertystatements
+            'pmslastninetypropertystatements' => $pmslastninetypropertystatements,
+            'pmslastninetypropertyrentingstatements' => $pmslastninetypropertyrentingstatements,
         ], 200);
     }    
 
@@ -214,11 +229,17 @@ class PmsStatementController extends Controller
     {
         $pmsyearpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])->get();
+        $pmsyearpropertyrentingstatements = PmsStatement::with('tenant','property','unit')
+        ->where('pms_tenant_id', '!=', null)
+        ->where('pms_property_id', $id)
+       ->whereBetween('created_at',
+        [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()])->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmsyearpropertystatements' => $pmsyearpropertystatements
+            'pmsyearpropertystatements' => $pmsyearpropertystatements,
+            'pmsyearpropertyrentingstatements' => $pmsyearpropertyrentingstatements,
         ], 200);
     }
 
@@ -226,11 +247,17 @@ class PmsStatementController extends Controller
     {
         $pmsquarterpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->startOfQuarter(), Carbon::now()->endOfDay()])->get();
+        $pmsquarterpropertyrentingstatements = PmsStatement::with('tenant','property','unit')
+        ->where('pms_tenant_id', '!=', null)
+        ->where('pms_property_id', $id)
+       ->whereBetween('created_at',
+        [Carbon::now()->startOfQuarter(), Carbon::now()->endOfDay()])->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmsquarterpropertystatements' => $pmsquarterpropertystatements
+            'pmsquarterpropertystatements' => $pmsquarterpropertystatements,
+            'pmsquarterpropertyrentingstatements' => $pmsquarterpropertyrentingstatements,
         ], 200);
     }
 
@@ -238,22 +265,32 @@ class PmsStatementController extends Controller
     {
         $pmslastyearpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
         [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()])->get();
+        $pmslastyearpropertyrentingstatements = PmsStatement::with('tenant','property','unit')
+        ->where('pms_tenant_id', '!=', null)
+        ->where('pms_property_id', $id)
+        ->whereBetween('created_at',
+        [Carbon::now()->subYear()->startOfYear(), Carbon::now()->subYear()->endOfYear()])->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmslastyearpropertystatements' => $pmslastyearpropertystatements
+            'pmslastyearpropertystatements' => $pmslastyearpropertystatements,
+            'pmslastyearpropertyrentingstatements' => $pmslastyearpropertyrentingstatements,
         ], 200);
     }
 
     public function propertyAllStatements(Request $request, $id)
     {
         $pmsallpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->get();
+        $pmsallpropertyrentingstatements = PmsStatement::with('tenant','property','unit')
+        ->where('pms_tenant_id', '!=', null)
+        ->where('pms_property_id', $id)->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmsallpropertystatements' => $pmsallpropertystatements
+            'pmsallpropertystatements' => $pmsallpropertystatements,
+            'pmsallpropertyrentingstatements' => $pmsallpropertyrentingstatements,
         ], 200);
     } 
 
@@ -414,6 +451,66 @@ class PmsStatementController extends Controller
             'status' => true,
             'message' => "Retrieved",
             'pmslandlordstatements' => $pmslandlordstatements
+        ], 200);
+    }
+
+    public function generateMonthlyStatements()
+    {
+        try {
+            // Execute the artisan command
+            Artisan::call('generate:monthly-statements');
+
+            // Optionally, you can return a response to indicate success
+            return response()->json(['message' => 'Monthly statements generated successfully']);
+
+        } catch (\Exception $e) {
+            // Handle any errors
+            return response()->json(['error' => 'Failed to generate monthly statements'], 500);
+        }
+    }
+
+    //create invoice public function
+    public function createInvoice(Request $request)
+    {
+        $tenant = PmsTenant::findOrFail($request->pms_tenant_id);
+        $unit = PmsUnit::findOrFail($tenant->pms_unit_id);
+        $waterBill = $request->water_bill;
+
+
+        $formattedDate = $request->rentMonth;
+        $tenantUnit = $tenant->unit_number;
+        $unitId = $tenant->pms_unit_id;
+        $orgDate = now();
+        $date = str_replace('-"', '/', $orgDate);
+        $newDate = date("YmdHis", strtotime($date));
+        $monthlyTotal = $tenant->unit->monthly_rent + $tenant->unit->garbage_fee + $tenant->unit->security_fee;
+        // $refno = "INV".$newDate." ".$tenant->unit->unit_number." Rent @".$monthlyTotal;
+        $refno = "INV" . $newDate . $tenant->id;
+
+        $data = [
+            'ref_no' => $refno,
+            'pms_property_id' => $tenant->pms_property_id,
+            'pms_tenant_id' => $tenant->id,
+            'pms_unit_id' => $unitId,
+            'unit_number' => $tenant->unit->unit_number,
+            'details' => "Rent-" . $tenant->unit->unit_number . "-" . $formattedDate,
+            'status' => 0, // status for rented units
+            'total' => $monthlyTotal, // You can set the default total
+            'paid' => 0, // You can set the default paid amount
+            'balance' => 0, // You can set the default balance
+        ];
+
+        if (!is_null($waterBill)) {
+            $data['water_bill'] = $waterBill;
+        }
+
+        PmsStatement::create($data);
+
+        return response()->json([
+            'status' => true,
+            'message' => "Retrieved",
+            'tenant' => $tenant,
+            'unit' => $unit
         ], 200);
     }
 

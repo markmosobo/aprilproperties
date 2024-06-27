@@ -15,7 +15,7 @@
                         </li>
     
                         <li>
-                            <router-link :to="`/pmsmonthpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <router-link :to="`/pmspropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
@@ -23,6 +23,39 @@
                                 @click="navigate"
                             >
                             This Month</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/pmslastmonthpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            Last Month</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/pmslastninetypropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            Last 90 Days</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/pmsquarterpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            This Quarter</a>
                             </router-link>
                         </li>
                         <li>
@@ -34,6 +67,17 @@
                                 @click="navigate"
                             >
                             This Year</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/pmslastyearpropertystatements/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            Last Year</a>
                             </router-link>
                         </li>
                         <li>
@@ -52,12 +96,13 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{property.name}} Statement <span>| This Month</span></h5>
+                      <h5 class="card-title">{{property.name}} Invoices <span>| This Month</span></h5>
                       <p class="card-text">
                          <div class="row">
                           <div class="col d-flex">
                           <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>                 
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button>
+                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Invoice</button>
+                          <button v-if="statements.length !== 0" @click="generatePDF">Generate Rent Statement</button>
                           </div>
                           <div class="col-auto d-flex justify-content-end">
                           <div class="btn-group" role="group">
@@ -65,7 +110,7 @@
                                 <i class="ri-add-line"></i>
                               </button>
                               <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>
+                                <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoices</a>
                                     <a @click="navigateTo('/propertyawaitinginvoicing/'+property.id)" class="dropdown-item" href="#">
                                       <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
                                     </a>
@@ -288,6 +333,7 @@
     import moment from 'moment';
     import jsPDF from 'jspdf';
     import * as XLSX from 'xlsx';
+    import aprilLogo from '@/assets/img/apex-logo.png';
 
     const toast = Swal.mixin({
         toast: true,
@@ -302,8 +348,12 @@
       data(){
         return {
           property: [],
+          name: '',
+          unitsNo: '',
+          logoBase64: '',
           statements: [],
           rentingstatements: [],
+          paymentMethod: '',
           expenses: [],
           categories: [],
           propertytypes: [],
@@ -432,6 +482,21 @@
             this.form.payment_method = 'Mpesa';
             this.loadLists()
           }
+        },
+        loadLogo() {
+          fetch(aprilLogo)
+            .then(response => response.blob())
+            .then(blob => {
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                this.logoBase64 = reader.result;
+                // console.log(this.logoBase64)
+              };
+            })
+            .catch(error => {
+              console.error('Error converting image to base64:', error);
+            });
         },
         printReceipt() {
           this.submit().then(() => {
@@ -648,27 +713,46 @@
             this.property = response.data.property;
             this.commission = this.property.landlord.commission;
             this.fixedCommission = this.property.landlord.fixed_commission;
-            if(this.commission !== null)
-            {
-              this.propertyCommission = this.commission
-            }
-            else
-            {
-              this.propertyCommission = this.fixedCommission;
-            }
-            // else
-            // {
-            //   this.propertyCommission = '';
-            // }
-            console.log("commission", this.propertyCommission)
+            this.fName = this.property.landlord.first_name;
+            this.lName = this.property.landlord.last_name;
+            this.landlord = this.fName + " " + this.lName;
+            this.landlordPhone = this.property.landlord.phone_no;
+            this.landlordAddress = this.property.landlord.address;
+            this.landlordEmail = this.property.landlord.email;
+            this.unitsNo = this.property.units_no;
+
           }).catch(() => {
               console.log('error')
           })
         },
         getPropertyStatements() {
              axios.get('/api/pmspropertystatements/'+this.$route.params.id).then((response) => {
+              //includes vacants
              this.statements = response.data.pmspropertystatements;
+             //excludes vacants
              this.rentingstatements = response.data.pmspropertyrentingstatements;
+             this.totalAmountPaid = this.calculateTotalAmountPaid();
+            this.totalPaid = this.calculateTotal();
+
+            if(this.commission !== null)
+            {
+              this.propertyCommission = ((this.commission/100) * this.totalPaid).toFixed(2);
+            }
+            else
+            {
+              this.propertyCommission = this.fixedCommission;
+            }
+            this.rentLessCommission = this.totalPaid - this.propertyCommission;
+            this.netRemmission = this.rentLessCommission - (this.totalAmountPaid);            
+
+            console.log("kijamo", this.totalPaid)
+
+             if(this.totalDue == this.totalPaid) {
+               this.paymentMethod = 'SETTLED'; 
+             } 
+             else{
+                this.paymentMethod = 'NOT SETTLED'
+             }
              console.log("props", response)
              setTimeout(() => {
                   $("#AllStatementsTable").DataTable();
@@ -818,8 +902,176 @@
           // Parse the date string using Moment.js and format it
            return moment(dateString).format('MMM YYYY');
         },
+        printInvoice(){
+            // Open a new window for printing
+            const printWindow = window.open("", "_blank");
+
+            // Build the content for printing
+            const invoiceContent = this.buildInvoiceContent();
+
+            // Write the content to the new window
+            printWindow.document.write(invoiceContent);
+
+            // Close the document stream
+            printWindow.document.close();
+
+            // Trigger the print dialog
+            printWindow.print();
+        },
+        buildInvoiceContent() {
+          // Determine whether to include the row
+          const showExpensesDeductionRow = this.expenses !== 0;
+          const logoBase64 = this.logoBase64;
+          const watermarkText = this.paymentMethod;
+          // Build the HTML content for the receipt
+          const receiptHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Invoice Of Payment</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f5f5f5;
+                }
+                .receipt {
+                  max-width: 600px;
+                  margin: 20px auto;
+                  padding: 20px;
+                  background-color: #fff;
+                  border: 2px solid #ccc;
+                  border-radius: 10px;
+                  display: flex;
+                  flex-direction: column;
+                }
+                 .watermark {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 80px;
+                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
+                    white-space: nowrap;
+                    z-index: 0;
+                    pointer-events: none; /* Prevents watermark from interfering with other elements */
+                  }
+                .receipt-header {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 20px;
+                }
+                .company-info {
+                  text-align: left;
+                }
+                .company-info img {
+                  max-width: 150px;
+                  height: auto;
+                }
+                .receipt-info {
+                  margin-bottom: 20px;
+                }
+                .receipt-info p {
+                  margin: 5px 0;
+                  color: #555;
+                }
+                .receipt-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 20px;
+                }
+                .receipt-table th, .receipt-table td {
+                  padding: 8px;
+                  border-bottom: 1px solid #ccc;
+                }
+                .receipt-table th {
+                  text-align: left;
+                  background-color: #f2f2f2;
+                  color: #333;
+                }
+                .receipt-table td {
+                  text-align: left;
+                  color: #666;
+                }
+                .receipt-footer {
+                  text-align: center;
+                  margin-top: auto;
+                }
+                .receipt-footer p {
+                  margin: 5px 0;
+                  color: #777;
+                }
+              </style>
+            </head>
+            <body>
+            <div class="watermark">${watermarkText}</div>
+              <div class="receipt">
+                <div class="receipt-header">
+                  <div class="company-logo">
+                    <img src="${logoBase64}" alt="Company Logo" style="max-width: 150px; height: auto;">
+                  </div>
+                  <div class="company-info">
+                    <p>Kakamega-Webuye Rd, ACK Building</p>
+                    <p>Phone: (0720) 020-401 </p>
+                    <p> Email: propertapril@gmail.com</p>
+                  </div>
+                </div>
+                <div class="receipt-info">
+                  <p><strong>Invoice For:</strong></p>
+                  <p><strong></strong> ${this.landlord}</p>
+                  <p><strong></strong> ${this.property.name} - ${this.unitsNo} Units</p>
+                  <p><strong></strong> ${this.currentMonth}</p>
+                  <p><strong></strong>  ${new Date().toLocaleString()}</p>
+                  
+                </div>
+                <table class="receipt-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total Rent Less Commission</td>
+                      <td>KES ${this.formatNumber(this.rentLessCommission)}</td>
+                    </tr>
+                    <tr>
+                      <td>Total Due Remmitted</td>
+                      <td>KES ${this.formatNumber(this.totalPaid)}</td>
+                    </tr>
+                    <!-- Conditionally include expenses deduction row -->
+                    ${showExpensesDeductionRow ? `
+                    <tr>
+                      <td>Total Expenses</td>
+                      <td>KES ${this.formatNumber(this.totalAmountPaid)}</td>
+                    </tr>
+                    ` : ''}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>Net Remmission:</th>
+                      <td>KES ${this.formatNumber(this.netRemmission)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div class="receipt-footer">
+                  <p>PDF Generated on ${new Date().toLocaleDateString()}</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `;
+
+          return receiptHTML;
+        },
         exportToExcel() {
           const invoicesData = this.statements.map(statement => ({
+            "PROPERTY": statement.property ? statement.property.name : 'N/A',
             "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
             "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
             "DUE": this.formatNumber(statement.total),
@@ -828,18 +1080,22 @@
             "WATER": this.formatNumber(statement.water_bill ?? "N/A"),
             "PAID": this.formatNumber(statement.paid),
             "BALANCE": this.formatNumber(statement.balance),
+            "PAID ON": this.format_date(statement.paid_at ?? "N/A"),
           }));
 
           const worksheet = XLSX.utils.json_to_sheet(invoicesData);
           const workbook = XLSX.utils.book_new();
-          let fileName = this.property.name+" "+this.formatMonth(new Date);
-          XLSX.utils.book_append_sheet(workbook, worksheet, fileName);
-          XLSX.writeFile(workbook, fileName + ".xlsx");
+          XLSX.utils.book_append_sheet(workbook, worksheet, "SETTLED INVOICES");
+
+          // Customize the filename with a timestamp
+          const timestamp = new Date().toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "_");
+          const filename = `SETTLED_INVOICES_${timestamp}.xlsx`;
+          
+          XLSX.writeFile(workbook, filename);
         },
         generatePDF() {
             let pdfName = 'Full Statement';
             var doc = new jsPDF('landscape');
-            // const maxRowsPerPage = 13; // Adjust this value based on the number of rows you want per page
             const firstPageMaxRows = 13; // Rows for the first page
             const subsequentPagesMaxRows = 30; // Rows for subsequent pages
 
@@ -854,7 +1110,7 @@
             doc.text(rightHeaderText, rightheaderX, rightheaderY, { align: 'left' });
 
             // Add top-right header
-            const headerText = 'Generated on: ' + new Date().toLocaleString()+'\n'+this.property.name+'\n'+this.property.units_no + ' Units';
+            const headerText = 'Generated on: ' + new Date().toLocaleString() + '\n' + 'Statement for:' + '\n' + this.landlord + '\n' + this.property.name + '\n' + this.landlordPhone + '\n' + this.landlordEmail + '\n' + this.landlordAddress + '\n' + this.property.units_no + ' Units';
             const headerFontSize = 12;
             const headerX = doc.internal.pageSize.width - 20; // Adjust the X coordinate
             const headerY = 10;
@@ -871,8 +1127,8 @@
             const imageY = 20;
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
-           // Add title
-            const titleText = (this.property.name+" "+this.formatMonth(new Date)+' Rent Statement').toUpperCase();
+            // Add title
+            const titleText = (this.property.name + " " + this.currentMonth + ' Rent Statement').toUpperCase();
             const titleFontSize = 16;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -882,37 +1138,27 @@
             doc.setTextColor(44, 62, 80); // Set text color to a dark shade
             doc.text(titleText, titleX, titleY);
 
-
-
-            // // Add subtitle with date information
-            // doc.setFontSize(14);
-            // doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
-            // doc.text('Generated on: ' + new Date().toLocaleString(), 20, imageY + imageHeight + 20);
-
             const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = this.propertyCommission/100*this.totalPaid;
-
+            const commissionTotal = this.propertyCommission / 100 * this.totalPaid;
             const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
             doc.setFontSize(14);
             doc.setTextColor(44, 62, 80);
-            doc.text('Commission: '+ 'KES ' +this.formatNumber(commissionTotal), 20, imageY + imageHeight + 35);
-
-
+            doc.text('Total Expenses: ' + 'KES ' + this.formatNumber(this.totalAmountPaid), 20, imageY + imageHeight + 35);
 
             doc.setFontSize(14);
             doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
 
             let textY = imageY + imageHeight + 20; // Initial y-coordinate for the first text
 
-            doc.text('Total Rent Collected: ' + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
+            doc.text('Total Rent Less Commission: ' + 'KES ' + this.formatNumber(this.rentLessCommission), 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
-            doc.text('Total Expenses Incurred: '+ 'KES ' +this.formatNumber(this.totalAmountPaid), 20, textY);
+            doc.text('Total Due Remitted: ' + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
-            doc.text('Net Remission: ' + 'KES ' + this.formatNumber(netRemissionTotal) , 20, textY);
+            doc.text('Net Remission: ' + 'KES ' + this.formatNumber(this.netRemmission), 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
             // Set font size for the table headers and data
@@ -924,11 +1170,8 @@
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
-            // let columnWidths = [60, 30, 70, 30, 30, 30];
-            // let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER'];
             let columnWidths = [20, 50, 20, 20, 20, 20, 20, 20, 30]; // Adjusted column widths for 9 columns
             let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BALANCE', 'DATE PAID']; // Example headers
-
 
             let xPos = 20;
             doc.setDrawColor(0);
@@ -940,11 +1183,12 @@
                 xPos += columnWidths[i];
             }
 
-
             let currentPage = 1;
             let currentRow = 0;
             let maxRowsPerPage = firstPageMaxRows; // Set initial max rows for the first page
 
+            // Initialize totals
+            let totals = Array(columnHeaders.length).fill(0);
 
             this.statements.forEach((statement, index) => {
                 if (currentRow >= maxRowsPerPage) {
@@ -970,10 +1214,9 @@
                     doc.rect(xPos, yPos, columnWidths[i], cellHeight);
                     switch (i) {
                         case 0:
-                           const unitNumber = statement.unit ? statement.unit.unit_number : 'N/A';
-                           const truncatedText = unitNumber.length > 4 ? unitNumber.slice(0, 4) + '...' : unitNumber;
-                           doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
-
+                            const unitNumber = statement.unit ? statement.unit.unit_number : 'N/A';
+                            const truncatedText = unitNumber.length > 4 ? unitNumber.slice(0, 4) + '...' : unitNumber;
+                            doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
                             break;
                         case 1:
                             doc.text(
@@ -984,52 +1227,60 @@
                             break;
                         case 2:
                             doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[2] += parseFloat(statement.total) || 0;
                             break;
                         case 3:
-                            doc.text(statement.unit ? this.formatNumber(statement.unit.monthly_rent) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            let monthlyRent = statement.unit ? parseFloat(statement.unit.monthly_rent) : 0;
+                            doc.text(this.formatNumber(monthlyRent), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[3] += monthlyRent || 0;
                             break;
                         case 4:
-                            doc.text(statement.unit ? this.formatNumber(statement.unit.garbage_fee) : '0.00', xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            let garbageFee = statement.unit ? parseFloat(statement.unit.garbage_fee) : 0;
+                            doc.text(this.formatNumber(garbageFee), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[4] += garbageFee || 0;
                             break;
                         case 5:
-                            doc.text(this.formatNumber(statement.water_bill ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            let waterBill = parseFloat(statement.water_bill) || 0;
+                            doc.text(this.formatNumber(waterBill), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[5] += waterBill;
                             break;
                         case 6:
-                            doc.text(this.formatNumber(statement.paid), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            let paidAmount = parseFloat(statement.paid) || 0;
+                            doc.text(this.formatNumber(paidAmount), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[6] += paidAmount;
                             break;
                         case 7:
-                            doc.text(this.formatNumber(statement.balance), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
+                            let balance = parseFloat(statement.balance) || 0;
+                            doc.text(this.formatNumber(balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[7] += balance;
                             break;
                         case 8:
-                            doc.text(this.format_date(statement.paid_at ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding); // Replace with actual data
-                            break;    
+                            doc.text(this.format_date(statement.paid_at ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
                     }
                     xPos += columnWidths[i];
                 }
                 currentRow++;
-
             });
-            
 
-            // Add subtitle with date information
-            
+            // Add totals row
+            let totalsYPos = headerYPos + (currentRow + 1) * lineHeight;
+            xPos = 20;
+            doc.setDrawColor(0);
+            for (let i = 0; i < columnWidths.length; i++) {
+                doc.rect(xPos, totalsYPos, columnWidths[i], cellHeight);
+                if (i > 1 && i < columnWidths.length - 1) { // Skip first two and last column
+                    doc.text(this.formatNumber(totals[i]), xPos + cellPadding, totalsYPos + cellHeight - cellPadding);
+                }
+                xPos += columnWidths[i];
+            }
+
             // Add footer
             doc.setFontSize(10);
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
 
-
-
-            // Call the function to add expenses to the PDF with pagination
-            if (this.expenses && this.expenses.length > 0) {
-                // Call the function to add expenses to the PDF with pagination
-                let totalPages = '';
-                totalPages = this.addExpensesToPDF(this.expenses, doc);
-            }
             // Save the PDF
-            // let fileName = 'Full Statement' + '_Page_' + currentPage + '.pdf';
-
-            let fileName = this.property.name+" "+this.formatMonth(new Date)+' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
-
+            let fileName = this.property.name + " " +  this.currentMonth + '_Total_Pages_' + currentPage + '.pdf';
             doc.save(fileName);
         },
         // Function to add expenses to the PDF with pagination
@@ -1153,6 +1404,11 @@
         navigateTo(location){
             this.$router.push(location)
         },
+        getCurrentMonth() {
+          const now = new Date();
+          const options = { month: 'short', year: 'numeric' }; // 'short' for abbreviated month name, 'numeric' for year
+          return now.toLocaleDateString('en-US', options);
+        }, 
         loadLists() {
              axios.get('/api/lists').then((response) => {
              this.properties = response.data.lists.pmsproperties;
@@ -1201,8 +1457,10 @@
         this.getProperty();
         this.getPropertyStatements();
         this.getPropertyExpenses();
+        this.loadLogo();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.currentMonth = this.getCurrentMonth(); // Set the initial date
 
       }
     }

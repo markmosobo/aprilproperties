@@ -76,7 +76,7 @@
                                 <i class="ri-add-line"></i>
                               </button>
                               <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>
+                                <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoices</a>
                                     <a @click="navigateTo('/propertyawaitinginvoicing/'+property.id)" class="dropdown-item" href="#">
                                       <i class="ri-file-list-2-fill mr-2"></i>Awaiting Invoicing
                                     </a>
@@ -93,7 +93,7 @@
                               </div>
                             </div>
                           </div>
-                      </div>  
+                        </div>  
             
                       </p>
     
@@ -238,6 +238,10 @@
             water_bill: ''
           },
           loading: false,
+          invoicedTenantPhone: '',
+          invoicedTenantName: '',
+          dueWater: '',
+          dueAmount: ''
         }
       },
       methods: {
@@ -293,7 +297,8 @@
             console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
             axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
               .then(response => {
-                console.log(response);
+                this.invoiceStatement = response.data.statement
+                this.sendSms(this.invoiceStatement);
                 this.successMessage = 'Tenant invoiced!';
                 toast.fire(
                   'Success!',
@@ -325,6 +330,111 @@
               });
           }
         },
+        async loginUwazii() {
+          try {
+            const data = JSON.stringify({
+              "username": "April_Properties",
+              "password": "Mosobo*123#"
+            });
+
+            const config = {
+              method: 'post',
+              maxBodyLength: Infinity,
+              url: 'https://restapi.uwaziimobile.com/v1/authorize',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              data: data
+            };
+
+            const response = await axios(config);
+            this.authorizationCode = response.data.data.authorization_code; // Save authorizationCode into this.authorizationCode
+            console.log(this.authorizationCode);
+          } catch (error) {
+            console.log(error);
+          }
+        },
+
+        async getAccessToken() {
+          try {
+            const data = JSON.stringify({
+              "authorization_code": this.authorizationCode
+            });
+
+            const config = {
+              method: 'post',
+              maxBodyLength: Infinity,
+              url: 'https://restapi.uwaziimobile.com/v1/accesstoken',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              data: data
+            };
+
+            const response = await axios(config);
+            this.accessToken = response.data.data.access_token; // Save accessToken into this.accessToken
+            console.log(this.accessToken);
+          } catch (error) {
+            console.log(error);
+          }
+        },
+
+        async sendSms(statement) {
+              await this.loginUwazii();
+              await this.getAccessToken();
+              console.log("uhunye", statement);
+              const dueAmount = statement.total;
+              const dueWater = statement.water_bill;
+              const tenantId = statement.pms_tenant_id;
+
+              // Fetch tenant data and wait for it to complete
+              await this.getTenant(tenantId);
+
+              // Ensure tenant details are available before creating the payload
+              const payload = {
+                  'token': this.accessToken,
+                  'tenantName': this.invoicedTenantName,
+                  'dueWater': dueWater,  // Use the dueWater from statement
+                  'dueAmount': dueAmount,  // Use the dueAmount from statement
+                  'number': this.formatPhoneNumber(this.invoicedTenantPhone.toString()) // Format the phone number
+              };
+
+              axios.post('/api/sendsms', payload)
+                  .then((response) => {
+                      console.log("sms status", payload);
+                  })
+                  .catch((error) => {
+                      console.error("Error sending sms:", error);
+                  });
+          },
+
+        async getTenant(id) {
+              try {
+                  const response = await axios.get('/api/pmstenant/' + id);
+                  this.tenant = response.data.tenant;
+                  console.log("omollo", this.tenant);
+                  this.invoicedTenantName = this.tenant.first_name;
+                  this.invoicedTenantPhone = this.tenant.phone_number;
+              } catch (error) {
+                  console.log('error', error);
+              }
+        },
+
+        formatPhoneNumber(number) {
+            // Ensure number is a string
+            number = number.toString();
+            
+            // Clean the phone number and ensure it has the 254 prefix
+            if (number.startsWith('0')) {
+                // Remove the leading zero and add the 254 prefix
+                number = '254' + number.substring(1);
+            } else if (!number.startsWith('254')) {
+                // If the number is not already prefixed with 254, add it
+                number = '254' + number;
+            }
+            return number;
+        },
+
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)
             this.$router.push({ 

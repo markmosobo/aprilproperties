@@ -15,14 +15,36 @@
                         </li>
     
                         <li>
-                            <router-link :to="`/propertyyearsettledinvoices/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <router-link :to="`/propertysettledinvoices/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
                             <a
                                 :href="href"
                                 :class="{ active: isActive }"
                                 class="dropdown-item"
                                 @click="navigate"
                             >
-                            This Year</a>
+                            This Month</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/propertylastmonthsettledinvoices/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            Last Month</a>
+                            </router-link>
+                        </li>
+                        <li>
+                            <router-link :to="`/propertylastninetysettledinvoices/${propertyId}`" custom v-slot="{ href, navigate, isActive }">
+                            <a
+                                :href="href"
+                                :class="{ active: isActive }"
+                                class="dropdown-item"
+                                @click="navigate"
+                            >
+                            Last 90 Days</a>
                             </router-link>
                         </li>
                         <li>
@@ -232,6 +254,7 @@
             landlordAddress: '',
             logoBase64: '',
             propertyId: '',
+            currentYear: ''
 
 
         }
@@ -325,10 +348,11 @@
             // Trigger the print dialog
             printWindow.print();
         },
-        buildInvoiceContent(refNo) {
+        buildInvoiceContent() {
           // Determine whether to include the row
           const showExpensesDeductionRow = this.expenses !== 0;
           const logoBase64 = this.logoBase64;
+          const watermarkText = this.paymentMethod;
           // Build the HTML content for the receipt
           const receiptHTML = `
             <!DOCTYPE html>
@@ -354,6 +378,17 @@
                   display: flex;
                   flex-direction: column;
                 }
+                 .watermark {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 80px;
+                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
+                    white-space: nowrap;
+                    z-index: 0;
+                    pointer-events: none; /* Prevents watermark from interfering with other elements */
+                  }
                 .receipt-header {
                   display: flex;
                   justify-content: space-between;
@@ -403,6 +438,7 @@
               </style>
             </head>
             <body>
+            <div class="watermark">${watermarkText}</div>
               <div class="receipt">
                 <div class="receipt-header">
                   <div class="company-logo">
@@ -415,13 +451,11 @@
                   </div>
                 </div>
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong></p>
+                  <p><strong>Invoice For:</strong>${this.currentYear}</p>
                   <p><strong></strong> ${this.landlord}</p>
                   <p><strong></strong> ${this.property.name} - ${this.unitsNo} Units</p>
-                  <p><strong></strong> ${this.currentMonth}</p>
                   <p><strong></strong>  ${new Date().toLocaleString()}</p>
                   
-                  <p><strong>Payment Status:</strong> Unsettled</p>
                 </div>
                 <table class="receipt-table">
                   <thead>
@@ -524,7 +558,7 @@
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
             // Add title
-            const titleText = (this.property.name + " " + this.currentMonth + ' Rent Statement').toUpperCase();
+            const titleText = (this.property.name + " " + this.currentYear + ' Rent Statement').toUpperCase();
             const titleFontSize = 16;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -676,7 +710,7 @@
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
 
             // Save the PDF
-            let fileName = this.property.name + " " + this.formatMonth(new Date()) + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
+            let fileName = this.property.name + " " + this.currentYear + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
             doc.save(fileName);
         },
 
@@ -981,11 +1015,19 @@
           return `${day}/${month}/${year}`;
         },
         loadLists() {
-             axios.get('/api/propertysettledinvoices/'+this.$route.params.id).then((response) => {
+             axios.get('/api/propertyyearsettledinvoices/'+this.$route.params.id).then((response) => {
                 //settled invoices
              this.statements = response.data.propertyyearsettledinvoices;
              //all invoices (unsettled & vacants too)
              this.allstatements = response.data.propertyyearmonthinvoices;
+             this.rentLessCommission = this.totalPaid - this.propertyCommission;
+            this.netRemmission = this.rentLessCommission - (this.totalAmountPaid); 
+             if(this.totalDue == this.totalPaid) {
+               this.paymentMethod = 'SETTLED'; 
+             } 
+             else{
+                this.paymentMethod = 'NOT SETTLED'
+             }
              console.log("all",this.allstatements)
              // Calculate the total amount paid
              setTimeout(() => {
@@ -1039,8 +1081,8 @@
         },
         getPropertyExpenses()
         {
-          axios.get('/api/pmspropertyexpenses/'+ this.$route.params.id).then((response) => {
-            this.expenses = response.data.pmspropertyexpenses;
+          axios.get('/api/pmsyearpropertyexpenses/'+ this.$route.params.id).then((response) => {
+            this.expenses = response.data.pmsyearpropertyexpenses;
             // this.commission = this.property.landlord.commission;
             // this.fixedCommission = this.property.landlord.fixed_commission;
             this.totalAmountPaid = this.calculateTotalAmountPaid();
@@ -1050,6 +1092,10 @@
           }).catch(() => {
               console.log('error')
           })
+        },
+        getCurrentYear() {
+          const date = new Date();
+          return date.getFullYear();
         },
         calculateTotalAmountPaid() {
         if (!this.expenses || this.expenses.length === 0) {
@@ -1095,6 +1141,8 @@
         this.updateTime(); // Set the initial time
         setInterval(this.updateTime, 1000); // Update the time every second
         this.currentMonth = this.getCurrentMonth(); // Set the initial date
+        this.currentYear = this.getCurrentYear();
+
 
       }
     }
