@@ -455,6 +455,50 @@
         </router-link>
       </li> -->
 
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#con-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-file-earmark-text"></i><span>Configurations</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="con-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <router-link to="/awaitinginvoicing" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>User Permissions</span>
+            </a>
+            </router-link>
+          </li>
+         <li>
+            <router-link to="/invoicestosettle" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>User Activity</span>
+            </a>
+            </router-link>
+          </li> 
+         <li>
+            <router-link to="/settledinvoices" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>Settled Invoices</span>
+            </a>
+            </router-link>
+          </li>    
+        </ul>
+      </li>
+
     </ul>
 
   </aside><!-- End Sidebar-->

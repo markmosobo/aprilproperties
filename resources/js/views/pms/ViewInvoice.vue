@@ -384,7 +384,7 @@ export default {
     },
     formatDate(value) {
       if (value) {
-        return moment(String(value)).format('MM/DD/YYYY');
+        return moment(String(value)).format('DD/MM/YYYY');
       }
     },
     formatNumber(value) {

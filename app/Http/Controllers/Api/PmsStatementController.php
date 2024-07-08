@@ -504,6 +504,10 @@ class PmsStatementController extends Controller
             $data['water_bill'] = $waterBill;
         }
 
+        if (is_null($waterBill)) {
+            $data['water_bill'] = 0;
+        }
+
         PmsStatement::create($data);
 
         return response()->json([

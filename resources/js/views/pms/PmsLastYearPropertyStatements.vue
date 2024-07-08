@@ -209,7 +209,7 @@
                               <strong>Amount Due:</strong> N/A
                             </p>
                             <p>
-                              <strong>Water Bill:</strong>
+                              <strong>Water Bill:</strong>(optional)
                               <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
                               <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
                             </p>
@@ -763,8 +763,8 @@
         },
         getPropertyExpenses()
         {
-          axios.get('/api/pmsquarterpropertyexpenses/'+this.$route.params.id).then((response) => {
-            this.expenses = response.data.pmsyearpropertyexpenses;
+          axios.get('/api/pmslastyearpropertyexpenses/'+this.$route.params.id).then((response) => {
+            this.expenses = response.data.pmslastyearpropertyexpenses;
             console.log("expenses", this.expenses)
             // Calculate the total amount paid
             this.totalAmountPaid = this.calculateTotalAmountPaid();
@@ -853,39 +853,52 @@
             });
         },
         confirmInvoiceTenant() {
-           // Validate water_bill
-          if (!this.form.water_bill) {
-            this.errors.water_bill = 'Water bill is required.';
-            return;
-          }
+          // Validate water_bill
+          // if (!this.form.water_bill) {
+          //   this.errors.water_bill = 'Water bill is required.';
+          //   return;
+          // }
+
           if (this.selectedStatement && this.selectedStatement.id) {
+            // Show loading spinner
+            this.loading = true;
+            this.successMessage = '';
+
             // Implement your logic to invoice the tenant here
             console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
-            axios.put("/api/pmsinvoicestatement/"+this.selectedStatement.id, this.form)
-           .then(function (response) {
-              console.log(response);
-              // this.step = 1;
-              toast.fire(
-                 'Success!',
-                 'Tenant invoiced!',
-                 'success'
-              )
-           })
-           .catch(function (error) {
-              console.log(error);
-              // Swal.fire(
-              //    'error!',
-              //    // phone_error + id_error + pass_number,
-              //    'error'
-              // )
-           });
-            // Close the modal after invoicing
-            const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
-            modal.hide();
-            //reset form
-            this.form.water_bill = '';
-            this.getPropertyStatements();
+            axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
+              .then(response => {
+                this.invoiceStatement = response.data.statement
+                // this.sendSms(this.invoiceStatement);
+                this.successMessage = 'Tenant invoiced!';
+                toast.fire(
+                  'Success!',
+                  'Tenant invoiced!',
+                  'success'
+                );
+              })
+              .catch(error => {
+                console.log(error);
+                // Handle the error appropriately
+                toast.fire(
+                  'Error!',
+                  'An error occurred while invoicing the tenant.',
+                  'error'
+                );
+              })
+              .finally(() => {
+                // Hide loading spinner
+                this.loading = false;
 
+                // Close the modal after invoicing
+                const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
+                modal.hide();
+
+                // Reset form
+                this.form.water_bill = '';
+                this.form.cash = '';
+                this.getPropertyStatements();
+              });
           }
         },
         // settleTenant(id, tenantId){

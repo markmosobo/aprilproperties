@@ -139,12 +139,12 @@ class PmsExpenseController extends Controller
 
     public function propertyAllExpenses(Request $request, $id)
     {
-        $pmspropertyexpenses = PmsExpense::with('user','unit','property')->where('pms_property_id', $id)->get();
+        $pmsallpropertyexpenses = PmsExpense::with('user','unit','property')->where('pms_property_id', $id)->get();
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmspropertyexpenses' => $pmspropertyexpenses
+            'pmsallpropertyexpenses' => $pmsallpropertyexpenses
         ], 200);
     }       
 

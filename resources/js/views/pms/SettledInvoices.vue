@@ -252,7 +252,7 @@
               console.error('Error converting image to base64:', error);
             });
         },
-        print(statement) {
+        async print(statement) {
             console.log("merc",statement);
             this.name = statement.property.name;
             this.firstName = statement.tenant.first_name;
@@ -262,15 +262,39 @@
             this.unitNumber = statement.tenant.pms_unit_id;
             this.tenantId = statement.pms_tenant_id;
             this.propertyId = statement.pms_property_id;
-            this.getProperty(this.propertyId);
+            this.unitId = statement.pms_unit_id;
+            if(this.propertyId == 5)
+            {
+              await this.getUnitInfo(this.unitId);              
+            }
+            else
+            {
+              await this.getProperty(this.propertyId);              
+            }
             this.refNo = statement.ref_no;
             this.details = statement.details;
             this.date = statement.created_at;
             this.status = statement.status;
             this.paid = statement.paid;
-            this.balance = statement.balance;
+            // this.balance = statement.balance;
+            this.balance = statement.total - statement.paid;
             this.invoiceDate = statement.updated_at;
-            this.payDate = statement.paid_at;
+            this.payDate = statement.created_at;
+            // Assuming this.payDate is already assigned with statement.created_at
+            let payDate = new Date(this.payDate);
+
+            // Create a new Date object for dueDate based on payDate
+            let dueDate = new Date(payDate);
+
+            // Add one month to payDate
+            dueDate.setMonth(dueDate.getMonth() + 1);
+
+            // Set the date to the 5th of the succeeding month
+            dueDate.setDate(5);
+
+            // Assign the result to this.dueDate
+            this.dueDate = dueDate;
+
             this.total = statement.total;
             this.payment = statement.payment_method;
             this.statementId = statement.id;
@@ -461,11 +485,10 @@
                 </table>
                 <div class="payment-info">
                   <p><strong>Payment Options:</strong></p>
-                  <p>Bank Transfer: Account Number 123456789</p>
-                  <p>Mobile Money: Paybill - ${this.paybillNo ?? 'N/A'} Account Number - ${this.accountNo ?? 'N/A'}</p>
+                  <p>Mpesa: Paybill - ${this.paybillNo ?? 'N/A'} Account Number - ${this.accountNo ?? 'N/A'}</p>
                 </div>
                 <div class="receipt-footer">
-                  <p>Generated on ${new Date().toLocaleString()}</p>
+                  <p>Printed on ${this.format_date(new Date().toLocaleString())}</p>
                 </div>
               </div>
             </body>
@@ -745,14 +768,28 @@
 
           XLSX.writeFile(workbook, "SETTLED INVOICES.xlsx");
         },
-        getProperty()
-        {
-            axios.get('/api/pmsproperty/'+this.propertyId).then((response) => {
-                this.property = response.data.property
-                this.accountNo = response.data.property.account_number
-                this.paybillNo = response.data.property.paybill_number
-                console.log("property", response)
-            })
+        async getProperty() {
+            try {
+                const response = await axios.get('/api/pmsproperty/' + this.propertyId);
+                this.property = response.data.property;
+                this.accountNo = response.data.property.account_number;
+                this.paybillNo = response.data.property.paybill_number;
+                console.log("property", response);
+            } catch (error) {
+                console.error("Error fetching property data:", error);
+            }
+        },
+
+        async getUnitInfo() {
+            try {
+                const response = await axios.get(`/api/pmsunit/${this.unitId}`);
+                this.unit = response.data.unit;
+                this.accountNo = response.data.unit.account_number;
+                this.paybillNo = response.data.unit.paybill_number;
+                console.log("aprilthings", response);
+            } catch (error) {
+                console.error("Error fetching unit data:", error);
+            }
         },
         loadLists() {
              axios.get('api/lists').then((response) => {

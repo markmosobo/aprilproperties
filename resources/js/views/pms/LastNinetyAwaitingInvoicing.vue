@@ -320,6 +320,7 @@
           modal.show();
         },
         confirmInvoiceTenant() {
+          console.log(this.form)
           // Validate water_bill
           if (!this.form.water_bill) {
             this.errors.water_bill = 'Water bill is required.';

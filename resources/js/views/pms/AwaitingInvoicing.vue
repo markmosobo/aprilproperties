@@ -278,7 +278,7 @@
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                               <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">
-                              <span v-if="loading">
+                              <span v-if="invoicing">
                                 <i class="fa fa-spinner fa-spin"></i> Invoicing...
                               </span>
                               <span v-else>
@@ -397,6 +397,7 @@
             rentmonth: ''
           },
           loading: true,
+          invoicing: false,
           generating: false,
         }
       },
@@ -412,7 +413,7 @@
             return;
           }
 
-          // Validate water_bill
+          // Validate rent month
           if (!this.form.rentMonth) {
             this.errors.rentmonth = 'Rent month is required.';
             return;
@@ -506,22 +507,23 @@
         },
         confirmInvoiceTenant() {
           // Validate water_bill
-          if (!this.form.water_bill) {
-            this.errors.water_bill = 'Water bill is required.';
-            return;
-          }
+          // if (!this.form.water_bill) {
+          //   this.errors.water_bill = 'Water bill is required.';
+          //   return;
+          // }
 
           if (this.selectedStatement && this.selectedStatement.id) {
             // Show loading spinner
-            this.loading = true;
+            this.invoicing = true;
             this.successMessage = '';
 
             // Implement your logic to invoice the tenant here
             console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
+            
             axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
               .then(response => {
                 this.invoiceStatement = response.data.statement
-                this.sendSms(this.invoiceStatement);
+                // this.sendSms(this.invoiceStatement);
                 console.log("tems", this.invoiceStatement);
                 this.successMessage = 'Tenant invoiced!';
                 toast.fire(
@@ -541,7 +543,7 @@
               })
               .finally(() => {
                 // Hide loading spinner
-                this.loading = false;
+                this.invoicing = false;
 
                 // Close the modal after invoicing
                 const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));

@@ -173,7 +173,7 @@
                               <strong>Amount Due:</strong> N/A
                             </p>
                             <p>
-                              <strong>Water Bill:</strong>
+                              <strong>Water Bill:</strong>(optional)
                               <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
                               <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
                             </p>
@@ -283,10 +283,10 @@
         },
         confirmInvoiceTenant() {
           // Validate water_bill
-          if (!this.form.water_bill) {
-            this.errors.water_bill = 'Water bill is required.';
-            return;
-          }
+          // if (!this.form.water_bill) {
+          //   this.errors.water_bill = 'Water bill is required.';
+          //   return;
+          // }
 
           if (this.selectedStatement && this.selectedStatement.id) {
             // Show loading spinner
@@ -298,7 +298,7 @@
             axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
               .then(response => {
                 this.invoiceStatement = response.data.statement
-                this.sendSms(this.invoiceStatement);
+                // this.sendSms(this.invoiceStatement);
                 this.successMessage = 'Tenant invoiced!';
                 toast.fire(
                   'Success!',

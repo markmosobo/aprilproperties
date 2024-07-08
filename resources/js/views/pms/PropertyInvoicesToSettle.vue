@@ -149,6 +149,7 @@
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a> 
                                   </div>
                               </div>
                             </td>
@@ -266,6 +267,7 @@
     import moment from 'moment';
     import jsPDF from 'jspdf';
     import * as XLSX from 'xlsx';
+    import aprilLogo from '@/assets/img/apex-logo.png';
 
     const toast = Swal.mixin({
         toast: true,
@@ -286,6 +288,7 @@
           collectedTotal: 0,
           expensesTotal: 0,
           user: [],
+          logoBase64: '',
           authorizationCode: '',
           accessToken: '',
           selectedStatement: {}, // Initialize as an empty object
@@ -515,6 +518,264 @@
                         reject(error); // Reject the promise if there's an error
                     });
             });
+        },
+        loadLogo() {
+          fetch(aprilLogo)
+            .then(response => response.blob())
+            .then(blob => {
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                this.logoBase64 = reader.result;
+                // console.log(this.logoBase64)
+              };
+            })
+            .catch(error => {
+              console.error('Error converting image to base64:', error);
+            });
+        },
+        async print(statement) {
+            console.log("merc",statement);
+            this.name = statement.property.name;
+            this.firstName = statement.tenant.first_name;
+            this.lastName = statement.tenant.last_name;
+            this.tenant = this.firstName + " " + this.lastName;
+            this.phoneNumber = statement.tenant.phone_number;
+            this.unitNumber = statement.tenant.pms_unit_id;
+            this.tenantId = statement.pms_tenant_id;
+            this.propertyId = statement.pms_property_id;
+            this.unitId = statement.pms_unit_id;
+            if(this.propertyId == 5)
+            {
+              await this.getUnitInfo(this.unitId);              
+            }
+            else
+            {
+              await this.getProperty(this.propertyId);              
+            }
+            this.refNo = statement.ref_no;
+            this.details = statement.details;
+            this.date = statement.created_at;
+            this.status = statement.status;
+            this.paid = statement.paid;
+            this.balance = statement.total - statement.paid;
+            // this.balance = statement.balance;
+            this.invoiceDate = statement.updated_at;
+            this.payDate = statement.created_at;
+            // Assuming this.payDate is already assigned with statement.created_at
+            let payDate = new Date(this.payDate);
+
+            // Create a new Date object for dueDate based on payDate
+            let dueDate = new Date(payDate);
+
+            // Add one month to payDate
+            dueDate.setMonth(dueDate.getMonth() + 1);
+
+            // Set the date to the 5th of the succeeding month
+            dueDate.setDate(5);
+
+            // Assign the result to this.dueDate
+            this.dueDate = dueDate;
+            this.total = statement.total;
+            this.payment = statement.payment_method;
+            this.statementId = statement.id;
+            this.waterBill = statement.water_bill;
+            if(this.total == this.paid) {
+               this.paymentMethod = 'SETTLED'; 
+             } 
+             else{
+                this.paymentMethod = 'NOT SETTLED'
+             }
+            //unit info
+            this.unitName = statement.unit.unit_number;
+            this.unitRent = statement.unit.monthly_rent;
+            this.unitSecurityFee = statement.unit.security_fee;
+            this.unitGarbageFee = statement.unit.garbage_fee;
+            this.unitType = statement.unit.type;
+
+            // Open a new window for printing
+            const printWindow = window.open("", "_blank");
+
+            // Build the content for printing
+            const receiptContent = this.buildPrintContent();
+
+            // Write the content to the new window
+            printWindow.document.write(receiptContent);
+
+            // Close the document stream
+            printWindow.document.close();
+
+            // Trigger the print dialog
+            printWindow.print();
+        },
+        buildPrintContent() {
+          // Determine whether to include the row
+          const showExpensesDeductionRow = this.expenses !== 0;
+          const logoBase64 = this.logoBase64;
+          const watermarkText = this.paymentMethod;
+          // Build the HTML content for the receipt
+          const receiptHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Invoice Of Payment - ${this.refNo}</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f5f5f5;
+                }
+                .receipt {
+                  max-width: 600px;
+                  margin: 20px auto;
+                  padding: 20px;
+                  background-color: #fff;
+                  border: 2px solid #ccc;
+                  display: flex;
+                  flex-direction: column;
+                }
+                 .watermark {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 80px;
+                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
+                    white-space: nowrap;
+                    z-index: 0;
+                    pointer-events: none; /* Prevents watermark from interfering with other elements */
+                  }
+                .receipt-header {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 50px;
+                }
+                .company-info {
+                  text-align: left;
+                }
+                .company-info img {
+                  max-width: 150px;
+                  height: auto;
+                }
+                .receipt-info {
+                  margin-bottom: 50px;
+                }
+                .receipt-info p {
+                  margin: 5px 0;
+                  color: #555;
+                }
+                 .additional-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                }
+                .additional-info p {
+                  margin: 8px 0;
+                }
+                .payment-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                  text-align: center;
+                }
+                .payment-info p {
+                  margin: 8px 0;
+                }
+                .receipt-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 50px;
+                }
+                .receipt-table th, .receipt-table td {
+                  padding: 8px;
+                  border-bottom: 1px solid #ccc;
+                }
+                .receipt-table th {
+                  text-align: left;
+                  background-color: #f2f2f2;
+                  color: #333;
+                }
+                .receipt-table td {
+                  text-align: left;
+                  color: #666;
+                }
+                .receipt-footer {
+                  text-align: center;
+                  margin-top: auto;
+                }
+                .receipt-footer p {
+                  margin: 5px 0;
+                  color: #777;
+                }
+              </style>
+            </head>
+            <body>
+            <div class="watermark">${watermarkText}</div>
+              <div class="receipt">
+                <div class="receipt-header">
+                  <div class="company-logo">
+                    <img src="${logoBase64}" alt="Company Logo" style="max-width: 150px; height: auto;">
+                  </div>
+                  <div class="company-info">
+                    <p>Kakamega-Webuye Rd, ACK Building</p>
+                    <p>Phone: (0720) 020-401 </p>
+                    <p> Email: propertapril@gmail.com</p>
+                    <p> Website: www.aprilproperties.co.ke</p>
+                  </div>
+                </div>
+                <div class="receipt-info">
+                  <p><strong>#${this.refNo}</strong></p>
+                  <p><strong>Invoice Date:</strong> ${this.format_date(this.invoiceDate ?? 'N/A')}</p>
+                  <p><strong>Due Date:</strong>  ${this.format_date(this.dueDate ?? 'N/A')}</p>
+                  
+                </div>
+                <div class="additional-info">
+                    <p><strong>Invoiced To</strong></p>
+                    <p><strong></strong> ${this.tenant}</p>
+                    <p><strong></strong> ${this.name} - ${this.unitName}</p>
+                    <p><strong></strong> ${this.details}</p>
+                </div>
+                <table class="receipt-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total Rent Due (Incl. Water Bill)</td>
+                      <td>KES ${this.formatNumber(this.total)}</td>
+                    </tr>
+                    <tr>
+                      <td>Total Amount Paid</td>
+                      <td>KES ${this.formatNumber(this.paid)}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>Total Balance:</th>
+                      <td>KES ${this.formatNumber(this.balance)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div class="payment-info">
+                  <p><strong>Payment Options:</strong></p>
+                  <p>Mobile Money: Paybill - ${this.paybillNo ?? 'N/A'} Account Number - ${this.accountNo ?? 'N/A'}</p>
+                </div>
+                <div class="receipt-footer">
+                  <p>Generated on ${new Date().toLocaleString()}</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `;
+
+          return receiptHTML;
         },
         printReceipt() {
           this.submit().then(() => {
@@ -1158,12 +1419,37 @@
     
              });
         },
+        async getProperty() {
+            try {
+                const response = await axios.get('/api/pmsproperty/' + this.propertyId);
+                this.property = response.data.property;
+                this.accountNo = response.data.property.account_number;
+                this.paybillNo = response.data.property.paybill_number;
+                console.log("property", response);
+            } catch (error) {
+                console.error("Error fetching property data:", error);
+            }
+        },
+
+        async getUnitInfo() {
+            try {
+                const response = await axios.get(`/api/pmsunit/${this.unitId}`);
+                this.unit = response.data.unit;
+                this.accountNo = response.data.unit.account_number;
+                this.paybillNo = response.data.unit.paybill_number;
+                console.log("aprilthings", response);
+            } catch (error) {
+                console.error("Error fetching unit data:", error);
+            }
+        },
         getProperty()
         {
           axios.get('/api/pmsproperty/'+ this.$route.params.id).then((response) => {
             this.property = response.data.property;
             this.commission = this.property.landlord.commission;
             this.fixedCommission = this.property.landlord.fixed_commission;
+            this.accountNo = response.data.property.account_number;
+            this.paybillNo = response.data.property.paybill_number;
             if(this.commission !== null)
             {
               this.propertyCommission = this.commission
@@ -1231,6 +1517,7 @@
       mounted(){
         this.loadLists();
         this.getProperty();
+        this.loadLogo();
         // this.loginUwazii();
         this.formattedDate = this.getFormattedDate();
         this.user = localStorage.getItem('user');
