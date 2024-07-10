@@ -13,9 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('pms_properties', function (Blueprint $table) {
-            $table->integer('paybill_number')->nullable(); // Change 'string' to the data type you need
-            $table->integer('account_number')->nullable(); // Change 'string' to the data type you need
+        Schema::create('permissions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -26,8 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('pms_properties', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('permissions');
     }
 };

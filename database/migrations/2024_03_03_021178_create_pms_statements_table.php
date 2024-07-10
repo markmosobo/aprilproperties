@@ -34,12 +34,14 @@ return new class extends Migration
             $table->string('details')->nullable(); 
             $table->string('payment_method')->nullable(); 
             $table->string('mpesa_code')->nullable(); 
+            $table->string('unit_number')->nullable(); 
             $table->integer('status')->nullable()->default(0);
             $table->integer('sms_status')->nullable()->default(0);
             $table->float('total')->nullable();
             $table->float('paid')->nullable();
             $table->float('balance')->nullable();
             $table->float('water_bill')->nullable();
+            $table->timestamp('paid_at')->nullable();
             $table->timestamps();
         });
     }

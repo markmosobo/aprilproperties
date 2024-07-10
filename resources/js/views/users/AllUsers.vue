@@ -70,7 +70,8 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewuser/'+user.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>       
-                                  <a @click="resetPassword(user.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>Reset Password</a>                                     
+                                  <a @click="resetPassword(user.id )" class="dropdown-item" href="#"><i class="ri-lock-fill mr-2"></i>Reset Password</a> 
+                                  <a @click="setPermissions(user)" class="dropdown-item" href="#"><i class="ri-user-settings-fill mr-2"></i>Set Permissions</a>                                     
                                   <a v-if="user.status == 2" @click="activateUser(user.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Activate</a>
                                   <a v-if="user.status == 1" @click="deactivateUser(user.id)" class="dropdown-item" href="#"><i class="ri-refresh-fill mr-2"></i>Deactivate</a>
                                   </div>
@@ -80,6 +81,47 @@
                         </tbody>
                       </table>
     
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="invoiceTenantModal" tabindex="-1" aria-labelledby="invoiceTenantModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="invoiceTenantModalLabel">Set Permissions</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>#{{user.first_name}} {{user.last_name}}</p>
+                            <div class="form-check">
+                                  <input type="checkbox" class="form-check-input" id="waterBillCheck" name="water_bill_check">
+                                  <label class="form-check-label" for="waterBillCheck">Assign All Rights & Privileges</label>
+                              </div>
+                            <p>
+                                  <strong>Rights & Privileges:</strong>
+                                  <div class="row">
+                                  <div v-for="permission in permissions" :key="permission.id" class="col-sm-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="waterBillCheck" name="water_bill_check">
+                                        <label class="form-check-label" for="waterBillCheck">{{permission.name}}</label>
+                                    </div>
+                                  </div>
+                                  </div>  
+                            </p>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmSetPermissions">
+                              <span v-if="loading">
+                                <i class="fa fa-spinner fa-spin"></i> Saving...
+                              </span>
+                              <span v-else>
+                                Save changes
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
     
                   </div>
@@ -113,7 +155,8 @@
       data(){
         return {
           users: [],
-          user: []
+          user: [],
+          permissions: []
         }
       },
       methods: {
@@ -128,6 +171,16 @@
         },
         navigateTo(location){
             this.$router.push(location)
+        },
+        setPermissions(user)
+        {
+          this.permissionUser = user;
+          const modal = new bootstrap.Modal(document.getElementById('invoiceTenantModal'));
+          modal.show();
+        },
+        confirmSetPermissions()
+        {
+          console.log("test", this.permissionUser)
         },
         resetPassword(id){
           axios.put('api/resetpassword/'+ id).then(() => {
@@ -168,7 +221,8 @@
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.users = response.data.lists.users;
-             console.log(this.users)
+             this.permissions = response.data.lists.permissions;
+             console.log(this.permissions)
              setTimeout(() => {
                   $("#AllUsersTable").DataTable();
               }, 10);

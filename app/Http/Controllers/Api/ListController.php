@@ -27,6 +27,7 @@ use App\Models\PmsTenant;
 use App\Models\PmsExpense;
 use App\Models\PmsStatement;
 use App\Models\Invoice;
+use App\Models\Permission;
 use Carbon\Carbon;
 
 class ListController extends Controller
@@ -55,6 +56,7 @@ class ListController extends Controller
         $landlords = Landlord::all();
         $smslandlords = Landlord::whereNotNull('phone_no')->get();
         $units = PmsUnit::all();
+        $permissions = Permission::all();
         $statements = PmsStatement::with('property', 'tenant','unit')->latest()->get();
         $pmsinvoices = Invoice::with('property', 'tenant')->latest()->get();
         $pmstenants = PmsTenant::orderBy('id', 'desc')->with('unit','property')->get();
@@ -133,6 +135,7 @@ class ListController extends Controller
                 'smslandlords' => $smslandlords,
                 'pmsproperties' => $pmsproperties,
                 'units' => $units,
+                'permissions' => $permissions,
                 'pmstenants' => $pmstenants,
                 'pmsexpenses' => $pmsexpenses,
                 'statements' => $statements,
