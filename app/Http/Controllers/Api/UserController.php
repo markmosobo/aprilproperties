@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Permission;
+use App\Models\UserPermission;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -48,6 +50,10 @@ class UserController extends Controller
             'role_id' => $request->role_id,
             'password' => bcrypt('aprilproperties'),
         ]);
+
+        //auto assign permissions
+        $permissions = Permission::all()->pluck('id')->toArray();
+        $user->permissions()->sync($permissions);
 
         return response()->json([
             'status' => true,
@@ -102,8 +108,9 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy(Request $request, $id)
     {
+        $user = User::findOrFail($id);
         $user->delete();
 
         return response()->json([
@@ -142,4 +149,54 @@ class UserController extends Controller
             'user' => $user
         ], 200);
     }
+
+    public function userPermissions(Request $request, $id)
+    {
+        $permissions = UserPermission::where('user_id',$id)->with('permission')->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => "success",
+            'permissions' => $permissions
+        ], 200);
+    }
+
+   public function updateUserPermissions(Request $request, $id)
+   {
+        $permissions = $request->input('permissions');
+
+        // Get the user
+        $user = User::findOrFail($id);
+
+        // Detach all permissions
+        $user->permissions()->detach();
+
+        // $user->permissions()->sync($permissions);
+
+        // Attach permissions with the correct status
+        foreach ($permissions as $permission) {
+            if ($permission['status']) {
+                $user->permissions()->attach($permission['permission_id'], ['status' => 1]);
+            } else {
+                $user->permissions()->attach($permission['permission_id'], ['status' => 0]);
+            }
+        }
+
+        return response()->json(['message' => 'Permissions updated successfully!']);
+   }
+
+    public function generateUserPermissions(Request $request, $id)
+   {
+
+        $user = User::findOrFail($id);
+
+        // Detach all permissions
+        $user->permissions()->detach();
+
+        //auto assign permissions
+        $permissions = Permission::all()->pluck('id')->toArray();
+        $user->permissions()->sync($permissions);
+
+        return response()->json(['message' => 'Permissions generated successfully!']);
+   } 
 }

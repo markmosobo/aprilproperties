@@ -145,7 +145,9 @@
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
-                                  <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a>                                  
+                                  <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a> 
+                                  <a @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>  
+                                  <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>                                 
                                   </div>
                               </div>
                             </td>
@@ -160,7 +162,7 @@
                       </div>     
                     </div>
 
-                    <!-- Modal -->
+                    <!--Settle Invoice Modal -->
                     <div class="modal fade" id="settleTenantModal" tabindex="-1" aria-labelledby="settleTenantModalLabel" aria-hidden="true">
                       <div class="modal-dialog">
                         <div class="modal-content">
@@ -239,6 +241,53 @@
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="confirmSettleTenant">Settle Tenant</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!--Eit Invoice Modal -->
+                    <div class="modal fade" id="EditInvoiceModal" tabindex="-1" aria-labelledby="EditInvoiceModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="EditInvoiceModalLabel">Edit Invoice</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>#{{selectedStatement.ref_no}}</p>
+                            <p>{{ tenant}}</p>
+                            <p v-if="selectedStatement">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Amount Due(Inclusive of Water Bill):</strong> 
+                                 <input type="text" name="total" v-model="form.total" class="form-control">
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Amount Paid:</strong>
+                                 <input type="text" name="paid" v-model="form.paid" class="form-control">
+                                </div>
+                              </div>   
+                            </p>
+                            <p v-if="selectedStatement">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Balance:</strong> 
+                                 <input type="text" name="balance" v-model="form.balance" class="form-control">
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Water Bill:</strong>
+                                 <input type="text" name="water_bill" v-model="form.water_bill" class="form-control">
+                                </div>
+                              </div>   
+                            </p>
+
+                            
+
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="confirmEditInvoice">Save changes</button>
                           </div>
                         </div>
                       </div>
@@ -339,6 +388,60 @@
           const seconds = String(now.getSeconds()).padStart(2, '0');
 
           return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        },
+        editInvoice(statement)
+        {
+          this.selectedStatement = statement;
+          this.form.paid = this.selectedStatement.paid;
+          this.form.balance = this.selectedStatement.balance;
+          this.form.total = this.selectedStatement.total;
+          this.form.water_bill = this.selectedStatement.water_bill;
+          this.firstName = this.selectedStatement.tenant.first_name;
+          this.lastName = this.selectedStatement.tenant.last_name;
+          this.tenant = this.firstName + " " + this.lastName;
+          // Show the modal after fetching data
+            const modal = new bootstrap.Modal(document.getElementById('EditInvoiceModal'));
+            modal.show();
+        },
+        async confirmEditInvoice() {
+          if (this.selectedStatement && this.selectedStatement.id) {
+            // Implement your logic to invoice the tenant here
+            console.log("Editing invoice with statement ID:", this.selectedStatement.id);
+            await this.saveEditInvoice();
+
+            // Close the modal after invoicing
+            const modal = bootstrap.Modal.getInstance(document.getElementById('EditInvoiceModal'));
+            modal.hide();
+            this.loadLists()
+          }
+        },
+        saveEditInvoice() {
+            return new Promise((resolve, reject) => {
+                let payload; // Define payload variable outside the if-else blocks
+
+                  payload = {
+                      total: this.form.total,
+                      paid: this.form.paid,
+                      balance: this.form.balance,
+                      water_bill: this.form.water_bill,
+                  };
+               
+
+                axios.put("/api/edit-statement/" + this.selectedStatement.id, payload)
+                    .then(response => {
+                        console.log(response);
+                         toast.fire(
+                              'Success!',
+                              'Invoice updated!',
+                              'success'
+                          );
+                        resolve(); // Resolve the promise when settleTenant completes successfully
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        reject(error); // Reject the promise if there's an error
+                    });
+            });
         },
         async settleTenant(statement) {
           try {
@@ -1382,7 +1485,38 @@
                 console.error("Error fetching unit data:", error);
             }
         },
-
+        deleteInvoice(id){
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#006400',
+            cancelButtonColor: '#FFA500',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            if (result.isConfirmed) { 
+            //send request to the server
+            axios.delete('/api/pmsstatement/'+id).then(() => {
+            toast.fire(
+              'Deleted!',
+              'Invoice has been deleted.',
+              'success'
+            )
+            this.loadLists();
+            }).catch(() => {
+              Swal.fire(
+              'Failed!',
+              'There was something wrong.',
+              'warning'
+            )
+            }); 
+            }else if(result.isDenied) {
+              console.log('cancelled')
+            }
+                             
+          })
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.statements = response.data.lists.invoicestosettle;

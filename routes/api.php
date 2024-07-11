@@ -187,6 +187,7 @@ Route::put('pmsstatement/{id}', [PmsStatementController::class, 'update']);
 Route::put('pmssettlestatement/{id}', [PmsStatementController::class, 'settle']);
 Route::put('pmsinvoicestatement/{id}', [PmsStatementController::class, 'invoice']);
 Route::put('pmslastmonthtenantstatement/{id}', [PmsStatementController::class, 'updateTenantLastMonthStatement']);
+Route::put('edit-statement/{id}', [PmsStatementController::class, 'editStatement']);
 
 Route::delete('property/{id}', [PropertyController::class, 'destroy']);
 Route::delete('category/{id}', [CategoryController::class, 'destroy']);
@@ -209,6 +210,7 @@ Route::delete('pmsproperty/{id}', [PmsPropertyController::class, 'destroy']);
 Route::delete('pmstenant/{id}', [PmsTenantController::class, 'destroy']);
 Route::delete('pmsunit/{id}', [PmsUnitController::class, 'destroy']);
 Route::delete('pmsexpense/{id}', [PmsExpenseController::class, 'destroy']);
+Route::delete('pmsstatement/{id}', [PmsStatementController::class, 'destroy']);
 
 Route::put('vacatetenant/{id}',[PmsTenantController::class,'vacate']);
 Route::put('vacateunit/{id}',[PmsUnitController::class,'vacate']);
@@ -261,3 +263,7 @@ Route::post('sendlandlordsms', [SearchController::class, 'sendLandlordSms'])->na
 //generate invoices
 Route::post('/generate-monthly-statements', [PmsStatementController::class, 'generateMonthlyStatements']);
 
+//user permissions
+Route::get('/userpermissions/{id}', [UserController::class, 'userPermissions']);
+Route::post('/update-permissions/{id}', [UserController::class, 'updateUserPermissions']);
+Route::post('/generate-permissions/{id}', [UserController::class, 'generateUserPermissions']);

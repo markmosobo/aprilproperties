@@ -235,11 +235,11 @@
           })
           .catch(function (error) {
              console.log(error);
-             // Swal.fire(
-             //    'error!',
-             //    // phone_error + id_error + pass_number,
-             //    'error'
-             // )
+             Swal.fire(
+                'error!',
+                response.data.message,
+                'error'
+             )
           });
           this.$router.push('/all-users')
          }

@@ -86,6 +86,40 @@ class PmsStatementController extends Controller
         }
     }
 
+    public function editStatement(Request $request, $id)
+    {
+        $pmsstatement = PmsStatement::findOrFail($id);
+
+        if ($pmsstatement) {
+                $pmsstatement->update([
+                    'total' => $request->total,
+                    'paid' => $request->paid,
+                    'balance' => $request->balance,
+                    'water_bill' => $request->water_bill,
+                ]);                   
+                
+
+            return response()->json([
+                'status' => true,
+                'message' => "Statement Updated successfully!",
+                'statement' => $pmsstatement
+            ], 200);
+        }
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $pmsstatement = PmsStatement::findOrFail($id);
+        if($pmsstatement){
+        $pmsstatement->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Invoice Deleted successfully!",
+        ], 200);
+        }
+    }
+
     public function settle(Request $request, $id)
     {
         $pmsstatement = PmsStatement::findOrFail($id);

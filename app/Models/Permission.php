@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Permission extends Model
 {
@@ -13,4 +14,9 @@ class Permission extends Model
         'code',
         'name',
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_permissions');
+    }
 }

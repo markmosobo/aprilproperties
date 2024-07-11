@@ -64,6 +64,7 @@ import AddSocialLink from '../views/sociallinks/AddSocialLink.vue'
 import EditSocialLink from '../views/sociallinks/EditSocialLink.vue'
 import Profile from '../views/Profile.vue'
 import AllUsers from '../views/users/AllUsers.vue'
+import Permissions from '../views/users/Permissions.vue'
 import AddUser from '../views/users/AddUser.vue'
 import ViewUser from '../views/users/ViewUser.vue'
 // import OurServices from '../views/OurServices.vue'
@@ -274,6 +275,12 @@ const routes = [
         path:'/all-users',
         name: 'all-users',
         component: AllUsers,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/permissions',
+        name: 'permissions',
+        component: Permissions,
         beforeEnter : guardMyroute,
     },
     {

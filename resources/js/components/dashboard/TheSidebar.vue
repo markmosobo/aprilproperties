@@ -197,6 +197,18 @@
               <i class="bi bi-circle"></i><span>Roles</span>
               </a>
             </router-link>
+          </li>
+          <li>
+            <router-link to="/permissions" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+              <i class="bi bi-circle"></i><span>Permissions</span>
+              </a>
+            </router-link>
           </li>                          
         </ul>
       </li>
