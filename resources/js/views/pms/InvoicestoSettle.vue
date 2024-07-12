@@ -144,10 +144,10 @@
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
-                                  <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
+                                  <a v-if="statement.status == 0 && statement.water_bill !== null && settleInvoicePermission" @click="settleTenant(statement)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a> 
-                                  <a @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>  
-                                  <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>                                 
+                                  <a v-if="editInvoicePermission" @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>  
+                                  <a v-if="deleteInvoicePermission" @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>                                 
                                   </div>
                               </div>
                             </td>
@@ -246,7 +246,7 @@
                       </div>
                     </div>
 
-                    <!--Eit Invoice Modal -->
+                    <!--Edit Invoice Modal -->
                     <div class="modal fade" id="EditInvoiceModal" tabindex="-1" aria-labelledby="EditInvoiceModalLabel" aria-hidden="true">
                       <div class="modal-dialog">
                         <div class="modal-content">
@@ -369,6 +369,9 @@
             cash: '',
             mpesa_code: ''
           },
+          settleInvoicePermission: '',
+          editInvoicePermission: '',
+          deleteInvoicePermission: ''
         }
       },
       methods: {
@@ -1517,6 +1520,62 @@
                              
           })
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredSettlePermissionId = 5;
+              const requiredEditPermissionId = 2;
+              const requiredDeletePermissionId = 3;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasSettlePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredSettlePermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasDeletePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredDeletePermissionId && permission.status === requiredStatus);
+
+              if (hasSettlePermission) {
+                // User has the required permission, allow them to view things
+                this.settleInvoicePermission = true;
+                console.log(`User has permission: ${this.settleInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.settleInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.editInvoicePermission = true;
+                console.log(`User has permission: ${this.editInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.editInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasDeletePermission) {
+                // User has the required permission, allow them to view things
+                this.deleteInvoicePermission = true;
+                console.log(`User has permission: ${this.deleteInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.deleteInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+              });
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.statements = response.data.lists.invoicestosettle;
@@ -1587,6 +1646,8 @@
         this.formattedDate = this.getFormattedDate();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
 
       }
     }

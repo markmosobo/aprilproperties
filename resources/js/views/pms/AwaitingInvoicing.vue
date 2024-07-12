@@ -106,6 +106,7 @@
                                   :href="href"
                                   :class="{ active: isActive }"
                                    @click="openModal"
+                                   v-if="addInvoicePermission"
                                   class="btn btn-sm btn-primary rounded-pill me-2"
                                   style="background-color: darkgreen; border-color: darkgreen;"
                                 >
@@ -225,7 +226,7 @@
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                       <a @click="navigateTo('/viewstatement/' + statement.id)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>
-                                      <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
+                                      <a v-if="statement.status == 0 && statement.water_bill == null && invoiceTenantPermission" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
                                       <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                     </div>
                                   </div>
@@ -399,6 +400,8 @@
           loading: true,
           invoicing: false,
           generating: false,
+          addInvoicePermission: '',
+          invoiceTenantPermission: ''
         }
       },
       methods: {
@@ -994,6 +997,50 @@
           const year = currentDate.getFullYear();
           return `${months[monthIndex]} ${year}`;
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredAddPermissionId = 1;
+              const requiredEditPermissionId = 4;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasAddPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredAddPermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+
+              if (hasAddPermission) {
+                // User has the required permission, allow them to view things
+                this.addInvoicePermission = true;
+                console.log(`User has permission: ${this.addInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.addInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.invoiceTenantPermission = true;
+                console.log(`User has permission: ${this.invoiceTenantPermission}`);
+              } else {
+                // User does not have the required permission
+                this.invoiceTenantPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+              });
+        },
         loadLists() {
              axios.get('/api/lists').then((response) => {
              this.statements = response.data.lists.awaitinginvoicing;
@@ -1049,6 +1096,8 @@
         this.months = this.generateMonthsArray();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
         this.currentMonth = this.getCurrentMonth();
 
       }

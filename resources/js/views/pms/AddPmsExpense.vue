@@ -90,7 +90,7 @@
                       <div class="col-sm-10">
                         <input
                             type="text"
-                            placeholder="e.g Slashing or Repair Works"
+                            placeholder="Briefly describe what was paid fore.g Slashing or Repair Works"
                             id="title"
                             name="title"
                             v-model="form.payment_type"

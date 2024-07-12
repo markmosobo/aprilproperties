@@ -27,7 +27,7 @@
                           <div class="col d-flex">
                    
                    
-                            <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
+                            <router-link v-if="addLandlordPermission" to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
                                   :class="{ active: isActive }"
@@ -78,8 +78,8 @@
                                   <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>  -->
                                   <a @click="navigateTo('/pmslandlordproperties/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Property</a>
                                    <a @click="navigateTo('/pmslandlordstatements/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>                                           
-                                  <a @click="navigateTo('/edit-pmslandlord/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-                                  <a @click="deleteLandlord(landlord.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a v-if="editLandlordPermission" @click="navigateTo('/edit-pmslandlord/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a v-if="deleteLandlordPermission" @click="deleteLandlord(landlord.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
                               </div>
                             </td>
@@ -121,7 +121,10 @@
           landlords: [],
           categories: [],
           landlordtypes: [],
-          user: []
+          user: [],
+          addLandlordPermission: '',
+          editLandlordPermission: '',
+          deleteLandlordPermission: '',
         }
       },
       methods: {
@@ -164,6 +167,63 @@
                                    
                 })
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredAddPermissionId = 10;
+              const requiredEditPermissionId = 11;
+              const requiredDeletePermissionId = 12;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasAddPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredAddPermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasDeletePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredDeletePermissionId && permission.status === requiredStatus);
+
+              if (hasAddPermission) {
+                // User has the required permission, allow them to view things
+                this.addLandlordPermission = true;
+                console.log(`User has permission: ${this.addLandlordPermission}`);
+              } else {
+                // User does not have the required permission
+                this.addLandlordPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.editLandlordPermission = true;
+                console.log(`User has permission: ${this.editLandlordPermission}`);
+              } else {
+                // User does not have the required permission
+                this.editLandlordPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasDeletePermission) {
+                // User has the required permission, allow them to view things
+                this.deleteLandlordPermission = true;
+                console.log(`User has permission: ${this.deleteLandlordPermission}`);
+              } else {
+                // User does not have the required permission
+                this.deleteLandlordPermission = false;
+                console.log('User does not have the required permission');
+              }
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+                this.deleteLandlordPermission = false;
+              });
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.landlords = response.data.lists.landlords;
@@ -182,6 +242,8 @@
         this.loadLists();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
 
       }
     }

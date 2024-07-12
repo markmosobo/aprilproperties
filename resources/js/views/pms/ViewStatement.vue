@@ -145,8 +145,8 @@
                                         <button @click.prevent="cancel()" class="btn btn-dark w-100">Cancel</button>
                                     </div>
                                     <div class="col-sm-6 text-end">
-                                        <button @click.prevent="settleTenant()" type="submit" v-if="status == 0 && waterBill !== null" class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Settle</button>
-                                        <button @click.prevent="invoiceTenant()" type="submit" v-else-if="status == 0 && waterBill == null" class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Invoice</button>
+                                        <button @click.prevent="settleTenant()" type="submit" v-if="status == 0 && waterBill !== null && settleInvoicePermission" class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Settle</button>
+                                        <button @click.prevent="invoiceTenant()" type="submit" v-else-if="status == 0 && waterBill == null && invoiceTenantPermission" class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Invoice</button>
                                         <button @click="printReceipt" v-else class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Print Receipt</button>
                                     </div>
                                 </div>
@@ -195,7 +195,9 @@ export default {
             unitGarbageFee: '',
             unitName: '',
             invoice: '',
-            user: []
+            user: [],
+            invoiceTenantPermission: '',
+            settleInvoicePermission: ''
         }
     },
     components: {
@@ -254,6 +256,48 @@ export default {
                     console.error("Error fetching unit:", error);            
           })
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredEditPermissionId = 4;
+              const requiredSettlePermissionId = 5;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasSettlePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredSettlePermissionId && permission.status === requiredStatus);
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.invoiceTenantPermission = true;
+                console.log(`User has permission: ${this.invoiceTenantPermission}`);
+              } else {
+                // User does not have the required permission
+                this.invoiceTenantPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasSettlePermission) {
+                // User has the required permission, allow them to view things
+                this.settleInvoicePermission = true;
+                console.log(`User has permission: ${this.settleInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.settleInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+              });
+        },
         cancel() {
           this.$router.go(-1);
         },
@@ -304,11 +348,11 @@ export default {
                     // )
                 });
 
-            this.$router.push('/statements');
+            this.$router.push('/invoicestosettle');
         },
         printReceipt() {
             // this.submit();
-            this.$router.push('/statements')
+            this.$router.push('/invoicestosettle')
 
             // Open a new window for printing
             const printWindow = window.open("", "_blank");
@@ -474,7 +518,10 @@ export default {
     mounted() {
         this.getStatement();
         this.getInvoiceDate();
-        this.user = JSON.parse(localStorage.getItem('user'));
+        this.user = localStorage.getItem('user');
+        this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
     }
 }
 </script>

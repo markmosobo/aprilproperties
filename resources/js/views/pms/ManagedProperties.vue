@@ -21,12 +21,12 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">All Managed Properties <span>| Today</span></h5>
+                      <h5 class="card-title">All Managed Properties <span>| Properties under management</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
                          
-                            <router-link to="/add-pmsproperty" custom v-slot="{ href, navigate, isActive }">
+                            <router-link  v-if="addPropertyPermission" to="/add-pmsproperty" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
                                   :class="{ active: isActive }"
@@ -37,7 +37,7 @@
                                   Add Property
                                 </a>
                             </router-link>
-                            </div>
+                          </div>
                           <div class="col-auto d-flex justify-content-end">
                           <div class="btn-group" role="group">
                               <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -92,8 +92,8 @@
                                     <i class="ri-bank-card-fill mr-2"></i>Settled Invoices
                                   </a>
  
-                                  <a @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-                                  <a @click="deleteProperty(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a v-if="editPropertyPermission" @click="navigateTo('/edit-pmsproperty/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a v-if="deletePropertyPermission" @click="deleteProperty(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                  
                                   </div>
                               </div>
@@ -136,7 +136,10 @@
           properties: [],
           categories: [],
           propertytypes: [],
-          user: []
+          user: [],
+          addPropertyPermission: '',
+          editPropertyPermission: '',
+          deletePropertyPermission: '',
         }
       },
       methods: {
@@ -227,6 +230,62 @@
                                    
                 })
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredAddPermissionId = 16;
+              const requiredEditPermissionId = 17;
+              const requiredDeletePermissionId = 18;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasAddPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredAddPermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasDeletePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredDeletePermissionId && permission.status === requiredStatus);
+
+              if (hasAddPermission) {
+                // User has the required permission, allow them to view things
+                this.addPropertyPermission = true;
+                console.log(`User has permission: ${this.addPropertyPermission}`);
+              } else {
+                // User does not have the required permission
+                this.addPropertyPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.editPropertyPermission = true;
+                console.log(`User has permission: ${this.editPropertyPermission}`);
+              } else {
+                // User does not have the required permission
+                this.editPropertyPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasDeletePermission) {
+                // User has the required permission, allow them to view things
+                this.deletePropertyPermission = true;
+                console.log(`User has permission: ${this.deletePropertyPermission}`);
+              } else {
+                // User does not have the required permission
+                this.deletePropertyPermission = false;
+                console.log('User does not have the required permission');
+              }
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+              });
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
              this.properties = response.data.lists.pmsproperties;
@@ -245,6 +304,9 @@
         this.loadLists();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
+        console.log(this.user)
 
       }
     }

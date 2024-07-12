@@ -21,15 +21,32 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{unit.name}} Units <span>| Today</span></h5>
-                      <p class="card-text">                 
+                      <h5 class="card-title">{{unit.name}} Units <span>| Property units</span></h5>
+                      <p class="card-text"> 
+                      <div class="row">
+                          <div class="col d-flex">                
                           <a
                             class="btn btn-sm btn-primary rounded-pill active"
+                            v-if="addUnitPermission"
                             style="background-color: darkgreen; border-color: darkgreen;"
                             @click="navigateTo('/add-pmsunit/'+unit.id )"
                           >
                             Add Unit
                           </a>
+                          </div>
+                          <div class="col-auto d-flex justify-content-end">
+                          <div class="btn-group" role="group">
+                              <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="ri-add-line"></i>
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                     <a @click="navigateTo('/managedproperties' )" class="dropdown-item" href="#"><i class="ri-building-fill mr-2"></i>Properties</a>
+                                     <a @click="navigateTo('/pmstenants' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Tenants</a>
+                                    <a @click="navigateTo('/pmslandlords' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Landlords</a>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
             
                       </p>
     
@@ -67,8 +84,8 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/view-pmsunit/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> 
-                                  <a @click="navigateTo('/edit-pmsunit/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>                                           
-                                  <a @click="deleteUnit(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a v-if="editUnitPermission" @click="navigateTo('/edit-pmsunit/'+property.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>                                           
+                                  <a v-if="deleteUnitPermission" @click="deleteUnit(property.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
                               </div>
                             </td>
@@ -111,7 +128,10 @@
           categories: [],
           propertytypes: [],
           user: [],
-          unit: []
+          unit: [],
+          addUnitPermission: '',
+          editUnitPermission: '',
+          deleteUnitPermission: ''
         }
       },
       methods: {
@@ -198,6 +218,62 @@
                                    
                 })
         },
+        getUserPermissions(id) {
+          axios.get('/api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log("vee", this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredAddPermissionId = 19;
+              const requiredEditPermissionId = 20;
+              const requiredDeletePermissionId = 21;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasAddPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredAddPermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasDeletePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredDeletePermissionId && permission.status === requiredStatus);
+
+              if (hasAddPermission) {
+                // User has the required permission, allow them to view things
+                this.addUnitPermission = true;
+                console.log(`User has permission: ${this.addUnitPermission}`);
+              } else {
+                // User does not have the required permission
+                this.addUnitPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.editUnitPermission = true;
+                console.log(`User has permission: ${this.editUnitPermission}`);
+              } else {
+                // User does not have the required permission
+                this.editUnitPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasDeletePermission) {
+                // User has the required permission, allow them to view things
+                this.deleteUnitPermission = true;
+                console.log(`User has permission: ${this.deleteUnitPermission}`);
+              } else {
+                // User does not have the required permission
+                this.deleteUnitPermission = false;
+                console.log('User does not have the required permission');
+              }
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+              });
+        },
         loadLists() {
              axios.get('/api/pmsunits/'+this.$route.params.id).then((response) => {
      
@@ -218,6 +294,8 @@
         this.getProperty();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
 
       }
     }

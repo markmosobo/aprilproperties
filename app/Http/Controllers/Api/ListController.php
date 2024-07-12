@@ -164,4 +164,52 @@ class ListController extends Controller
         ]);
 
     }
+
+    public function editPermission(Request $request, $id)
+    {
+        $permission = Permission::findOrFail($id);
+
+        if ($permission) {
+                $permission->update([
+                    'code' => $request->code,
+                    'name' => $request->name
+                ]);                   
+                
+
+            return response()->json([
+                'status' => true,
+                'message' => "Permission Updated successfully!",
+                'permission' => $permission
+            ], 200);
+        }
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $permission = Permission::findOrFail($id);
+        if($permission){
+        $permission->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Permission Deleted successfully!",
+        ], 200);
+        }
+    }
+
+    public function savePermission(Request $request)
+    {
+        $permission = Permission::create([
+            'code' => $request->code,
+            'name' => $request->name,             
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => "Permission Created successfully!",
+            'permission' => $permission
+        ], 200);
+
+            
+    }
 }

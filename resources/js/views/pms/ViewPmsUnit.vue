@@ -19,6 +19,9 @@
                   <span v-else-if="form.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Occupied</span>
                   <span v-else class="badge bg-light text-dark"><i class="bi bi-star me-1"></i> Closed </span>                  
                </p>
+               <div class="bg-light clearfix">
+                   <button type="button" @click="edit" class="btn btn-sm btn-success float-right rounded-pill">Edit</button>
+               </div>
             </div>
           </div>
          </div> 
@@ -30,7 +33,10 @@
                   <strong>Electricity:</strong> {{form.electricity_meter !== null ? form.electricity_meter : 'N/A'}} <br>
                   <strong>Water:</strong> {{form.water_meter !== null ? form.water_meter : 'N/A'}} <br>
   
-               </p>              
+               </p> 
+               <div class="bg-light clearfix">
+                   <button type="button" @click="back" class="btn btn-sm btn-dark float-right rounded-pill">Back</button>
+               </div>             
             </div>
           </div>
          </div>          
@@ -118,6 +124,10 @@
              // )
           });
           this.$router.push('/pmsunits/'+this.form.pms_property_id)
+       },
+       edit()
+       {
+         this.$router.push('/edit-pmsunit/'+this.$route.params.id)
        },
        back(){
          this.$router.push('/pmsunits/'+this.form.pms_property_id)

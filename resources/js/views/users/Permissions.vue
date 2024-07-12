@@ -20,12 +20,12 @@
             <div class="card-body pb-0">
               <h5 class="card-title">All Permissions <span>| User rights and privileges</span></h5>
               <p class="card-text">
-                <router-link to="/add-permission" custom v-slot="{ href, navigate, isActive }">
+                <router-link to="#" custom v-slot="{ href, navigate, isActive }">
                   <a
                     :href="href"
                     :class="{ active: isActive }"
                     class="btn btn-sm btn-success rounded-pill"
-                    @click="navigate"
+                    @click="addPermission"
                   >
                     Add Permission
                   </a>
@@ -77,17 +77,20 @@
 
             </div>
 
-            <!--Edit Permission Modal -->
-            <div class="modal fade" id="invoiceTenantModal" tabindex="-1" aria-labelledby="invoiceTenantModalLabel" aria-hidden="true">
+            <!--Add Permission Modal -->
+            <div class="modal fade" id="addPermissionModal" tabindex="-1" aria-labelledby="addPermissionModalLabel" aria-hidden="true">
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="invoiceTenantModalLabel">Set Permissions</h5>
+                    <h5 class="modal-title" id="addPermissionModalLabel">Add Permission</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
                     <p>
-                      <strong>Rights & Privileges:</strong>
+                      <strong>Code:</strong>
+                      <input type="text" name="code" v-model="form.add_code" class="form-control">
+                      <strong>Name:</strong>
+                      <input type="text" name="name" v-model="form.add_name" class="form-control">
                       <div class="row">
         
                       </div>
@@ -95,7 +98,41 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmSetPermissions">
+                    <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="savePermission">
+                      <span v-if="loading">
+                        <i class="fa fa-spinner fa-spin"></i> Saving...
+                      </span>
+                      <span v-else>
+                        Save changes
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!--Edit Permission Modal -->
+            <div class="modal fade" id="editPermissionModal" tabindex="-1" aria-labelledby="editPermissionModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="editPermissionModalLabel">Edit Permission</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      <strong>Code:</strong>
+                      <input type="text" name="code" v-model="form.code" class="form-control">
+                      <strong>Name:</strong>
+                      <input type="text" name="name" v-model="form.name" class="form-control">
+                      <div class="row">
+        
+                      </div>
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmPermissions">
                       <span v-if="loading">
                         <i class="fa fa-spinner fa-spin"></i> Saving...
                       </span>
@@ -143,6 +180,12 @@ export default {
     return {
       permissions: [],
       user: [],
+      form: {
+        code: '',
+        name: '',
+        add_code: '',
+        add_name: ''
+      },
       permissionUser: '',
       permissions: [],
       assignAllChecked: false,
@@ -159,9 +202,90 @@ export default {
     navigateTo(location) {
       this.$router.push(location)
     },
+    addPermission()
+    {
+      // Show the modal 
+      const modal = new bootstrap.Modal(document.getElementById('addPermissionModal'));
+      modal.show();
+    },
+    async savePermission()
+    {
+      this.loading = true;
+      let payload; // Define payload variable outside the if-else blocks
+
+      payload = {
+          code: this.form.add_code,
+          name: this.form.add_name,
+      };
+      axios.post("/api/save-permission", payload)
+      .then(response => {
+          console.log(response);
+          this.loading = false;
+           toast.fire(
+                'Success!',
+                'Permission added!',
+                'success'
+            );
+          resolve(); // Resolve the promise when settleTenant completes successfully
+      })
+      .catch(error => {
+          console.log(error);
+          reject(error); // Reject the promise if there's an error
+      });
+
+      // Close the modal after invoicing
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addPermissionModal'));
+      modal.hide();
+      this.loadLists();
+    },
     editPermission(permission)
     {
+      this.selectedPermission = permission;
+      this.form.code = this.selectedPermission.code;
+      this.form.name = this.selectedPermission.name;
+      console.log(this.form.code)
+      // Show the modal after fetching data
+      const modal = new bootstrap.Modal(document.getElementById('editPermissionModal'));
+      modal.show();
+    },
+    async confirmPermissions() {
+      if (this.selectedPermission && this.selectedPermission.id) {
+        // Implement your logic to invoice the tenant here
+        console.log("Editing permission ID:", this.selectedPermission.id);
+        await this.saveEditPermission();
 
+        // Close the modal after invoicing
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editPermissionModal'));
+        modal.hide();
+        this.loadLists();
+      }
+    },
+    saveEditPermission() {
+        return new Promise((resolve, reject) => {
+            let payload; // Define payload variable outside the if-else blocks
+
+              payload = {
+                  code: this.form.code,
+                  name: this.form.name,
+              };
+           
+
+            axios.put("/api/edit-permission/" + this.selectedPermission.id, payload)
+                .then(response => {
+                    console.log(response);
+                     toast.fire(
+                          'Success!',
+                          'Permission updated!',
+                          'success'
+                      );
+                    resolve(); // Resolve the promise when settleTenant completes successfully
+                })
+                .catch(error => {
+                    console.log(error);
+                    reject(error); // Reject the promise if there's an error
+                });
+            this.loadLists();    
+        });
     },
     deletePermission(id) {
       Swal.fire({
@@ -169,8 +293,8 @@ export default {
         text: "You won't be able to revert this!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#006400',
+        cancelButtonColor: '#FFA500',
         confirmButtonText: 'Yes, delete!'
       }).then((result) => {
         if (result.isConfirmed) {

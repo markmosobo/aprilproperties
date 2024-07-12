@@ -27,6 +27,7 @@
                       <router-link to="/add-pmsexpense" custom v-slot="{ href, navigate, isActive }">
                           <a
                             :href="href"
+                            v-if="addExpensePermission"
                             :class="{ active: isActive }"
                             class="btn btn-sm btn-primary rounded-pill"
                             style="background-color: darkgreen; border-color: darkgreen;"
@@ -67,7 +68,8 @@
                                   <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                             -->
                                   <a v-if="expense.created_by == user.id" @click="navigateTo('/editexpense/'+expense.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a class="dropdown-item" @click="generateInvoice(expense.id)" href="#"><i class="ri-printer-fill mr-2"></i>Download Invoice</a>
-                                  <a @click="deleteExpense(expense.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a v-if="editExpensePermission" @click="editExpense(expense)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a v-if="deleteExpensePermission" @click="deleteExpense(expense.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
                               </div>
                             </td>
@@ -76,6 +78,86 @@
                       </table>
                       <div><strong>Total Amount Paid: {{ formatNumber(calculateTotal()) }}</strong></div>
 
+                    </div>
+
+                    <!--Edit Expense Modal -->
+                    <div class="modal fade" id="EditExpenseModal" tabindex="-1" aria-labelledby="EditExpenseModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="EditExpenseModalLabel">Edit Invoice</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>#{{ref_no}}</p>
+                            <p v-if="selectedExpense">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Property:</strong> 
+                                  <select @change="getUnits" name="landlord" v-model="form.pms_property_id" class="form-select" id="">
+                                    <option value="0" selected disabled>Select Property</option>
+                                    <option v-for="property in properties" :value="property.id"
+                                    :selected="property.id == form.pms_property_id" :key="property.id">{{ property.name}} </option>
+         
+                                 </select>
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Unit:</strong>
+                                  <select :disabled="!form.pms_property_id" name="unit" v-model="form.pms_unit_id" class="form-select" id="">
+                                      <option value="0" selected disabled>Select Unit</option>
+                                      <option v-for="unit in propunits" :value="unit.id"
+                                      :selected="unit.id == form.unit_id" :key="unit.id">{{ unit.unit_number}}</option>
+           
+                                   </select>
+                                </div>
+                              </div>   
+                            </p>
+                            <p v-if="selectedExpense">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Amount Paid:</strong> 
+                                  <input
+                                      type="number"
+                                      placeholder="Amount Paid"
+                                      id="title"
+                                      name="title"
+                                      v-model="form.amount_paid"
+                                      class="form-control"
+                                      required=""
+                                  />
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Paid To:</strong>
+                                 <input
+                                      type="text"
+                                      placeholder="Paid To"
+                                      id="title"
+                                      name="title"
+                                      v-model="form.paid_to"
+                                      class="form-control"
+                                      required=""
+                                  />
+                                </div>
+                              </div>   
+                            </p>
+                            <p v-if="selectedExpense">
+                              <div class="row">
+                                <div class="col-sm-12">
+                                  <strong>Remarks:</strong> 
+                                 <textarea placeholder="Briefly describe what was paid fore.g Slashing or Repair Works" name="payment_type" v-model="form.payment_type" class="form-control" />
+                                </div>
+                              </div>   
+                            </p>
+
+                            
+
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="confirmEditExpense">Save changes</button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
     
                   </div>
@@ -110,13 +192,94 @@
       data(){
         return {
           expenses: [],
-          categories: [],
-          propertytypes: [],
+          properties: [],
+          units: [],
           user: [],
-          pmsexpense: []
+          pmsexpense: [],
+          selectedExpense: '',
+          form: {
+            pms_property_id: '',
+            pms_unit_id: '',
+            paid_to: '',
+            amount_paid: '',
+            payment_type: ''
+          },
+          loading: false,
+          addExpensePermission: '',
+          editExpensePermission: '',
+          deleteExpensePermission: ''
         }
       },
       methods: {
+        editExpense(expense)
+        {
+          this.selectedExpense = expense;
+          this.ref_no = this.selectedExpense.ref_no;
+          this.form.pms_property_id = this.selectedExpense.pms_property_id;
+          this.form.pms_unit_id = this.selectedExpense.pms_unit_id;
+          this.form.paid_to = this.selectedExpense.paid_to;
+          this.form.amount_paid = this.selectedExpense.amount_paid;
+          this.form.payment_type = this.selectedExpense.payment_type;
+
+          // Show the modal after fetching data
+            const modal = new bootstrap.Modal(document.getElementById('EditExpenseModal'));
+            modal.show();
+        },
+        async confirmEditExpense() {
+          if (this.selectedExpense && this.selectedExpense.id) {
+            // Implement your logic to invoice the tenant here
+            console.log("Editing expense ID:", this.selectedExpense.id);
+            await this.saveEditExpense();
+
+            // Close the modal after invoicing
+            const modal = bootstrap.Modal.getInstance(document.getElementById('EditExpenseModal'));
+            modal.hide();
+            this.loadLists()
+          }
+        },
+        saveEditExpense() {
+            return new Promise((resolve, reject) => {
+                this.loading = true;
+                let payload; // Define payload variable outside the if-else blocks
+
+                  payload = {
+                      pms_property_id: this.form.pms_property_id,
+                      pms_unit_id: this.form.pms_unit_id,
+                      paid_to: this.form.paid_to,
+                      amount_paid: this.form.amount_paid,
+                      payment_type: this.form.payment_type,
+                  };
+               
+
+                axios.put("/api/pmsexpense/" + this.selectedExpense.id, payload)
+                    .then(response => {
+                        console.log(response);
+                        this.loading = false;
+                         toast.fire(
+                              'Success!',
+                              'Expense updated!',
+                              'success'
+                          );
+                        resolve(); // Resolve the promise when settleTenant completes successfully
+                    })
+                    .catch(error => {
+                        this.loading = false;
+                        console.log(error);
+                        reject(error); // Reject the promise if there's an error
+                    });
+                    this.loadLists();
+            });
+        },
+        async getUnits() {
+         try {
+           //const propunits = this.units.find(unit => unit.pms_property_id === this.form.pms_property_id);
+           this.propunits = this.units.filter(item => item.pms_property_id === this.form.pms_property_id);
+
+           console.log("amoit", this.propunits)
+         } catch (error) {
+           console.error(error);
+         }
+       },
         format_date(value){
           if(value){
             return moment(String(value)).format('MMM Do YYYY')
@@ -232,11 +395,68 @@
                                    
                 })
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredAddPermissionId = 13;
+              const requiredEditPermissionId = 14;
+              const requiredDeletePermissionId = 15;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasAddPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredAddPermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasDeletePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredDeletePermissionId && permission.status === requiredStatus);
+
+              if (hasAddPermission) {
+                // User has the required permission, allow them to view things
+                this.addExpensePermission = true;
+                console.log(`User has permission: ${this.addExpensePermission}`);
+              } else {
+                // User does not have the required permission
+                this.addExpensePermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.editExpensePermission = true;
+                console.log(`User has permission: ${this.editExpensePermission}`);
+              } else {
+                // User does not have the required permission
+                this.editExpensePermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasDeletePermission) {
+                // User has the required permission, allow them to view things
+                this.deleteExpensePermission = true;
+                console.log(`User has permission: ${this.deleteExpensePermission}`);
+              } else {
+                // User does not have the required permission
+                this.deleteExpensePermission = false;
+                console.log('User does not have the required permission');
+              }
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+              });
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
 
-             this.expenses = response.data.lists.pmsexpenses;
-             console.log("props", response)
+               this.expenses = response.data.lists.pmsexpenses;
+               this.units = response.data.lists.units;
+               this.properties = response.data.lists.pmsproperties;
              setTimeout(() => {
                   $("#AllPropertiesTable").DataTable();
               }, 10);
@@ -251,6 +471,8 @@
         this.loadLists();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
 
       }
     }

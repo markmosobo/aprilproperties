@@ -188,6 +188,7 @@ Route::put('pmssettlestatement/{id}', [PmsStatementController::class, 'settle'])
 Route::put('pmsinvoicestatement/{id}', [PmsStatementController::class, 'invoice']);
 Route::put('pmslastmonthtenantstatement/{id}', [PmsStatementController::class, 'updateTenantLastMonthStatement']);
 Route::put('edit-statement/{id}', [PmsStatementController::class, 'editStatement']);
+Route::put('edit-permission/{id}', [ListController::class, 'editPermission']);
 
 Route::delete('property/{id}', [PropertyController::class, 'destroy']);
 Route::delete('category/{id}', [CategoryController::class, 'destroy']);
@@ -267,3 +268,5 @@ Route::post('/generate-monthly-statements', [PmsStatementController::class, 'gen
 Route::get('/userpermissions/{id}', [UserController::class, 'userPermissions']);
 Route::post('/update-permissions/{id}', [UserController::class, 'updateUserPermissions']);
 Route::post('/generate-permissions/{id}', [UserController::class, 'generateUserPermissions']);
+Route::delete('permission/{id}', [ListController::class, 'destroy']);
+Route::post('/save-permission', [ListController::class, 'savePermission']);

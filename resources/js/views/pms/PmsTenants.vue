@@ -26,7 +26,7 @@
                          <div class="row">
                           <div class="col d-flex">
                    
-                            <router-link to="/add-pmstenant" custom v-slot="{ href, navigate, isActive }">
+                            <router-link v-if="addTenantPermission" to="/add-pmstenant" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
                                   :class="{ active: isActive }"
@@ -96,10 +96,10 @@
                                   <a class="dropdown-item" @click="navigateTo('/pmstenant/'+tenant.id )" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <!-- <a @click="navigateTo('/pmstenantstatements/'+tenant.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a> -->
                                   <a @click="navigateTo('/pmstenantinvoices/'+tenant.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoices</a>
-                                  <a @click="navigateTo('/edit-pmstenant/'+tenant.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-                                  <a v-if="tenant.status == 1" @click="vacateTenant(tenant.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Vacate</a>
+                                  <a v-if="editTenantPermission" @click="navigateTo('/edit-pmstenant/'+tenant.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
+                                  <a v-if="tenant.status == 1 && vacateTenantPermission" @click="vacateTenant(tenant.id)" class="dropdown-item" href="#"><i class="ri-eye-close-fill mr-2"></i>Vacate</a>
                                   <a v-if="tenant.status == 2" @click="reopenTenant(tenant.id)" class="dropdown-item" href="#"><i class="ri-refresh-fill mr-2"></i>Reopen</a>
-                                  <a @click="deleteTenant(tenant.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a v-if="deleteTenantPermission" @click="deleteTenant(tenant.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
                               </div>
                             </td>
@@ -141,7 +141,11 @@
         return {
           tenants: [],
           categories: [],
-          user: []
+          user: [],
+          addTenantPermission: '',
+          editTenantPermission: '',
+          deleteTenantPermission: '',
+          vacateTenantPermission: ''
         }
       },
       methods: {
@@ -208,6 +212,78 @@
                                    
                 })
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredAddPermissionId = 6;
+              const requiredEditPermissionId = 7;
+              const requiredDeletePermissionId = 8;
+              const requiredVacatePermissionId = 9;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasAddPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredAddPermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasDeletePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredDeletePermissionId && permission.status === requiredStatus);
+
+              const hasVacatePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredVacatePermissionId && permission.status === requiredStatus);
+
+              if (hasAddPermission) {
+                // User has the required permission, allow them to view things
+                this.addTenantPermission = true;
+                console.log(`User has permission: ${this.addTenantPermission}`);
+              } else {
+                // User does not have the required permission
+                this.addTenantPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.editTenantPermission = true;
+                console.log(`User has permission: ${this.editTenantPermission}`);
+              } else {
+                // User does not have the required permission
+                this.editTenantPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasDeletePermission) {
+                // User has the required permission, allow them to view things
+                this.deleteTenantPermission = true;
+                console.log(`User has permission: ${this.deleteTenantPermission}`);
+              } else {
+                // User does not have the required permission
+                this.deleteTenantPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasVacatePermission) {
+                // User has the required permission, allow them to view things
+                this.vacateTenantPermission = true;
+                console.log(`User has permission: ${this.vacateTenantPermission}`);
+              } else {
+                // User does not have the required permission
+                this.vacateTenantPermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+                this.vacateTenantPermission = false;
+              });
+        },
         loadLists() {
              axios.get('api/lists').then((response) => {
 
@@ -227,6 +303,8 @@
         this.loadLists();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
 
       }
     }
