@@ -41,32 +41,33 @@
                         >
                           <input
                             type="text"
-                            name="username"
+                            name="email"
                             class="form-control"
                             id="yourUsername"
                             v-model="form.email"
                             required
                           />
-                          <div class="invalid-feedback">
-                            Please enter your email.
-                          </div>
+                          <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
+
                       </div>
   
-                      <div class="col-12">
-                        <label for="yourPassword" class="form-label"
-                          >Password</label
-                        >
-                        <input
-                          type="password"
-                          name="password"
-                          class="form-control"
-                          id="yourPassword"
-                          v-model="form.password"
-                          required
-                        />
-                        <div class="invalid-feedback">
-                          Please enter your password!
+                      <div class="col-12 password-container">
+                        <label for="yourPassword" class="form-label">Password</label>
+                        <div class="input-group">
+                          <input
+                            :type="isPasswordVisible ? 'text' : 'password'"
+                            name="password"
+                            class="form-control"
+                            id="yourPassword"
+                            v-model="form.password"
+                            required
+                          />
+                          <span class="input-group-text" @click="togglePasswordVisibility">
+                            <i :class="isPasswordVisible ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                          </span>
                         </div>
+                        <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
+
                       </div>
   
                       <div class="col-12">
@@ -94,6 +95,10 @@
                         </button>
                       </div>
                       <div class="col-12">
+                        <p class="small mb-0">
+                          Forgot your password?
+                          <router-link to="/resetpassword" style="color: orange;"> Reset Password</router-link>
+                        </p>
                         <p class="small mb-0">
                           Don't have account?
                           <router-link to="/register" style="color: orange;"> Create Account</router-link>
@@ -129,42 +134,67 @@
           email: '',
           password: ''
         },
+        errors: {
+          email: '',
+          password: ''
+        },
+        isPasswordVisible: false,
         loading: false
       }
     },
     methods: {
-      login_user(){
-        this.loading = true; // Set loading to true
-        axios.post('api/login', this.form).then((response) => {
-          console.log(response);
-          this.form.email = '';
-          this.form.password = '';
-          this.loading = false; // Set loading to false
-          if(response["data"]["status"] == "error")
-         {
-           Swal.fire({
-            title: 'Oops',
-            text:   "error",
-            icon: 'warning',
-          
-          });
-         }
-         else
-         {
-          localStorage.setItem('user', JSON.stringify(response.data.user))
-           this.$router.push('/dashboard')
-          //  Swal.fire({
-          //   title: 'Hurry',
-          //   text:   "You have been logged-in successfully",
-          //   icon: 'success',
-          
-          // });
-         }
-        }).catch((error) => {
-          console.log(error)
-          this.loading = false;
-        })
+      togglePasswordVisibility() {
+        this.isPasswordVisible = !this.isPasswordVisible;
+      },
+      async login_user() {
+    // Clear previous errors
+    this.errors = {};
+
+    // Validate credentials
+    if (!this.form.email) {
+      this.errors.email = 'Email is required.';
+      return;
+    }
+    if (!this.form.password) {
+      this.errors.password = 'Password is required.';
+      return;
+    }
+
+    this.loading = true; // Set loading to true
+
+    try {
+      const response = await axios.post('api/login', this.form);
+
+      console.log(response);
+      this.form.email = '';
+      this.form.password = '';
+      this.loading = false; // Set loading to false
+
+      if (response.data.status === "error") {
+        Swal.fire({
+          title: 'Oops',
+          text: "Error",
+          icon: 'warning',
+        });
+      } else {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        this.$router.push('/dashboard');
+        // Swal.fire({
+        //   title: 'Hurry',
+        //   text: "You have been logged-in successfully",
+        //   icon: 'success',
+        // });
       }
+    } catch (error) {
+      console.error(error);
+      this.loading = false;
+      Swal.fire({
+        title: 'Error',
+        text: 'An error occurred during login. Please try again.',
+        icon: 'error',
+      });
+    }
+  }
     }
   });
   </script>

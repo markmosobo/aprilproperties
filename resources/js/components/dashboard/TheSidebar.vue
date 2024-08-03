@@ -361,16 +361,31 @@
             </a>
             </router-link>
           </li>
-<!--           <li>
-            <a href="icons-remix.html">
-              <i class="bi bi-circle"></i><span>Statements</span>
+          <li>
+            <router-link to="/pmsrentingtenants" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>Renting Tenants</span>
             </a>
-          </li> -->
-          <!--<li>
-            <a href="icons-boxicons.html">
-              <i class="bi bi-circle"></i><span>Boxicons</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/pmsvacatedtenants" custom v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                :class="{ active: isActive }"
+                class="nav-link"
+                @click="navigate"
+              >          
+              <i class="bi bi-circle"></i><span>Vacated Tenants</span>
             </a>
-          </li>-->
+            </router-link>
+          </li>
+
         </ul>
       </li><!-- End Tenants Nav -->
 

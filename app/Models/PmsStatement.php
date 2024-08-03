@@ -28,6 +28,7 @@ class PmsStatement extends Model
         'payment_method',
         'mpesa_code',
         'sms_status',
+        'rent_month',
         'paid_at'
     ];
 

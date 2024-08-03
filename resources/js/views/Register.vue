@@ -1,6 +1,6 @@
 <template>
-  <main>
-    <div class="container">
+  <main class="background-image">
+      <div class="container">
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
         <div class="container">
           <div class="row justify-content-center">
@@ -49,11 +49,30 @@
                         <input type="email" name="email" placeholder="Email Address" class="form-control" id="email" v-model="form.email" required>
                         <div class="invalid-feedback" v-if="!form.email">Please enter email address!</div>
                       </div>
-                      <div class="col-12">
+                      <div class="col-12 password-container">
+                        <label for="yourPassword" class="form-label">Password</label>
+                        <div class="input-group">
+                          <input
+                            :type="isPasswordVisible ? 'text' : 'password'"
+                            name="password"
+                             placeholder="Password"
+                            class="form-control"
+                            id="password"
+                            v-model="form.password"
+                            required
+                          />
+                          <span class="input-group-text" @click="togglePasswordVisibility">
+                            <i :class="isPasswordVisible ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                          </span>
+                        </div>
+                        <div class="invalid-feedback" v-if="!form.password">Please enter password!</div>
+
+                      </div>
+   <!--                    <div class="col-12">
                         <label for="yourPassword" class="form-label">Password</label>
                         <input type="password" placeholder="Password" name="password" class="form-control" id="password" v-model="form.password" required>
                         <div class="invalid-feedback" v-if="!form.password">Please enter password!</div>
-                      </div>
+                      </div> -->
                       <div class="col-12">
                         <label for="confirmPassword" class="form-label">Confirm Password</label>
                         <input type="password" placeholder="Confirm Password" name="confirm_password" class="form-control" id="confirm_password" v-model="form.confirm_password" required>
@@ -116,10 +135,14 @@
           last_name: '',
           email: '',
           password: ''
-        }
+        },
+        isPasswordVisible: false,
       }
     },
     methods: {
+        togglePasswordVisibility() {
+          this.isPasswordVisible = !this.isPasswordVisible;
+        },
         validateForm() {
           let isValid = true;
           if (!this.form.first_name) {
@@ -209,3 +232,20 @@
   }
 }
   </script>
+
+  <style scoped>
+.background-image {
+  background-image: url('@/assets/img/april.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  width: 100%;
+}
+
+.container {
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+</style>

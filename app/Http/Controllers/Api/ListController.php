@@ -60,6 +60,8 @@ class ListController extends Controller
         $statements = PmsStatement::with('property', 'tenant','unit')->latest()->get();
         $pmsinvoices = Invoice::with('property', 'tenant')->latest()->get();
         $pmstenants = PmsTenant::orderBy('id', 'desc')->with('unit','property')->get();
+        $pmsrentingtenants = PmsTenant::orderBy('id', 'desc')->with('unit','property')->where('status', 1)->get();
+        $pmsvacatedtenants = PmsTenant::orderBy('id', 'desc')->with('unit','property')->where('status', 0)->get();
         $pmsexpenses = PmsExpense::with('user')->latest()->get();
 
         $recentblogs= Blog::with('category')->orderBy('id', 'DESC')->limit(6)->get();
@@ -75,7 +77,16 @@ class ListController extends Controller
         $closedproperties = Property::latest()->with('type','images')->where('status',2)->get();
 
         //invoices
+        //get current month
+        $currentMonthYear = Carbon::now()->format('F Y');
+
         $awaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereMonth('created_at', Carbon::now()->month)->get();
+    //     $awaitinginvoicing = PmsStatement::latest()
+    // ->where('water_bill', null)
+    // ->where('status', 0)
+    // ->where('rent_month', 'like', '%' . $currentMonthYear . '%')
+    // ->with(['property', 'tenant', 'unit'])
+    // ->get();
         $lastmonthawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereBetween('created_at',
         [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
         $lastninetyawaitinginvoicing = PmsStatement::latest()->where('water_bill', null)->where('status',0)->with('property','tenant','unit')->whereBetween('created_at',
@@ -137,6 +148,8 @@ class ListController extends Controller
                 'units' => $units,
                 'permissions' => $permissions,
                 'pmstenants' => $pmstenants,
+                'pmsrentingtenants' => $pmsrentingtenants,
+                'pmsvacatedtenants' => $pmsvacatedtenants,
                 'pmsexpenses' => $pmsexpenses,
                 'statements' => $statements,
                 'pmsinvoices' => $pmsinvoices,

@@ -641,11 +641,21 @@
             this.payment = statement.payment_method;
             this.statementId = statement.id;
             this.waterBill = statement.water_bill;
-            if(this.total == this.paid) {
+            console.log("pooma", this.waterBill)
+            if(this.total == this.paid)
+             {
                this.paymentMethod = 'SETTLED'; 
              } 
              else{
                 this.paymentMethod = 'NOT SETTLED'
+             }
+             if(this.waterBill == 0)
+             {
+                this.water = '';
+             }
+             else
+             {
+                this.water = '(Incl. Water Bill)';
              }
             //unit info
             this.unitName = statement.unit.unit_number;
@@ -809,7 +819,7 @@
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Total Rent Due (Incl. Water Bill)</td>
+                      <td>Total Rent Due ${this.water}</td>
                       <td>KES ${this.formatNumber(this.total)}</td>
                     </tr>
                     <tr>
@@ -873,6 +883,7 @@
          // Determine whether to include the row
           const showGarbageFeeRow = this.unitGarbageFee !== 0;
           const showSecurityFeeRow = this.unitSecurityFee !== 0;
+          const showWaterBillRow = this.waterBillAmount !== 0;
           // Build the HTML content for the receipt
           const receiptHTML = `
           <!DOCTYPE html>
@@ -967,10 +978,12 @@
                     <td>Rent Payment</td>
                     <td>KES ${this.formatNumber(this.unitRent)}</td>
                   </tr>
+                  ${showWaterBillRow ? `
                   <tr>
                     <td>Water Bill</td>
                     <td>KES ${this.formatNumber(this.waterBillAmount)}</td>
                   </tr>
+                  ` : ''}
                   <!-- Conditionally include garbage collection fee row -->
                   ${showGarbageFeeRow ? `
                   <tr>

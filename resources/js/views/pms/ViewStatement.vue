@@ -142,7 +142,7 @@
 
                                 <div class="row mt-4">
                                     <div class="col-sm-6">
-                                        <button @click.prevent="cancel()" class="btn btn-dark w-100">Cancel</button>
+                                        <button @click.prevent="cancel()" class="btn btn-dark w-100">Back</button>
                                     </div>
                                     <div class="col-sm-6 text-end">
                                         <button @click.prevent="settleTenant()" type="submit" v-if="status == 0 && waterBill !== null && settleInvoicePermission" class="btn btn-primary w-100" style="background-color: darkgreen; border-color: darkgreen;">Settle</button>
@@ -348,11 +348,11 @@ export default {
                     // )
                 });
 
-            this.$router.push('/invoicestosettle');
+            this.$router.push('/settledinvoices');
         },
         printReceipt() {
             // this.submit();
-            this.$router.push('/invoicestosettle')
+            this.$router.push('/settledinvoices')
 
             // Open a new window for printing
             const printWindow = window.open("", "_blank");
@@ -444,11 +444,10 @@ export default {
                     </div>
                     <div class="receipt-info">
                       <p><strong>Invoice Number:</strong> ${this.refNo}</p>
-                      <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
-                      <p><strong>Rent Month:</strong> ${this.formatMonth(this.date)}</p>
+                      <p><strong>Receipt Date:</strong> ${this.formattedTodayDate}</p>
+                      <p><strong>Details:</strong> ${this.details}</p>
                       <p><strong>Tenant:</strong> ${this.tenant}</p>
-                      <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
-                      <p><strong>Payment Mode:</strong> ${this.payment}</p>
+                      <p><strong>Property:</strong> ${this.name}</p>
                     </div>
                     <table class="receipt-table">
                       <thead>
@@ -522,6 +521,15 @@ export default {
         this.user = JSON.parse(this.user);
         this.userId = this.user.id;
         this.getUserPermissions(this.userId);
+        // Get the current date
+        const todayDate = new Date();
+
+        // Convert to desired format dd/mm/yy
+        this.formattedTodayDate = todayDate.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        });
     }
 }
 </script>

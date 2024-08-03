@@ -8,6 +8,7 @@ import {  createRouter, createWebHistory  } from 'vue-router';
 // import Blog from '../views/Blog.vue'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
+import ResetPassword from '../views/ResetPassword.vue'
 import Register from '../views/Register.vue'
 import AllProjects from '../views/projects/AllProjects.vue'
 import AddProject from '../views/projects/AddProject.vue'
@@ -76,6 +77,8 @@ import AddRole from '../views/roles/AddRole.vue'
 // import Project from '../views/Project.vue'
 import PmsLandlords from '../views/pms/PmsLandlords.vue'
 import PmsTenants from '../views/pms/PmsTenants.vue'
+import PmsRentingTenants from '../views/pms/PmsRentingTenants.vue'
+import PmsVacatedTenants from '../views/pms/PmsVacatedTenants.vue'
 import PmsExpenses from '../views/pms/PmsExpenses.vue'
 import PmsUnits from '../views/pms/PmsUnits.vue'
 import AddPmsUnit from '../views/pms/AddPmsUnit.vue'
@@ -174,6 +177,11 @@ const routes = [
         path:'/login',
         name: 'login',
         component: Login
+    },
+    {
+        path:'/resetpassword',
+        name: 'resetpassword',
+        component: ResetPassword
     },
     {
         path:'/register',
@@ -597,6 +605,18 @@ const routes = [
         path:'/pmstenants',
         name: 'pmstenants',
         component: PmsTenants,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmsrentingtenants',
+        name: 'pmsrentingtenants',
+        component: PmsRentingTenants,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/pmsvacatedtenants',
+        name: 'pmsvacatedtenants',
+        component: PmsVacatedTenants,
         beforeEnter : guardMyroute,
     },
     {

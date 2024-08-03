@@ -96,7 +96,7 @@
                     </div>
     
                       <div class="card-body pb-0">
-                        <h5 class="card-title">Awaiting Invoicing <span>| {{ statements.length }} awaiting invoicing this month</span></h5>
+                        <h5 class="card-title">Awaiting Invoicing <span>| {{ statements.length }} awaiting invoicing</span></h5>
                         <p class="card-text">
                           <div class="row">
                             <div class="col d-flex">
@@ -106,7 +106,6 @@
                                   :href="href"
                                   :class="{ active: isActive }"
                                    @click="openModal"
-                                   v-if="addInvoicePermission"
                                   class="btn btn-sm btn-primary rounded-pill me-2"
                                   style="background-color: darkgreen; border-color: darkgreen;"
                                 >
@@ -163,24 +162,8 @@
                           </div>
                         </p>
 
-                        <!-- Display "Generate Invoices" button when statements.length is zero -->
-                        <div v-if="!loading">
-                          <div v-if="statements.length === 0" class="text-center" style="margin-bottom: 20px;">
-                            <!-- <button class="btn btn-primary" @click="generateInvoices">Generate Invoices</button> -->
-                            <button class="btn btn-success rounded-pill" type="submit">
-                            <span v-if="generating">
-                              <i class="fa fa-spinner fa-spin"></i> Generating invoices for {{currentMonth}}...
-                            </span>
-                            <span @click="generateInvoices" v-else>
-                              Generate Invoices for {{currentMonth}}
-                            </span>
-                          </button>
-                          </div>
-                        </div>
-
-
                         <!-- Display table when statements.length is not zero -->
-                        <div v-if="statements.length !== 0">
+                        <div>
                           <table id="AllStatementsTable" class="table table-borderless">
                             <thead>
                               <tr>
@@ -190,7 +173,7 @@
                                 <th scope="col">Due</th>
                                 <th scope="col">Paid</th>
                                 <th scope="col">Bal</th>
-                                <th scope="col">Transaction On</th>
+                                <th scope="col">Generated</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Action</th>
                               </tr>
@@ -226,7 +209,7 @@
                                     </button>
                                     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                       <a @click="navigateTo('/viewstatement/' + statement.id)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>
-                                      <a v-if="statement.status == 0 && statement.water_bill == null && invoiceTenantPermission" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
+                                      <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement)" class="dropdown-item" href="#"><i class="ri-bill-line mr-2"></i>Invoice</a>
                                       <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                     </div>
                                   </div>
@@ -243,9 +226,7 @@
                           </div>
                         </div>
 
-                        <div v-else class="text-center">
-                          <i class="fa fa-spinner fa-spin"></i> Loading...
-                        </div>
+                        
                       </div>
 
                     <!-- Modal -->
@@ -305,11 +286,24 @@
                             <!-- Modal body content -->
                             <div class="modal-body">
                               <p>
-                                <strong>Tenant Name:*</strong> 
-                                <select v-model="form.pms_tenant_id" class="form-control">
-                                  <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">{{ tenant.first_name }} {{ tenant.last_name }}</option>
+                                <strong>Tenant Name:*</strong>
+                                <input
+                                  type="text"
+                                  v-model="searchQuery"
+                                  @input="filterTenants"
+                                  placeholder="Search tenants..."
+                                  class="form-control"
+                                />
+                                <select v-model="form.pms_tenant_id" class="form-control" size="5">
+                                  <option
+                                    v-for="tenant in filteredTenants"
+                                    :key="tenant.id"
+                                    :value="tenant.id"
+                                  >
+                                    {{ tenant.first_name }} {{ tenant.last_name }}
+                                  </option>
                                 </select>
-                              <div v-if="errors.tenant" class="text-danger">{{ errors.tenant }}</div>
+                                <div v-if="errors.tenant" class="text-danger">{{ errors.tenant }}</div>
                               </p>
 
                                <!-- Display selected tenant details -->
@@ -328,7 +322,7 @@
                                 </select>
                                 <div v-if="errors.rentmonth" class="text-danger">{{ errors.rentmonth }}</div>
                               </p>
-                <!--               <p>
+                              <!-- <p>
                                 <strong>Water Bill:</strong>(optional)
                                 <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
                                 <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
@@ -397,6 +391,8 @@
             tenant: '',
             rentmonth: ''
           },
+          searchQuery: '',
+          filteredTenants: [],
           loading: true,
           invoicing: false,
           generating: false,
@@ -436,7 +432,7 @@
                 // Handle the error appropriately
                 toast.fire(
                   'Error!',
-                  'An error occurred while creating the invoice.',
+                  error.response.data.message,
                   'error'
                 );
               })
@@ -1043,8 +1039,9 @@
         },
         loadLists() {
              axios.get('/api/lists').then((response) => {
-             this.statements = response.data.lists.awaitinginvoicing;
+             this.statements = response.data.lists.allawaitinginvoicing;
              this.tenants = response.data.lists.pmstenants;
+             this.filteredTenants = this.tenants;
              this.expenses = response.data.lists.pmsexpenses;
              console.log(this.statements)
              // Calculate the total amount paid
@@ -1054,6 +1051,13 @@
               }, 10);
     
              });
+        },
+         filterTenants() {
+          const query = this.searchQuery.toLowerCase();
+          this.filteredTenants = this.tenants.filter(tenant => {
+            const fullName = `${tenant.first_name} ${tenant.last_name}`.toLowerCase();
+            return fullName.includes(query);
+          });
         },
         calculateTotalAmountPaid() {
         if (!this.expenses || this.expenses.length === 0) {

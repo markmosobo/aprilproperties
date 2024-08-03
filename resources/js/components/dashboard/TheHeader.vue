@@ -32,7 +32,7 @@
               <!-- <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle"> -->
               <i class="bi bi-person-fill"></i>
               <span class="d-none d-md-block dropdown-toggle ps-2">{{user.first_name}} {{user.last_name}}</span>
-            </a><!-- End Profile Iamge Icon -->
+            </a><!-- End Profile Image Icon -->
   
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
               <li class="dropdown-header">

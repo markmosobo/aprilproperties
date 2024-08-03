@@ -21,7 +21,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">All Tenants <span>| Today</span></h5>
+                      <h5 class="card-title">Vacated Tenants <span>| Tenants currently vacated</span></h5>
                       <p class="card-text">
                          <div class="row">
                           <div class="col d-flex">
@@ -287,7 +287,7 @@
         loadLists() {
              axios.get('api/lists').then((response) => {
 
-             this.tenants = response.data.lists.pmstenants;
+             this.tenants = response.data.lists.pmsvacatedtenants;
              console.log("props", response)
              setTimeout(() => {
                   $("#AllPropertiesTable").DataTable();

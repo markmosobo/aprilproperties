@@ -322,10 +322,10 @@
         confirmInvoiceTenant() {
           console.log(this.form)
           // Validate water_bill
-          if (!this.form.water_bill) {
-            this.errors.water_bill = 'Water bill is required.';
-            return;
-          }
+          // if (!this.form.water_bill) {
+          //   this.errors.water_bill = 'Water bill is required.';
+          //   return;
+          // }
 
           if (this.selectedStatement && this.selectedStatement.id) {
             // Show loading spinner
