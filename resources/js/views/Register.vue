@@ -183,52 +183,52 @@
           }
           return isValid;
        },
-      create_user(){
-        if (this.validateForm()) {                                 
-            
-      axios
-      .post('api/register',this.form)
-      .then((response) =>{
-        console.log(response)
-          //reset form after submission
-          this.form.first_name = '';
-          this.form.last_name = '';
-          this.form.phone_number = '';
-          this.form.email = '';
-          this.form.password = '';
-          if(response["data"]["status"] == "error")
-         {
-           Swal.fire({
-            title: 'OPPS',
-            text:   "error",
-            icon: 'warning',
-          
-        });
-         }
-         else
-         {
-           toast.fire({
-                title: 'Hurry',
-                text:   "You have been registered successfully. Contact admin for activation.",
-                icon: 'success',
+        create_user(){
+            if (this.validateForm()) {                                 
+                
+          axios
+          .post('api/register',this.form)
+          .then((response) =>{
+            console.log(response)
+              //reset form after submission
+              this.form.first_name = '';
+              this.form.last_name = '';
+              this.form.phone_number = '';
+              this.form.email = '';
+              this.form.password = '';
+              if(response["data"]["status"] == "error")
+             {
+               Swal.fire({
+                title: 'OPPS',
+                text:   "error",
+                icon: 'warning',
               
             });
-           this.$router.push('/login');
-         }
-          //success message alert
-        //   Swal.fire({
-        //   title: 'Hurry',
-        //   text:   "User has been registered successfully",
-        //   icon: 'success',
-          
-        // });
-      })
-      .catch((e)=>{
-          console.log(e); 
-          Swal.fire({ title: 'Hurry', text:   e, icon: 'warning', });
-      })
-      }
-    }
+             }
+             else
+             {
+               toast.fire({
+                    title: 'Hurry',
+                    text:   "You have been registered successfully. Contact admin for activation.",
+                    icon: 'success',
+                  
+                });
+               this.$router.push('/login');
+             }
+              //success message alert
+            //   Swal.fire({
+            //   title: 'Hurry',
+            //   text:   "User has been registered successfully",
+            //   icon: 'success',
+              
+            // });
+          })
+          .catch((e)=>{
+              console.log(e); 
+              Swal.fire({ title: 'Hurry', text:   e, icon: 'warning', });
+          })
+          }
+        }
   }
 }
   </script>
