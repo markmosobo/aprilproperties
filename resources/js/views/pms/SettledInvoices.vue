@@ -123,6 +123,7 @@
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a>
+                                  <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a> 
                                   </div>
                               </div>
                             </td>
@@ -185,6 +186,38 @@
       methods: {
         navigateTo(location){
             this.$router.push(location)
+        },
+        deleteInvoice(id){
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#006400',
+            cancelButtonColor: '#FFA500',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            if (result.isConfirmed) { 
+            //send request to the server
+            axios.delete('/api/pmsstatement/'+id).then(() => {
+            toast.fire(
+              'Deleted!',
+              'Invoice has been deleted.',
+              'success'
+            )
+            this.loadLists();
+            }).catch(() => {
+              Swal.fire(
+              'Failed!',
+              'There was something wrong.',
+              'warning'
+            )
+            }); 
+            }else if(result.isDenied) {
+              console.log('cancelled')
+            }
+                             
+          })
         },
          invoiceTenant(id){
             this.$router.push('invoicestatement/'+id)
