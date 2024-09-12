@@ -87,9 +87,12 @@ _Below is an example of how you can instruct your audience on installing and set
    ```sh
    php artisan db:seed
    ```   
-7. Finally
+7. Finally, open two seperate terminals/cmd and at the projct level run these two commands 
    ```sh
    php artisan serve
+   ```
+   ```sh
+   npm run dev
    ```  
 8. Login credentials (admin)
     admin@admin.com
