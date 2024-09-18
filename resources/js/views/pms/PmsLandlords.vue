@@ -21,7 +21,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">All Landlords <span>| Today</span></h5>
+                      <h5 class="card-title">All Landlords <span>| Landlords with agreements at April Properties</span></h5>
                       <p class="card-text">
                         <div class="row">
                           <div class="col d-flex">
@@ -61,6 +61,7 @@
                             <th scope="col">Full Name</th>
                             <th scope="col">Email Address</th>
                             <th scope="col">Phone No.</th>
+                            <th scope="col">Commission</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -70,14 +71,18 @@
                             <td>{{landlord.email ?? "N/A"}}</td>
                             <td>{{landlord.phone_no ?? "N/A"}}</td>
                             <td>
+                              {{landlord.commission ?? landlord.fixed_commission ?? 'N/A' }}
+                            </td>
+
+                            <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <!-- <a class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>  -->
+                                  <!-- <a @click="navigateTo('/pmslandlord /'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>  -->
                                   <a @click="navigateTo('/pmslandlordproperties/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Property</a>
-                                   <a @click="navigateTo('/pmslandlordstatements/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>                                           
+                                   <a @click="navigateTo('/pmslandlordstatements/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoices</a>                                           
                                   <a v-if="editLandlordPermission" @click="navigateTo('/edit-pmslandlord/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a v-if="deleteLandlordPermission" @click="deleteLandlord(landlord.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>

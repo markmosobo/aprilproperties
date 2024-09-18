@@ -96,7 +96,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{property.name}} Invoices <span>| This Month</span></h5>
+                      <h5 class="card-title">{{property.name}} Invoices <span>| This Month ({{currentMonth}})</span></h5>
                       <p class="card-text">
                          <div class="row">
                           <div class="col d-flex">
@@ -347,6 +347,7 @@
     export default {
       data(){
         return {
+          currentMonth: '',
           property: [],
           name: '',
           unitsNo: '',
@@ -736,7 +737,7 @@
 
             if(this.commission !== null)
             {
-              this.propertyCommission = ((this.commission/100) * this.totalPaid).toFixed(2);
+              this.propertyCommission = this.commission;
             }
             else
             {
@@ -936,6 +937,7 @@
           const showExpensesDeductionRow = this.expenses !== 0;
           const logoBase64 = this.logoBase64;
           const watermarkText = this.paymentMethod;
+
           // Build the HTML content for the receipt
           const receiptHTML = `
             <!DOCTYPE html>
@@ -961,17 +963,17 @@
                   display: flex;
                   flex-direction: column;
                 }
-                 .watermark {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%) rotate(-45deg);
-                    font-size: 80px;
-                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
-                    white-space: nowrap;
-                    z-index: 0;
-                    pointer-events: none; /* Prevents watermark from interfering with other elements */
-                  }
+                .watermark {
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%) rotate(-45deg);
+                  font-size: 80px;
+                  color: rgba(0, 0, 0, 0.1);
+                  white-space: nowrap;
+                  z-index: 0;
+                  pointer-events: none;
+                }
                 .receipt-header {
                   display: flex;
                   justify-content: space-between;
@@ -984,6 +986,12 @@
                 .company-info img {
                   max-width: 150px;
                   height: auto;
+                }
+                .receipt-title {
+                  text-align: center;
+                  font-size: 20px;
+                  font-weight: bold;
+                  margin: 20px 0; /* Adding space before and after title */
                 }
                 .receipt-info {
                   margin-bottom: 20px;
@@ -1030,37 +1038,45 @@
                   <div class="company-info">
                     <p>Kakamega-Webuye Rd, ACK Building</p>
                     <p>Phone: (0720) 020-401 </p>
-                    <p> Email: propertapril@gmail.com</p>
+                    <p>Email: propertapril@gmail.com</p>
                   </div>
                 </div>
+
                 <div class="receipt-info">
                   <p><strong>Invoice For:</strong></p>
-                  <p><strong></strong> ${this.landlord}</p>
-                  <p><strong></strong> ${this.property.name} - ${this.unitsNo} Units</p>
-                  <p><strong></strong> ${this.currentMonth}</p>
-                  <p><strong></strong>  ${new Date().toLocaleString()}</p>
-                  
+                  <p>${this.landlord}</p>
+                  <p>${this.property.name} - ${this.unitsNo} Units</p>
+                  <p>${new Date().toLocaleString()}</p>
                 </div>
+
+                <!-- Centered Title (Sep 2024) placed directly below Invoice For section -->
+                <div class="receipt-title">
+                  ${this.currentMonth} Rent Statement <!-- Displays the centered month title -->
+                </div>
+
                 <table class="receipt-table">
                   <thead>
                     <tr>
                       <th>Description</th>
+                      <th>@</th> <!-- New column added here -->
                       <th>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Total Rent Less Commission</td>
+                      <td>Commercial Property</td>
+                      <td>${this.propertyCommission}</td> <!-- Add your dynamic content here for the @ column -->
                       <td>KES ${this.formatNumber(this.rentLessCommission)}</td>
                     </tr>
                     <tr>
-                      <td>Total Due Remmitted</td>
+                      <td>Residential Property</td>
+                      <td>${this.propertyCommission}</td> <!-- Add your dynamic content here for the @ column -->
                       <td>KES ${this.formatNumber(this.totalPaid)}</td>
                     </tr>
-                    <!-- Conditionally include expenses deduction row -->
                     ${showExpensesDeductionRow ? `
                     <tr>
                       <td>Total Expenses</td>
+                      <td>@</td> <!-- Add your dynamic content here for the @ column -->
                       <td>KES ${this.formatNumber(this.totalAmountPaid)}</td>
                     </tr>
                     ` : ''}
@@ -1068,6 +1084,7 @@
                   <tfoot>
                     <tr>
                       <th>Net Remmission:</th>
+                      <th>@</th> <!-- Footer content for @ column -->
                       <td>KES ${this.formatNumber(this.netRemmission)}</td>
                     </tr>
                   </tfoot>
@@ -1082,6 +1099,7 @@
 
           return receiptHTML;
         },
+
         exportToExcel() {
           const invoicesData = this.statements.map(statement => ({
             "PROPERTY": statement.property ? statement.property.name : 'N/A',

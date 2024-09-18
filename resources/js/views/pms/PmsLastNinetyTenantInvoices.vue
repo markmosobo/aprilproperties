@@ -857,7 +857,6 @@
                 </table>
                 <div class="payment-info">
                   <p><strong>Payment Options:</strong></p>
-                  <p>Bank Transfer: Account Number 123456789</p>
                   <p>Mobile Money: Paybill - ${this.paybillNo ?? 'N/A'} Account Number - ${this.accountNo ?? 'N/A'}</p>
                 </div>
                 <div class="receipt-footer">
@@ -1119,7 +1118,6 @@
                 </table>
                 <div class="payment-info">
                   <p><strong>Payment Options:</strong></p>
-                  <p>Bank Transfer: Account Number 123456789</p>
                   <p>Mobile Money: Paybill - ${this.paybillNo} Account Number - ${this.accountNo}</p>
                 </div>
                 <div class="receipt-footer">

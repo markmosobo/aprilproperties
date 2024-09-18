@@ -209,11 +209,18 @@ class PmsStatementController extends Controller
 
     public function propertyStatements(Request $request, $id)
     {
-        $pmspropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereMonth('created_at', Carbon::now()->month)->get();
+        // Assuming $month is like 'September 2024'
+        $month = Carbon::now()->format('F Y');
+
+        // Query to filter by the 'rent_month' field in "September 2024" format
+        $pmspropertystatements = PmsStatement::with('tenant', 'property', 'unit')
+            ->where('pms_property_id', $id)
+            ->where('rent_month', $month) // Correlate directly to rent_month column
+            ->get();
         $pmspropertyrentingstatements = PmsStatement::with('tenant','property','unit')
         ->where('pms_tenant_id', '!=', null)
         ->where('pms_property_id', $id)
-        ->whereMonth('created_at', Carbon::now()->month)->get();
+        ->where('rent_month', $month)->get();
 
         return response()->json([
             'status' => true,
@@ -225,13 +232,19 @@ class PmsStatementController extends Controller
 
     public function propertyLastMonthStatements(Request $request, $id)
     {
-        $pmslastmonthpropertystatements = PmsStatement::with('tenant','property','unit')->where('pms_property_id', $id)->whereBetween('created_at',
-        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+        // Get last month in the format 'F Y' (e.g., 'August 2024')
+        $lastMonth = Carbon::now()->subMonth()->format('F Y');
+
+        // Query to filter by the 'rent_month' field for last month
+        $pmslastmonthpropertystatements = PmsStatement::with('tenant', 'property', 'unit')
+            ->where('pms_property_id', $id)
+            ->where('rent_month', $lastMonth) // Correlate directly to rent_month column for last month
+            ->get();
         $pmslastmonthpropertyrentingstatements = PmsStatement::with('tenant','property','unit')
         ->where('pms_tenant_id', '!=', null)
         ->where('pms_property_id', $id)
-        ->whereBetween('created_at',
-        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+        ->where('rent_month',
+        $lastMonth)->get();
 
         return response()->json([
             'status' => true,

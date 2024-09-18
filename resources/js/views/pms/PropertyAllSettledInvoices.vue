@@ -1058,7 +1058,7 @@
                 //settled invoices
              this.statements = response.data.propertyallsettledinvoices;
              //all invoices (unsettled & vacants too)
-             this.allstatements = response.data.propertyallmonthinvoices;
+             this.allstatements = response.data.propertyallinvoices;
              console.log("all",this.allstatements)
              // Calculate the total amount paid
              setTimeout(() => {

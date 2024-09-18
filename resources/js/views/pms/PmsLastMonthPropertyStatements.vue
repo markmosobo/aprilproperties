@@ -731,7 +731,7 @@
               //includes vacants
              this.statements = response.data.pmslastmonthpropertystatements;
              //excludes vacants
-             this.rentingstatements = response.data.pmspropertyrentingstatements;
+             this.rentingstatements = response.data.pmslastmonthpropertyrentingstatements;
              this.totalAmountPaid = this.calculateTotalAmountPaid();
             this.totalPaid = this.calculateTotal();
 
