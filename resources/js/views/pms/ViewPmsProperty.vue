@@ -63,7 +63,7 @@
 
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Deductible Commission</div>
-                    <div v-if="property.commission !== null" class="col-lg-9 col-md-8">{{(property.commission * 100).toFixed(2)}}%</div>
+                    <div v-if="property.commission !== null" class="col-lg-9 col-md-8">{{(property.commission)}}%</div>
                     <div v-else class="col-lg-9 col-md-8">{{property.fixed_commission}}</div>
                   </div>
 

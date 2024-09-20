@@ -81,7 +81,7 @@
                                   <a @click="navigateTo('/pmsproperties/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
                                   <a @click="navigateTo('/pmsunits/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Units</a>
                                   <!-- <a @click="navigateTo('/pmspropertystatements/'+property.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Statements</a>  -->
-                                  <a @click="navigateTo('/propertyallsettledinvoices/'+property.id)" class="dropdown-item" href="#">
+                                  <a @click="navigateTo('/propertysettledinvoices/'+property.id)" class="dropdown-item" href="#">
                                     <i class="ri-bank-card-fill mr-2"></i>View Invoices
                                   </a>
  

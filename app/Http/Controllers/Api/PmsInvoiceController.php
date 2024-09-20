@@ -70,16 +70,26 @@ class PmsInvoiceController extends Controller
     public function propSettledInvoices(Request $request, $id)
     {
         $property = PmsProperty::findOrFail($id);
+        // Assuming $month is like 'September 2024'
+        $month = Carbon::now()->format('F Y');
         //only settled invoices for month
-        $propertymonthsettledinvoices = PmsStatement::latest()->whereNotNull('water_bill')->where('status',1)->with('tenant','property','unit')->where('pms_property_id', $property->id)->whereMonth('created_at', Carbon::now()->month)->get();
+        $propertymonthsettledinvoices = PmsStatement::latest()->whereNotNull('water_bill')->where('status',1)->with('tenant','property','unit')->where('pms_property_id', $property->id)->where('rent_month',$month)->get();
         //includes vacant and unsettled
-        $propertymonthinvoices = PmsStatement::latest()->whereNotNull('water_bill')->with('tenant','property','unit')->where('pms_property_id', $property->id)->whereMonth('created_at', Carbon::now()->month)->get();
+        $propertymonthinvoices = PmsStatement::latest()->whereNotNull('water_bill')->with('tenant','property','unit')->where('pms_property_id', $property->id)->where('rent_month',$month)->get();
+        $commercialpropertymonthinvoices = $propertymonthinvoices->filter(function ($invoice) {
+            return $invoice['unit']['type'] === 'Commercial';
+        })->sum('paid');
+        $residentialpropertymonthinvoices = $propertymonthinvoices->filter(function ($invoice) {
+            return $invoice['unit']['type'] === 'Residential';
+        })->sum('paid');
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
             'propertymonthsettledinvoices' => $propertymonthsettledinvoices,
-            'propertymonthinvoices' => $propertymonthinvoices
+            'propertymonthinvoices' => $propertymonthinvoices,
+            'commercialpropertymonthinvoices' => $commercialpropertymonthinvoices,
+            'residentialpropertymonthinvoices' => $residentialpropertymonthinvoices
         ], 200);
     }
 

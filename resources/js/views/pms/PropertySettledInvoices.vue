@@ -85,7 +85,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Settled Invoices - {{property.name}} <span>| This Month</span></h5>
+                      <h5 class="card-title">{{property.name}} Invoices <span>| This Month ({{currentMonth}})</span></h5>
                       <p class="card-text">
                    
 <!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
@@ -101,7 +101,7 @@
                       <div class="row">
                         <div class="col d-flex">
                           <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
-                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Invoice</button>
+                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Landlord Invoice</button>
                           <button v-if="statements.length !== 0" @click="generatePDF">Generate Rent Statement</button>
                         </div>
                         <div class="col-auto d-flex justify-content-end">
@@ -146,7 +146,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="statement in statements" :key="statement.id">
+                          <tr v-for="statement in allstatements" :key="statement.id">
                             <td>{{ statement.unit_number ?? 'N/A' }}</td>
                             <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
                             <td>{{formatNumber(statement.total)}}</td>
@@ -254,6 +254,7 @@
             landlordAddress: '',
             logoBase64: '',
             propertyId: '',
+            currentTime: ''
 
 
         }
@@ -313,6 +314,11 @@
             return moment(String(value)).format('DD/MM/YYYY')
           }
         },
+        formatted_date(value){
+          if(value){
+            return moment(String(value)).format('lll');
+          }
+        }, 
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
         },
@@ -331,7 +337,7 @@
               console.error('Error converting image to base64:', error);
             });
         },
-        printInvoice(){
+        printInvoice() {
             // Open a new window for printing
             const printWindow = window.open("", "_blank");
 
@@ -344,14 +350,35 @@
             // Close the document stream
             printWindow.document.close();
 
-            // Trigger the print dialog
-            printWindow.print();
+            // Wait for the content to be fully loaded
+            printWindow.onload = function() {
+                // Find the logo image element
+                const logoImage = printWindow.document.querySelector('img');
+
+                if (logoImage) {
+                    // Ensure the image is loaded
+                    logoImage.onload = function() {
+                        // Trigger the print dialog after the image has loaded
+                        printWindow.print();
+                    };
+
+                    // Handle case where the image might already be cached
+                    if (logoImage.complete) {
+                        logoImage.onload();  // Manually trigger onload if image is already loaded
+                    }
+                } else {
+                    // If there's no image, just print immediately
+                    printWindow.print();
+                }
+            };
         },
+
         buildInvoiceContent() {
           // Determine whether to include the row
           const showExpensesDeductionRow = this.expenses !== 0;
           const logoBase64 = this.logoBase64;
-          const watermarkText = 'Unpaid';
+          const watermarkText = 'INVOICE';
+
           // Build the HTML content for the receipt
           const receiptHTML = `
             <!DOCTYPE html>
@@ -359,10 +386,10 @@
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Invoice Of Payment</title>
+              <title>Landlord Invoice</title>
               <style>
                 body {
-                  font-family: Arial, sans-serif;
+                  font-family: 'Arial', sans-serif;
                   margin: 0;
                   padding: 0;
                   background-color: #f5f5f5;
@@ -372,22 +399,21 @@
                   margin: 20px auto;
                   padding: 20px;
                   background-color: #fff;
-                  border: 2px solid #ccc;
+                  border: 1px solid #ddd;
                   border-radius: 10px;
-                  display: flex;
-                  flex-direction: column;
+                  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+                  position: relative;
                 }
-                 .watermark {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%) rotate(-45deg);
-                    font-size: 80px;
-                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
-                    white-space: nowrap;
-                    z-index: 0;
-                    pointer-events: none; /* Prevents watermark from interfering with other elements */
-                  }
+                .watermark {
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%) rotate(-45deg);
+                  font-size: 80px;
+                  color: rgba(0, 0, 0, 0.05);
+                  z-index: 0;
+                  pointer-events: none;
+                }
                 .receipt-header {
                   display: flex;
                   justify-content: space-between;
@@ -401,11 +427,15 @@
                   max-width: 150px;
                   height: auto;
                 }
-                .receipt-info {
-                  margin-bottom: 20px;
+                .receipt-title {
+                  text-align: center;
+                  font-size: 22px;
+                  font-weight: bold;
+                  margin: 20px 0;
+                  color: #333;
                 }
                 .receipt-info p {
-                  margin: 5px 0;
+                  margin: 4px 0;
                   color: #555;
                 }
                 .receipt-table {
@@ -414,25 +444,32 @@
                   margin-bottom: 20px;
                 }
                 .receipt-table th, .receipt-table td {
-                  padding: 8px;
-                  border-bottom: 1px solid #ccc;
+                  padding: 10px;
+                  border-bottom: 1px solid #ddd;
+                  text-align: left;
                 }
                 .receipt-table th {
-                  text-align: left;
-                  background-color: #f2f2f2;
+                  background-color: #f0f0f0;
                   color: #333;
                 }
                 .receipt-table td {
-                  text-align: left;
                   color: #666;
                 }
                 .receipt-footer {
                   text-align: center;
-                  margin-top: auto;
+                  margin-top: 30px;
                 }
                 .receipt-footer p {
                   margin: 5px 0;
                   color: #777;
+                }
+                .payment-details {
+                  margin-top: 20px;
+                  font-size: 14px;
+                  color: #555;
+                }
+                .payment-details strong {
+                  color: #333;
                 }
               </style>
             </head>
@@ -445,51 +482,62 @@
                   </div>
                   <div class="company-info">
                     <p>Kakamega-Webuye Rd, ACK Building</p>
-                    <p>Phone: (0720) 020-401 </p>
-                    <p> Email: propertapril@gmail.com</p>
+                    <p>Phone: (0720) 020-401</p>
+                    <p>Email: propertapril@gmail.com</p>
                   </div>
                 </div>
+
                 <div class="receipt-info">
                   <p><strong>Invoice For:</strong></p>
-                  <p><strong></strong> ${this.landlord}</p>
-                  <p><strong></strong> ${this.property.name} - ${this.unitsNo} Units</p>
-                  <p><strong></strong> ${this.currentMonth}</p>
-                  <p><strong></strong>  ${new Date().toLocaleString()}</p>
-                  
+                  <p>${this.landlord}</p>
+                  <p>${this.property.name} - ${this.unitsNo} Units</p>
+                  <p>${this.format_date(new Date().toLocaleString())}</p>
                 </div>
+
+                <!-- Centered Title (Sep 2024) placed directly below Invoice For section -->
+                <div class="receipt-title">
+                  ${this.currentMonth} Rent Statement <!-- Displays the centered month title -->
+                </div>
+
                 <table class="receipt-table">
                   <thead>
                     <tr>
                       <th>Description</th>
+                      <th>@</th> <!-- New column added here -->
                       <th>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>Total Rent Less Commission</td>
-                      <td>KES ${this.formatNumber(this.rentLessCommission)}</td>
+                      <td>Commercial Property</td>
+                      <td>${this.propertyCommission}</td> <!-- Dynamic content for the @ column -->
+                      <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
                     </tr>
                     <tr>
-                      <td>Total Due Remmitted</td>
-                      <td>KES ${this.formatNumber(this.totalPaid)}</td>
+                      <td>Residential Property</td>
+                      <td>${this.propertyCommission}</td> <!-- Dynamic content for the @ column -->
+                      <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
                     </tr>
-                    <!-- Conditionally include expenses deduction row -->
-                    ${showExpensesDeductionRow ? `
-                    <tr>
-                      <td>Total Expenses</td>
-                      <td>KES ${this.formatNumber(this.totalAmountPaid)}</td>
-                    </tr>
-                    ` : ''}
                   </tbody>
                   <tfoot>
                     <tr>
-                      <th>Net Remmission:</th>
-                      <td>KES ${this.formatNumber(this.netRemmission)}</td>
+                      <th>Total:</th>
+                      <th></th> <!-- Footer content for @ column -->
+                      <td>KES ${this.formatNumber(this.residentialPropertyAmount + this.commercialPropertyAmount)}</td>
                     </tr>
                   </tfoot>
                 </table>
+
+                <!-- Payment Account Details Section -->
+                <div class="payment-details">
+                  <p><strong>Payment Account Details:</strong></p>
+                  <p>Bank: ABC Bank, Kakamega Branch</p>
+                  <p>Account Name: Property April Ltd</p>
+                  <p>Account Number: 1234567890</p>
+                </div>
+
                 <div class="receipt-footer">
-                  <p>PDF Generated on ${new Date().toLocaleDateString()}</p>
+                  <p>Generated on ${this.format_date(new Date().toLocaleDateString())} ${this.currentTime}</p>
                 </div>
               </div>
             </body>
@@ -498,6 +546,7 @@
 
           return receiptHTML;
         },
+
 
         exportToExcel() {
           const invoicesData = this.statements.map(statement => ({
@@ -1020,7 +1069,10 @@
              this.statements = response.data.propertymonthsettledinvoices;
              //all invoices (unsettled & vacants too)
              this.allstatements = response.data.propertymonthinvoices;
+             this.commercialpropertymonthinvoices = response.data.commercialpropertymonthinvoices;
+             this.residentialpropertymonthinvoices = response.data.residentialpropertymonthinvoices;
              console.log("all",this.allstatements)
+             
              // Calculate the total amount paid
              setTimeout(() => {
                   $("#AllStatementsTable").DataTable();
@@ -1059,11 +1111,15 @@
             this.unitsNo = this.property.units_no;
             if(this.commission !== null)
             {
-              this.propertyCommission = ((this.commission/100) * this.totalPaid).toFixed(2);
+              this.propertyCommission = this.commission;
+              this.commercialPropertyAmount = ((this.commission/100) * this.commercialpropertymonthinvoices);
+              this.residentialPropertyAmount = ((this.commission/100) * this.residentialpropertymonthinvoices);
             }
             else
             {
               this.propertyCommission = this.fixedCommission;
+              this.commercialPropertyAmount = this.commercialpropertymonthinvoices - this.propertyCommission;
+              this.residentialPropertyAmount = this.residentialpropertymonthinvoices - this.propertyCommission;
             }
             this.rentLessCommission = this.totalPaid - this.propertyCommission;
             console.log("kijamo", response)
@@ -1096,7 +1152,12 @@
         calculateTotal(property) {
           // Function to calculate total for Total, Paid, and Bal columns
 
-          return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
+          return this.allstatements.reduce((total, statement) => total + (statement[property] || 0), 0);
+        },
+         updateTime() {
+          const now = new Date();
+          // Formatting the time to a readable format, e.g. HH:MM:SS
+          this.currentTime = now.toLocaleTimeString();
         },
       },
       components : {
@@ -1129,6 +1190,9 @@
         this.updateTime(); // Set the initial time
         setInterval(this.updateTime, 1000); // Update the time every second
         this.currentMonth = this.getCurrentMonth(); // Set the initial date
+        this.updateTime();
+        // Update the time every second
+        setInterval(this.updateTime, 1000);
 
       }
     }
