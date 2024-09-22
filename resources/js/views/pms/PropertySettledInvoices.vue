@@ -330,7 +330,7 @@
               reader.readAsDataURL(blob);
               reader.onloadend = () => {
                 this.logoBase64 = reader.result;
-                console.log(this.logoBase64)
+                // console.log(this.logoBase64)
               };
             })
             .catch(error => {
@@ -374,178 +374,204 @@
         },
 
         buildInvoiceContent() {
-          // Determine whether to include the row
-          const showExpensesDeductionRow = this.expenses !== 0;
-          const logoBase64 = this.logoBase64;
-          const watermarkText = 'INVOICE';
+  const logoBase64 = this.logoBase64 || ''; // Fallback if no logo is provided
+  const watermarkText = 'INVOICE';
 
-          // Build the HTML content for the receipt
-          const receiptHTML = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Landlord Invoice</title>
-              <style>
-                body {
-                  font-family: 'Arial', sans-serif;
-                  margin: 0;
-                  padding: 0;
-                  background-color: #f5f5f5;
-                }
-                .receipt {
-                  max-width: 600px;
-                  margin: 20px auto;
-                  padding: 20px;
-                  background-color: #fff;
-                  border: 1px solid #ddd;
-                  border-radius: 10px;
-                  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-                  position: relative;
-                }
-                .watermark {
-                  position: absolute;
-                  top: 50%;
-                  left: 50%;
-                  transform: translate(-50%, -50%) rotate(-45deg);
-                  font-size: 80px;
-                  color: rgba(0, 0, 0, 0.05);
-                  z-index: 0;
-                  pointer-events: none;
-                }
-                .receipt-header {
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  margin-bottom: 20px;
-                }
-                .company-info {
-                  text-align: left;
-                }
-                .company-info img {
-                  max-width: 150px;
-                  height: auto;
-                }
-                .receipt-title {
-                  text-align: center;
-                  font-size: 22px;
-                  font-weight: bold;
-                  margin: 20px 0;
-                  color: #333;
-                }
-                .receipt-info p {
-                  margin: 4px 0;
-                  color: #555;
-                }
-                .receipt-table {
-                  width: 100%;
-                  border-collapse: collapse;
-                  margin-bottom: 20px;
-                }
-                .receipt-table th, .receipt-table td {
-                  padding: 10px;
-                  border-bottom: 1px solid #ddd;
-                  text-align: left;
-                }
-                .receipt-table th {
-                  background-color: #f0f0f0;
-                  color: #333;
-                }
-                .receipt-table td {
-                  color: #666;
-                }
-                .receipt-footer {
-                  text-align: center;
-                  margin-top: 30px;
-                }
-                .receipt-footer p {
-                  margin: 5px 0;
-                  color: #777;
-                }
-                .payment-details {
-                  margin-top: 20px;
-                  font-size: 14px;
-                  color: #555;
-                }
-                .payment-details strong {
-                  color: #333;
-                }
-              </style>
-            </head>
-            <body>
-            <div class="watermark">${watermarkText}</div>
-              <div class="receipt">
-                <div class="receipt-header">
-                  <div class="company-logo">
-                    <img src="${logoBase64}" alt="Company Logo" style="max-width: 150px; height: auto;">
-                  </div>
-                  <div class="company-info">
-                    <p>Kakamega-Webuye Rd, ACK Building</p>
-                    <p>Phone: (0720) 020-401</p>
-                    <p>Email: propertapril@gmail.com</p>
-                  </div>
-                </div>
+  const receiptHTML = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Landlord Invoice</title>
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f9f9f9;
+        }
+        .receipt {
+          max-width: 100%;
+          width: 600px;
+          margin: 20px auto;
+          padding: 20px;
+          background-color: #fff;
+          border: 1px solid #ddd;
+          border-radius: 10px;
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+          position: relative;
+        }
+        .watermark {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-45deg);
+          font-size: 70px;
+          color: rgba(0, 0, 0, 0.04);
+          z-index: 0;
+          pointer-events: none;
+        }
+        .receipt-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+        .company-logo img {
+          max-width: 150px;
+          height: auto;
+        }
+        .company-info p {
+          margin: 4px 0;
+          color: #555;
+        }
+        .receipt-title {
+          text-align: center;
+          font-size: 24px;
+          font-weight: bold;
+          margin: 20px 0;
+          color: #333;
+        }
+        .receipt-info p {
+          margin: 4px 0;
+          color: #444;
+          line-height: 1.4;
+        }
+        .receipt-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+        }
+        .receipt-table th, .receipt-table td {
+          padding: 10px;
+          border-bottom: 1px solid #ddd;
+          text-align: left;
+        }
+        .receipt-table th {
+          background-color: #f0f0f0;
+          color: #333;
+        }
+        .receipt-table td {
+          color: #666;
+        }
+        .receipt-footer {
+          text-align: center;
+          margin-top: 30px;
+          color: #777;
+        }
+        .payment-section {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 20px;
+          gap: 15px;
+        }
+        .payment-details, .additional-details {
+          width: 48%;
+          font-size: 14px;
+          color: #555;
+        }
+        .payment-details strong, .additional-details strong {
+          color: #333;
+        }
+        .note-section {
+          margin-top: 20px;
+          padding: 10px;
+          background-color: #f9f9f9;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+        }
+        .note-section p {
+          margin: 0;
+          font-size: 13px;
+          color: #777;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="receipt">
+        <div class="watermark">${watermarkText}</div>
 
-                <div class="receipt-info">
-                  <p><strong>Invoice For:</strong></p>
-                  <p>${this.landlord}</p>
-                  <p>${this.property.name} - ${this.unitsNo} Units</p>
-                  <p>${this.format_date(new Date().toLocaleString())}</p>
-                </div>
+        <div class="receipt-header">
+          <div class="company-logo">
+            <img src="${logoBase64}" alt="Company Logo">
+          </div>
+          <div class="company-info">
+            <p>${this.contacts?.address || 'No Address'}</p>
+            <p>Phone: ${this.contacts?.phone || 'No Phone'}</p>
+            <p>Email: ${this.contacts?.email || 'No Email'}</p>
+          </div>
+        </div>
 
-                <!-- Centered Title (Sep 2024) placed directly below Invoice For section -->
-                <div class="receipt-title">
-                  ${this.currentMonth} Rent Statement <!-- Displays the centered month title -->
-                </div>
+        <div class="receipt-info">
+          <p><strong>Invoice For:</strong></p>
+          <p>${this.landlord || 'N/A'}</p>
+          <p>${this.property?.name || 'N/A'}</p>
+          <p>${this.format_date(new Date().toLocaleString())}</p>
+        </div>
 
-                <table class="receipt-table">
-                  <thead>
-                    <tr>
-                      <th>Description</th>
-                      <th>@</th> <!-- New column added here -->
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Commercial Property</td>
-                      <td>${this.propertyCommission}</td> <!-- Dynamic content for the @ column -->
-                      <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
-                    </tr>
-                    <tr>
-                      <td>Residential Property</td>
-                      <td>${this.propertyCommission}</td> <!-- Dynamic content for the @ column -->
-                      <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <th>Total:</th>
-                      <th></th> <!-- Footer content for @ column -->
-                      <td>KES ${this.formatNumber(this.residentialPropertyAmount + this.commercialPropertyAmount)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
+        <div class="receipt-title">${this.currentMonth || 'Current'} Rent Statement</div>
 
-                <!-- Payment Account Details Section -->
-                <div class="payment-details">
-                  <p><strong>Payment Account Details:</strong></p>
-                  <p>Bank: ABC Bank, Kakamega Branch</p>
-                  <p>Account Name: Property April Ltd</p>
-                  <p>Account Number: 1234567890</p>
-                </div>
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Commercial Property</td>
+              <td>${this.propertyCommission || 'N/A'}</td>
+              <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
+            </tr>
+            <tr>
+              <td>Residential Property</td>
+              <td>${this.propertyCommission || 'N/A'}</td>
+              <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total:</th>
+              <th></th>
+              <td>KES ${this.formatNumber(this.residentialPropertyAmount + this.commercialPropertyAmount)}</td>
+            </tr>
+          </tfoot>
+        </table>
 
-                <div class="receipt-footer">
-                  <p>Generated on ${this.format_date(new Date().toLocaleDateString())} ${this.currentTime}</p>
-                </div>
-              </div>
-            </body>
-            </html>
-          `;
+        <div class="payment-section">
+          <div class="payment-details">
+            <p><strong>Bank Account Details:</strong></p>
+            <p>Bank: ${this.bankMoney?.bank_name || 'N/A'}</p>
+            <p>Account Name: ${this.bankMoney?.account_name || 'N/A'}</p>
+            <p>Account Number: ${this.bankMoney?.account_number || 'N/A'}</p>
+          </div>
+          <div class="additional-details">
+            <p><strong>Mobile Payment Details:</strong></p>
+            <p>PayBill: ${this.mobileMoney?.paybill_number || 'N/A'}</p>
+            <p>Account Number: ${this.mobileMoney?.account_number || 'N/A'}</p>
+            <p>Account Name: ${this.mobileMoney?.account_name || 'N/A'}</p>
+          </div>
+        </div>
 
-          return receiptHTML;
-        },
+        <div class="note-section">
+          <p><strong>Note:</strong> Accounts are due on demand</p>
+        </div>
+
+        <div class="receipt-footer">
+          <p>Generated on ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return receiptHTML;
+},
+
+
 
 
         exportToExcel() {
@@ -1063,7 +1089,20 @@
           const year = now.getFullYear();
           return `${day}/${month}/${year}`;
         },
-        loadLists() {
+        loadLists()
+        {
+          axios.get('/api/lists').then((response) => {
+
+             this.payments = response.data.lists.payments;
+             this.mobileMoney = this.payments[0];
+             this.bankMoney = this.payments[1];
+             this.contacts = response.data.lists.contacts[0];
+             // this.tillMoney = response.data.lists.tillpayment;
+             // console.log("pussy", this.tillMoney)
+    
+             });
+        },
+        getInvoices() {
              axios.get('/api/propertysettledinvoices/'+this.$route.params.id).then((response) => {
                 //settled invoices
              this.statements = response.data.propertymonthsettledinvoices;
@@ -1180,6 +1219,7 @@
       },      
       mounted(){
         this.loadLists();
+        this.getInvoices();
         this.getProperty();
         this.getPropertyExpenses();
         this.loadLogo();

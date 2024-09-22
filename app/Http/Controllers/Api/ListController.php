@@ -54,6 +54,9 @@ class ListController extends Controller
         $services = Service::all();
         $contacts = Contact::all();
         $payments = Payment::all();
+        $tillpayment = Payment::where('transfer_type', 'Mpesa Till Number')
+            ->orderBy('created_at', 'desc') // Sorting by 'created_at' in descending order
+            ->first();
         $sociallinks = SocialLink::all();
         $landlords = Landlord::all();
         $smslandlords = Landlord::whereNotNull('phone_no')->get();
@@ -130,6 +133,7 @@ class ListController extends Controller
                 'homeservices' => $homeservices,
                 'contacts' => $contacts,
                 'payments' => $payments,
+                'tillpayment' => $tillpayment,
                 'sociallinks' => $sociallinks,
                 'saleproperties' => $saleproperties,
                 'rentproperties' => $rentproperties,
