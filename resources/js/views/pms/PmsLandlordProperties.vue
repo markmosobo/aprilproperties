@@ -21,7 +21,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">{{landlord}}'s Managed Properties <span>| Today</span></h5>
+                      <h5 class="card-title">{{landlord}}'s Managed Properties <span>| Properties under April Properties</span></h5>
                       <p class="card-text">
                         <div class="row">
                         <div class="col d-flex">

@@ -85,7 +85,7 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">Settled Invoices - {{property.name}} <span>| Last Month</span></h5>
+                      <h5 class="card-title">{{property.name}} Invoices<span> | Last Month ({{lastMonth}})</span></h5>
                       <p class="card-text">
                    
 <!--                       <router-link to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
@@ -101,7 +101,7 @@
                       <div class="row">
                         <div class="col d-flex">
                           <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
-                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Invoice</button>
+                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Landlord Invoice</button>
                           <button v-if="statements.length !== 0" @click="generatePDF">Generate Rent Statement</button>
                         </div>
                         <div class="col-auto d-flex justify-content-end">
@@ -324,14 +324,14 @@
               reader.readAsDataURL(blob);
               reader.onloadend = () => {
                 this.logoBase64 = reader.result;
-                console.log(this.logoBase64)
+                // console.log(this.logoBase64)
               };
             })
             .catch(error => {
               console.error('Error converting image to base64:', error);
             });
         },
-        printInvoice(){
+        printInvoice() {
             // Open a new window for printing
             const printWindow = window.open("", "_blank");
 
@@ -344,140 +344,232 @@
             // Close the document stream
             printWindow.document.close();
 
-            // Trigger the print dialog
-            printWindow.print();
+            // Wait for the content to be fully loaded
+            printWindow.onload = function() {
+                // Find the logo image element
+                const logoImage = printWindow.document.querySelector('img');
+
+                if (logoImage) {
+                    // Ensure the image is loaded
+                    logoImage.onload = function() {
+                        // Trigger the print dialog after the image has loaded
+                        printWindow.print();
+                    };
+
+                    // Handle case where the image might already be cached
+                    if (logoImage.complete) {
+                        logoImage.onload();  // Manually trigger onload if image is already loaded
+                    }
+                } else {
+                    // If there's no image, just print immediately
+                    printWindow.print();
+                }
+            };
         },
-        buildInvoiceContent(refNo) {
-          // Determine whether to include the row
-          const showExpensesDeductionRow = this.expenses !== 0;
-          const logoBase64 = this.logoBase64;
-          // Build the HTML content for the receipt
+        buildInvoiceContent() {
+          const logoBase64 = this.logoBase64 || ''; // Fallback if no logo is provided
+          const watermarkText = 'INVOICE';
+
+          // Determine whether to display each row based on the amounts
+          const showCommercialProperty = this.commercialPropertyAmount > 0;
+          const showResidentialProperty = this.residentialPropertyAmount > 0;
+
           const receiptHTML = `
             <!DOCTYPE html>
             <html lang="en">
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Invoice Of Payment</title>
+              <title>Landlord Invoice</title>
               <style>
                 body {
-                  font-family: Arial, sans-serif;
+                  font-family: 'Arial', sans-serif;
                   margin: 0;
                   padding: 0;
-                  background-color: #f5f5f5;
+                  background-color: #f4f4f4;
                 }
                 .receipt {
-                  max-width: 600px;
-                  margin: 20px auto;
-                  padding: 20px;
+                  max-width: 100%;
+                  width: 650px;
+                  margin: 40px auto;
+                  padding: 30px;
                   background-color: #fff;
-                  border: 2px solid #ccc;
+                  border: 1px solid #e0e0e0;
                   border-radius: 10px;
-                  display: flex;
-                  flex-direction: column;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                  position: relative;
+                }
+                .watermark {
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%) rotate(-45deg);
+                  font-size: 80px;
+                  color: rgba(0, 0, 0, 0.05);
+                  z-index: 0;
+                  pointer-events: none;
                 }
                 .receipt-header {
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
-                  margin-bottom: 20px;
+                  margin-bottom: 30px;
                 }
-                .company-info {
-                  text-align: left;
-                }
-                .company-info img {
-                  max-width: 150px;
+                .company-logo img {
+                  max-width: 120px;
                   height: auto;
                 }
-                .receipt-info {
-                  margin-bottom: 20px;
+                .company-info p {
+                  margin: 0;
+                  color: #333;
+                  font-size: 14px;
+                }
+                .receipt-title {
+                  text-align: center;
+                  font-size: 26px;
+                  font-weight: bold;
+                  margin: 30px 0;
+                  color: #444;
                 }
                 .receipt-info p {
-                  margin: 5px 0;
-                  color: #555;
+                  margin: 2px 0;
+                  color: #666;
+                  font-size: 14px;
+                  line-height: 1.6;
                 }
                 .receipt-table {
                   width: 100%;
                   border-collapse: collapse;
-                  margin-bottom: 20px;
+                  margin-bottom: 25px;
                 }
                 .receipt-table th, .receipt-table td {
-                  padding: 8px;
-                  border-bottom: 1px solid #ccc;
+                  padding: 12px 15px;
+                  border-bottom: 1px solid #ddd;
+                  text-align: left;
                 }
                 .receipt-table th {
-                  text-align: left;
-                  background-color: #f2f2f2;
+                  background-color: #f7f7f7;
                   color: #333;
+                  font-weight: 500;
                 }
                 .receipt-table td {
-                  text-align: left;
-                  color: #666;
+                  color: #555;
+                  font-size: 14px;
                 }
                 .receipt-footer {
                   text-align: center;
-                  margin-top: auto;
+                  margin-top: 30px;
+                  color: #888;
+                  font-size: 13px;
                 }
-                .receipt-footer p {
-                  margin: 5px 0;
-                  color: #777;
+                .payment-section {
+                  display: flex;
+                  justify-content: space-between;
+                  margin-top: 20px;
+                  gap: 15px;
+                }
+                .payment-details, .additional-details {
+                  width: 48%;
+                  font-size: 14px;
+                  color: #444;
+                }
+                .payment-details strong, .additional-details strong {
+                  color: #333;
+                }
+                .note-section {
+                  margin-top: 30px;
+                  padding: 15px;
+                  background-color: #f1f1f1;
+                  border: 1px solid #ddd;
+                  border-radius: 8px;
+                  text-align: center; /* Center the text */
+                }
+                .note-section p {
+                  margin: 0;
+                  font-size: 14px;
+                  color: #666;
+                  font-weight: bold;
                 }
               </style>
             </head>
             <body>
               <div class="receipt">
+                <div class="watermark">${watermarkText}</div>
+
                 <div class="receipt-header">
                   <div class="company-logo">
-                    <img src="${logoBase64}" alt="Company Logo" style="max-width: 150px; height: auto;">
+                    <img src="${logoBase64}" alt="Company Logo">
                   </div>
                   <div class="company-info">
-                    <p>Kakamega-Webuye Rd, ACK Building</p>
-                    <p>Phone: (0720) 020-401 </p>
-                    <p> Email: propertapril@gmail.com</p>
+                    <p>${this.contacts?.address || 'No Address'}</p>
+                    <p>Phone: ${this.formatPhoneNumber(this.contacts?.phone) || 'No Phone'}</p>
+                    <p>Email: ${this.contacts?.email || 'No Email'}</p>
+                    <p>Website: aprilproperties.co.ke</p>
                   </div>
                 </div>
+
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong></p>
-                  <p><strong></strong> ${this.landlord}</p>
-                  <p><strong></strong> ${this.property.name} - ${this.unitsNo} Units</p>
-                  <p><strong></strong> ${this.currentMonth}</p>
-                  <p><strong></strong>  ${new Date().toLocaleString()}</p>
-                  
-                  <p><strong>Payment Status:</strong> Unsettled</p>
+                  <p><strong>Invoice For:</strong> ${this.landlord || 'N/A'}</p>
+                  <p><strong>Property:</strong> ${this.property?.name || 'N/A'}</p>
+                  <p><strong>Date:</strong> ${this.format_date(new Date().toLocaleString())}</p>
                 </div>
+
+                <div class="receipt-title">${this.lastMonth || 'Last Month'} Rent Statement</div>
+
                 <table class="receipt-table">
                   <thead>
                     <tr>
                       <th>Description</th>
+                      <th>Rate</th>
                       <th>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
+                    ${showCommercialProperty ? `
                     <tr>
-                      <td>Total Rent Less Commission</td>
-                      <td>KES ${this.formatNumber(this.rentLessCommission)}</td>
+                      <td>Commercial Property</td>
+                      <td>${this.propertyCommission || 'N/A'}</td>
+                      <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
                     </tr>
+                    ` : ''}
+                    ${showResidentialProperty ? `
                     <tr>
-                      <td>Total Due Remmitted</td>
-                      <td>KES ${this.formatNumber(this.totalPaid)}</td>
-                    </tr>
-                    <!-- Conditionally include expenses deduction row -->
-                    ${showExpensesDeductionRow ? `
-                    <tr>
-                      <td>Total Expenses</td>
-                      <td>KES ${this.formatNumber(this.totalAmountPaid)}</td>
+                      <td>Residential Property</td>
+                      <td>${this.propertyCommission || 'N/A'}</td>
+                      <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
                     </tr>
                     ` : ''}
                   </tbody>
                   <tfoot>
                     <tr>
-                      <th>Net Remmission:</th>
-                      <td>KES ${this.formatNumber(this.netRemmission)}</td>
+                      <th>Total:</th>
+                      <th></th>
+                      <td>KES ${this.formatNumber(this.residentialPropertyAmount + this.commercialPropertyAmount)}</td>
                     </tr>
                   </tfoot>
                 </table>
+
+                <div class="payment-section">
+                  <div class="payment-details">
+                    <p><strong>Bank Account Details:</strong></p>
+                    <p>Bank: ${this.bankMoney?.bank_name || 'N/A'}</p>
+                    <p>Account Name: ${this.bankMoney?.account_name || 'N/A'}</p>
+                    <p>Account Number: ${this.bankMoney?.account_number || 'N/A'}</p>
+                  </div>
+                  <div class="additional-details">
+                    <p><strong>Mobile Payment Details:</strong></p>
+                    <p>PayBill: ${this.mobileMoney?.paybill_number || 'N/A'}</p>
+                    <p>Account Number: ${this.mobileMoney?.account_number || 'N/A'}</p>
+                    <p>Account Name: ${this.mobileMoney?.account_name || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div class="note-section">
+                  <p>Accounts are due on demand</p>
+                </div>
+
                 <div class="receipt-footer">
-                  <p>PDF Generated on ${new Date().toLocaleDateString()}</p>
+                  <p>Generated on ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
                 </div>
               </div>
             </body>
@@ -485,6 +577,12 @@
           `;
 
           return receiptHTML;
+        },
+        formatPhoneNumber(number) {
+          // Convert number to string and prepend '0'
+          const str = '0' + number.toString();
+          // Format like '07200-2040' (You can adjust this based on your needs)
+          return str.slice(0, 5) + '-' + str.slice(5);
         },
 
         exportToExcel() {
@@ -1002,7 +1100,7 @@
           const year = now.getFullYear();
           return `${day}/${month}/${year}`;
         },
-        loadLists() {
+        getInvoices() {
              axios.get('/api/propertylastmonthsettledinvoices/'+this.$route.params.id).then((response) => {
                 //settled invoices
              this.statements = response.data.propertylastmonthsettledinvoices;
@@ -1013,6 +1111,19 @@
              setTimeout(() => {
                   $("#AllStatementsTable").DataTable();
               }, 10);
+    
+             });
+        },
+        loadLists()
+        {
+          axios.get('/api/lists').then((response) => {
+
+             this.payments = response.data.lists.payments;
+             this.mobileMoney = this.payments[0];
+             this.bankMoney = this.payments[1];
+             this.contacts = response.data.lists.contacts[0];
+             // this.tillMoney = response.data.lists.tillpayment;
+             // console.log("pussy", this.tillMoney)
     
              });
         },
@@ -1073,6 +1184,12 @@
               console.log('error')
           })
         },
+         getLastMonth() {
+          const date = new Date();
+          date.setMonth(date.getMonth() - 1);
+          const options = { year: 'numeric', month: 'long' };
+          return date.toLocaleDateString('en-US', options);
+        },
         calculateTotalAmountPaid() {
         if (!this.expenses || this.expenses.length === 0) {
               return 0; // If expenses data is empty or undefined, return 0
@@ -1110,6 +1227,7 @@
         this.getProperty();
         this.getPropertyExpenses();
         this.loadLogo();
+        this.getInvoices();
         this.propertyId = this.$route.params.id;
         this.currentDate = this.getCurrentDate(); // Set the initial date
         this.user = localStorage.getItem('user');
@@ -1117,6 +1235,7 @@
         this.updateTime(); // Set the initial time
         setInterval(this.updateTime, 1000); // Update the time every second
         this.currentMonth = this.getCurrentMonth(); // Set the initial date
+        this.lastMonth = this.getLastMonth();
 
       }
     }
