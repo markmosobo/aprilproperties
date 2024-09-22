@@ -147,6 +147,9 @@ import BulkSms from '../views/sms/BulkSms.vue'
 import Sms from '../views/sms/Sms.vue'
 import SmsLandlord from '../views/sms/SmsLandlord.vue'
 
+import Payments from '../views/pms/Payments.vue'
+import ContactUs from '../views/pms/ContactUs.vue'
+
 function guardMyroute(to, from, next)
 {
  var isAuthenticated= false;
@@ -978,6 +981,18 @@ const routes = [
         path:'/smslandlord',
         name: 'smslandlord',
         component: SmsLandlord,
+        beforeEnter : guardMyroute,
+    }, 
+    {
+        path:'/payments',
+        name: 'payments',
+        component: Payments,
+        beforeEnter : guardMyroute,
+    }, 
+    {
+        path:'/contactus',
+        name: 'contactus',
+        component: ContactUs,
         beforeEnter : guardMyroute,
     }                              
 ];

@@ -214,7 +214,7 @@
       </li>
       <li v-show="user.role_id == 1" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#sms-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-people"></i><span>Manage SMS</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-people"></i><span>Manage About Info</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="sms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
  <!--          <li>
@@ -229,7 +229,7 @@
               </a>
             </router-link>
           </li> -->  
-          <li>
+<!--           <li>
             <router-link to="/sms" custom v-slot="{ href, navigate, isActive }">
                 <a
                   :href="href"
@@ -240,19 +240,29 @@
               <i class="bi bi-circle"></i><span>SMS Tenant</span>
               </a>
             </router-link>
-          </li> 
-<!--           <li>
-            <router-link to="/smslandlord" custom v-slot="{ href, navigate, isActive }">
+          </li>  -->
+          <li>
+            <router-link to="/contactus" custom v-slot="{ href, navigate, isActive }">
                 <a
                   :href="href"
                   :class="{ active: isActive }"
                   class="nav-link"
                   @click="navigate"
                 >
-              <i class="bi bi-circle"></i><span>SMS Landlord</span>
+              <i class="bi bi-circle"></i><span>Contact Us</span>
               </a>
             </router-link>
-          </li>  -->                         
+            <router-link to="/payments" custom v-slot="{ href, navigate, isActive }">
+                <a
+                  :href="href"
+                  :class="{ active: isActive }"
+                  class="nav-link"
+                  @click="navigate"
+                >
+              <i class="bi bi-circle"></i><span>Payment Info</span>
+              </a>
+            </router-link>
+          </li>                          
         </ul>
       </li>
       <!-- End Components Nav --> 

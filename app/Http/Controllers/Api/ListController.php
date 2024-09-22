@@ -28,6 +28,7 @@ use App\Models\PmsExpense;
 use App\Models\PmsStatement;
 use App\Models\Invoice;
 use App\Models\Permission;
+use App\Models\Payment;
 use Carbon\Carbon;
 
 class ListController extends Controller
@@ -52,6 +53,7 @@ class ListController extends Controller
         $abouts = About::latest()->take(1)->get();
         $services = Service::all();
         $contacts = Contact::all();
+        $payments = Payment::all();
         $sociallinks = SocialLink::all();
         $landlords = Landlord::all();
         $smslandlords = Landlord::whereNotNull('phone_no')->get();
@@ -127,6 +129,7 @@ class ListController extends Controller
                 'services' => $services,
                 'homeservices' => $homeservices,
                 'contacts' => $contacts,
+                'payments' => $payments,
                 'sociallinks' => $sociallinks,
                 'saleproperties' => $saleproperties,
                 'rentproperties' => $rentproperties,

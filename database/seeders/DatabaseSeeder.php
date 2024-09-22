@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ContactTableSeeder::class);
         $this->call(SocialLinkTableSeeder::class);
         $this->call(PermissionTableSeeder::class);
+        $this->call(PaymentTableSeeder::class);
 
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',
