@@ -9,6 +9,8 @@ use App\Models\PmsTenant;
 use App\Models\PmsProperty;
 use App\Models\PmsStatement;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LandlordInvoiceMail;
 
 class PmsInvoiceController extends Controller
 {
@@ -96,16 +98,24 @@ class PmsInvoiceController extends Controller
     public function propLastMonthSettledInvoices(Request $request, $id)
     {
         $property = PmsProperty::findOrFail($id);
-        $propertylastmonthsettledinvoices = PmsStatement::latest()->whereNotNull('water_bill')->where('status',1)->with('tenant','property','unit')->where('pms_property_id', $property->id)->whereBetween('created_at',
-        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
-        $propertylastmonthinvoices = PmsStatement::latest()->whereNotNull('water_bill')->with('tenant','property','unit')->where('pms_property_id', $property->id)->whereBetween('created_at',
-        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+        $lastMonth = Carbon::now()->subMonth()->format('F Y'); // Last month, e.g., 'August 2024'
+
+        $propertylastmonthsettledinvoices = PmsStatement::latest()->whereNotNull('water_bill')->where('status',1)->with('tenant','property','unit')->where('pms_property_id', $property->id)->where('rent_month',$lastMonth)->get();
+        $propertylastmonthinvoices = PmsStatement::latest()->whereNotNull('water_bill')->with('tenant','property','unit')->where('pms_property_id', $property->id)->where('rent_month',$lastMonth)->get();
+        $commercialpropertylastmonthinvoices = $propertylastmonthinvoices->filter(function ($invoice) {
+            return $invoice['unit']['type'] === 'Commercial';
+        })->sum('paid');
+        $residentialpropertylastmonthinvoices = $propertylastmonthinvoices->filter(function ($invoice) {
+            return $invoice['unit']['type'] === 'Residential';
+        })->sum('paid');
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
             'propertylastmonthsettledinvoices' => $propertylastmonthsettledinvoices,
-            'propertylastmonthinvoices' => $propertylastmonthinvoices
+            'propertylastmonthinvoices' => $propertylastmonthinvoices,
+            'commercialpropertylastmonthinvoices' => $commercialpropertylastmonthinvoices,
+            'residentialpropertylastmonthinvoices' => $residentialpropertylastmonthinvoices
         ], 200);
     }
 
@@ -185,5 +195,31 @@ class PmsInvoiceController extends Controller
             'propertyallsettledinvoices' => $propertyallsettledinvoices,
             'propertyallinvoices' => $propertyallinvoices
         ], 200);
-    }  
+    } 
+
+    public function sendLandlordInvoice(Request $request)
+    {
+        // Validate the input and the files
+        $request->validate([
+            'email' => 'required|email',
+            'subject' => 'required|string',
+            'message' => 'required|string',
+            'invoice' => 'required|file|mimes:html',
+            'pdfFile' => 'required|file|mimes:pdf|max:10000' // Max 10MB
+        ]);
+
+        // Retrieve the email details
+        $email = $request->input('email');
+        $subject = $request->input('subject');
+        $message = $request->input('message');
+
+        // Store the uploaded files temporarily
+        $invoicePath = $request->file('invoice')->store('invoices', 'public');
+        $pdfPath = $request->file('pdfFile')->store('pdfs', 'public');
+
+        // Send the email with attachments
+        Mail::to($email)->send(new LandlordInvoiceMail($subject, $message, $invoicePath, $pdfPath));
+
+        return response()->json(['message' => 'Email sent successfully']);
+    }
 }

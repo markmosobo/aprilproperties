@@ -462,6 +462,15 @@
                   color: #888;
                   font-size: 13px;
                 }
+                .footer-section {
+                  text-align: center;
+                  margin-top: 20px;
+                  padding-top: 10px;
+                  font-weight: bold;
+                  font-size: 14px;
+                  color: #444;
+                  border-top: 1px solid #ddd;
+                }
                 .payment-section {
                   display: flex;
                   justify-content: space-between;
@@ -502,7 +511,7 @@
                   </div>
                   <div class="company-info">
                     <p>${this.contacts?.address || 'No Address'}</p>
-                    <p>Phone: ${this.formatPhoneNumber(this.contacts?.phone) || 'No Phone'}</p>
+                    <p>Phone: ${this.contacts?.phone || 'No Phone'}</p>
                     <p>Email: ${this.contacts?.email || 'No Email'}</p>
                     <p>Website: aprilproperties.co.ke</p>
                   </div>
@@ -511,7 +520,7 @@
                 <div class="receipt-info">
                   <p><strong>Invoice For:</strong> ${this.landlord || 'N/A'}</p>
                   <p><strong>Property:</strong> ${this.property?.name || 'N/A'}</p>
-                  <p><strong>Date:</strong> ${this.format_date(new Date().toLocaleString())}</p>
+                  <p><strong>Date:</strong> ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
                 </div>
 
                 <div class="receipt-title">${this.lastMonth || 'Last Month'} Rent Statement</div>
@@ -519,22 +528,22 @@
                 <table class="receipt-table">
                   <thead>
                     <tr>
-                      <th>Description</th>
-                      <th>Rate</th>
+                      <th>Particulars</th>
+                      <th>@</th>
                       <th>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${showCommercialProperty ? `
                     <tr>
-                      <td>Commercial Property</td>
+                      <td>Commercial Property Units</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
                     </tr>
                     ` : ''}
                     ${showResidentialProperty ? `
                     <tr>
-                      <td>Residential Property</td>
+                      <td>Residential Property Units</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
                     </tr>
@@ -569,7 +578,10 @@
                 </div>
 
                 <div class="receipt-footer">
-                  <p>Generated on ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
+                
+                </div>
+                <div class="footer-section">
+                  Property Management, Rent Enforcement, Property Advertising, Rental Income Tax
                 </div>
               </div>
             </body>
@@ -626,7 +638,7 @@
             doc.text(rightHeaderText, rightheaderX, rightheaderY, { align: 'left' });
 
             // Add top-right header
-            const headerText = 'Generated on: ' + new Date().toLocaleString() + '\n' + 'Statement for:' + '\n' + this.landlord + '\n' + this.property.name + '\n' + this.landlordPhone + '\n' + this.landlordEmail + '\n' + this.landlordAddress + '\n' + this.property.units_no + ' Units';
+            const headerText = 'Generated on: ' + new Date().toLocaleString() + '\n' + 'Statement for:' + '\n' + this.landlord + '\n' + this.property.name + '\n' + this.landlordPhone + '\n' + this.landlordEmail;
             const headerFontSize = 12;
             const headerX = doc.internal.pageSize.width - 20; // Adjust the X coordinate
             const headerY = 10;
@@ -644,7 +656,7 @@
             doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
 
             // Add title
-            const titleText = (this.property.name + " " + this.currentMonth + ' Rent Statement').toUpperCase();
+            const titleText = (this.property.name + " " + this.lastMonth + ' Rent Statement').toUpperCase();
             const titleFontSize = 16;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
@@ -654,8 +666,7 @@
             doc.setTextColor(44, 62, 80); // Set text color to a dark shade
             doc.text(titleText, titleX, titleY);
 
-            const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = this.propertyCommission / 100 * this.totalPaid;
+            const commissionTotal = this.propertyCommission;
             const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
@@ -1106,7 +1117,9 @@
              this.statements = response.data.propertylastmonthsettledinvoices;
              //all invoices (unsettled & vacants too)
              this.allstatements = response.data.propertylastmonthinvoices;
-             console.log("all",this.allstatements)
+             this.commercialpropertylastmonthinvoices = response.data.commercialpropertylastmonthinvoices;
+             this.residentialpropertylastmonthinvoices = response.data.residentialpropertylastmonthinvoices;
+             console.log("all",this.commercialpropertylastmonthinvoices)
              // Calculate the total amount paid
              setTimeout(() => {
                   $("#AllStatementsTable").DataTable();
@@ -1158,14 +1171,23 @@
             this.unitsNo = this.property.units_no;
             if(this.commission !== null)
             {
-              this.propertyCommission = ((this.commission/100) * this.totalPaid).toFixed(2);
+              this.propertyCommission = this.commission;
+              this.commercialPropertyAmount = ((this.commission/100) * this.commercialpropertylastmonthinvoices);
+              this.residentialPropertyAmount = ((this.commission/100) * this.residentialpropertylastmonthinvoices);
+              this.totalCommission = ((this.commission/100) * this.totalPaid);
+              this.rentLessCommission = this.totalPaid - this.totalCommission;
+
+              console.log("tyrese", this.rentLessCommission)
             }
             else
             {
               this.propertyCommission = this.fixedCommission;
+              this.commercialPropertyAmount = this.commercialpropertylastmonthinvoices - this.propertyCommission;
+              this.residentialPropertyAmount = this.residentialpropertylastmonthinvoices - this.propertyCommission;
+              this.totalCommission = this.propertyCommission;
+              this.rentLessCommission = this.totalPaid - this.totalCommission;
             }
-            this.rentLessCommission = this.totalPaid - this.propertyCommission;
-            console.log("kijamo", response)
+            // console.log("frine", this.rentLessCommission)
           }).catch(() => {
               console.log('error')
           })
@@ -1223,11 +1245,11 @@
         }
       },      
       mounted(){
+        this.getInvoices();
         this.loadLists();
         this.getProperty();
         this.getPropertyExpenses();
         this.loadLogo();
-        this.getInvoices();
         this.propertyId = this.$route.params.id;
         this.currentDate = this.getCurrentDate(); // Set the initial date
         this.user = localStorage.getItem('user');

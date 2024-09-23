@@ -267,6 +267,10 @@ Route::post('sendsms', [SearchController::class, 'sendSms'])->name('sendsms');
 Route::post('sendtenantsms', [SearchController::class, 'sendTenantSms'])->name('sendTenantsms');
 Route::post('sendlandlordsms', [SearchController::class, 'sendLandlordSms'])->name('sendLandlordsms');
 
+//send mail
+Route::post('/send-landlordinvoice', [PmsInvoiceController::class, 'sendLandlordInvoice']);
+
+
 //generate invoices
 Route::post('/generate-monthly-statements', [PmsStatementController::class, 'generateMonthlyStatements']);
 

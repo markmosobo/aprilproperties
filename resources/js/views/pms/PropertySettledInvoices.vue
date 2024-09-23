@@ -102,7 +102,8 @@
                         <div class="col d-flex">
                           <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
                           <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Landlord Invoice</button>
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate Rent Statement</button>
+                          <button v-if="statements.length !== 0" @click="generatePDF" class="me-2">Generate Rent Statement</button>
+                          <button v-if="statements.length !== 0" @click="sendMail">Send Landlord Email</button>
                         </div>
                         <div class="col-auto d-flex justify-content-end">
                         <div class="btn-group" role="group">
@@ -469,6 +470,15 @@
                   color: #888;
                   font-size: 13px;
                 }
+                .footer-section {
+                  text-align: center;
+                  margin-top: 20px;
+                  padding-top: 10px;
+                  font-weight: bold;
+                  font-size: 14px;
+                  color: #444;
+                  border-top: 1px solid #ddd;
+                }
                 .payment-section {
                   display: flex;
                   justify-content: space-between;
@@ -489,7 +499,7 @@
                   background-color: #f1f1f1;
                   border: 1px solid #ddd;
                   border-radius: 8px;
-                  text-align: center; /* Center the text */
+                  text-align: center;
                 }
                 .note-section p {
                   margin: 0;
@@ -518,7 +528,7 @@
                 <div class="receipt-info">
                   <p><strong>Invoice For:</strong> ${this.landlord || 'N/A'}</p>
                   <p><strong>Property:</strong> ${this.property?.name || 'N/A'}</p>
-                  <p><strong>Date:</strong> ${this.format_date(new Date().toLocaleString())}</p>
+                  <p><strong>Date:</strong> ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
                 </div>
 
                 <div class="receipt-title">${this.currentMonth || 'Current'} Rent Statement</div>
@@ -526,22 +536,22 @@
                 <table class="receipt-table">
                   <thead>
                     <tr>
-                      <th>Description</th>
-                      <th>Rate</th>
+                      <th>Particulars</th>
+                      <th>@</th>
                       <th>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${showCommercialProperty ? `
                     <tr>
-                      <td>Commercial Property</td>
+                      <td>Commercial Property Units</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
                     </tr>
                     ` : ''}
                     ${showResidentialProperty ? `
                     <tr>
-                      <td>Residential Property</td>
+                      <td>Residential Property Units</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
                     </tr>
@@ -576,7 +586,10 @@
                 </div>
 
                 <div class="receipt-footer">
-                  <p>Generated on ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
+                
+                </div>
+                <div class="footer-section">
+                  Property Management, Rent Enforcement, Property Advertising, Rental Income Tax
                 </div>
               </div>
             </body>
@@ -585,6 +598,7 @@
 
           return receiptHTML;
         },
+        
 
         exportToExcel() {
           const invoicesData = this.statements.map(statement => ({
@@ -627,7 +641,7 @@
             doc.text(rightHeaderText, rightheaderX, rightheaderY, { align: 'left' });
 
             // Add top-right header
-            const headerText = 'Generated on: ' + new Date().toLocaleString() + '\n' + 'Statement for:' + '\n' + this.landlord + '\n' + this.property.name + '\n' + this.landlordPhone + '\n' + this.landlordEmail + '\n' + this.landlordAddress + '\n' + this.property.units_no + ' Units';
+            const headerText = 'Generated on: ' + new Date().toLocaleString() + '\n' + 'Statement for:' + '\n' + this.landlord + '\n' + this.property.name + '\n' + this.landlordPhone + '\n' + this.landlordEmail;
             const headerFontSize = 12;
             const headerX = doc.internal.pageSize.width - 20; // Adjust the X coordinate
             const headerY = 10;
@@ -889,6 +903,240 @@
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
 
             return currentPage; // Return the total number of pages used for expenses
+        },
+        generateEmailPDF() {
+            let pdfName = 'Full Statement';
+            var doc = new jsPDF('landscape');
+            
+            const firstPageMaxRows = 13; // Rows for the first page
+            const subsequentPagesMaxRows = 30; // Rows for subsequent pages
+
+            // Add top-left header
+            const rightHeaderText = 'April Properties\nKakamega-Webuye Rd, ACK Building\nTel: 0720 020 401\nP. O. Box 2973-50100, Kakamega\nEmail: propertapril@gmail.com';
+            const rightHeaderFontSize = 12;
+            const rightheaderX = 20; // Adjust the X coordinate
+            const rightheaderY = 10;
+
+            doc.setFontSize(rightHeaderFontSize);
+            doc.setTextColor(44, 62, 80);
+            doc.text(rightHeaderText, rightheaderX, rightheaderY, { align: 'left' });
+
+            // Add top-right header
+            const headerText = 'Generated on: ' + new Date().toLocaleString() + '\n' + 'Statement for:' + '\n' + this.landlord + '\n' + this.property.name + '\n' + this.landlordPhone + '\n' + this.landlordEmail;
+            const headerFontSize = 12;
+            const headerX = doc.internal.pageSize.width - 20; // Adjust the X coordinate
+            const headerY = 10;
+
+            doc.setFontSize(headerFontSize);
+            doc.setTextColor(44, 62, 80);
+            doc.text(headerText, headerX, headerY, { align: 'right' });
+
+            // Add image at the top
+            const imageUrl = '/images/apex-logo.png'; // Replace with the URL of your image
+            const imageWidth = 50; // Adjust the width of the image as needed
+            const imageHeight = 50; // Adjust the height of the image as needed
+            const imageX = (doc.internal.pageSize.width - imageWidth) / 2;
+            const imageY = 20;
+            doc.addImage(imageUrl, 'JPEG', imageX, imageY, imageWidth, imageHeight);
+
+            // Add title
+            const titleText = (this.property.name + " " + this.currentMonth + ' Rent Statement').toUpperCase();
+            const titleFontSize = 16;
+            const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
+            const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
+            const titleY = imageY + imageHeight + 10;
+
+            doc.setFontSize(titleFontSize);
+            doc.setTextColor(44, 62, 80); // Set text color to a dark shade
+            doc.text(titleText, titleX, titleY);
+
+            const roundedCommission = Math.round(this.property.commission * 100);
+            const commissionTotal = this.propertyCommission / 100 * this.totalPaid;
+            const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
+
+            // Add content headers
+            doc.setFontSize(14);
+            doc.setTextColor(44, 62, 80);
+            doc.text('Total Expenses: ' + 'KES ' + this.formatNumber(this.totalAmountPaid), 20, imageY + imageHeight + 35);
+
+            doc.setFontSize(14);
+            doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
+
+            let textY = imageY + imageHeight + 20; // Initial y-coordinate for the first text
+
+            doc.text('Total Rent Less Commission: ' + 'KES ' + this.formatNumber(this.rentLessCommission), 20, textY);
+            textY += 10; // Increment y-coordinate for the next text
+
+            doc.text('Total Due Remitted: ' + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
+            textY += 10; // Increment y-coordinate for the next text
+
+            doc.text('Net Remission: ' + 'KES ' + this.formatNumber(this.netRemmission), 20, textY);
+            textY += 10; // Increment y-coordinate for the next text
+
+            // Set font size for the table headers and data
+            const tableFontSize = 8;
+            doc.setFontSize(tableFontSize);
+            doc.setTextColor(0);
+
+            let headerYPos = imageY + imageHeight + 45;
+            let cellHeight = 10;
+            let cellPadding = 2;
+            let lineHeight = 5;
+            let columnWidths = [20, 50, 20, 20, 20, 20, 20, 20, 30]; // Adjusted column widths for 9 columns
+            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BALANCE', 'DATE PAID']; // Example headers
+
+            let xPos = 20;
+            doc.setDrawColor(0);
+
+            for (let i = 0; i < columnWidths.length; i++) {
+                doc.rect(xPos, headerYPos, columnWidths[i], cellHeight);
+                doc.setTextColor(0); // Set text color to black
+                doc.text(columnHeaders[i], xPos + cellPadding, headerYPos + cellHeight - cellPadding);
+                xPos += columnWidths[i];
+            }
+
+            let currentPage = 1;
+            let currentRow = 0;
+            let maxRowsPerPage = firstPageMaxRows; // Set initial max rows for the first page
+
+            // Initialize totals
+            let totals = Array(columnHeaders.length).fill(0);
+
+            this.allstatements.forEach((statement, index) => {
+                if (currentRow >= maxRowsPerPage) {
+                    doc.addPage();
+                    headerYPos = 20;
+                    currentRow = 0;
+                    currentPage++;
+                    maxRowsPerPage = subsequentPagesMaxRows; // Set max rows for subsequent pages
+
+                    xPos = 20;
+                    for (let i = 0; i < columnWidths.length; i++) {
+                        doc.rect(xPos, headerYPos, columnWidths[i], cellHeight, 'F');
+                        doc.setTextColor(0); // Set text color to black
+                        doc.text(columnHeaders[i], xPos + cellPadding, headerYPos + cellHeight - cellPadding);
+                        xPos += columnWidths[i];
+                    }
+                    headerYPos += cellHeight;
+                }
+
+                let yPos = headerYPos + (currentRow + 1) * lineHeight;
+                xPos = 20;
+                for (let i = 0; i < columnWidths.length; i++) {
+                    doc.rect(xPos, yPos, columnWidths[i], cellHeight);
+                    switch (i) {
+                        case 0:
+                            const unitNumber = statement.unit ? statement.unit.unit_number : 'N/A';
+                            const truncatedText = unitNumber.length > 4 ? unitNumber.slice(0, 4) + '...' : unitNumber;
+                            doc.text(truncatedText, xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                        case 1:
+                            doc.text(
+                                statement.tenant ? `${statement.tenant.first_name} ${statement.tenant.last_name}` : 'Vacant',
+                                xPos + cellPadding,
+                                yPos + cellHeight - cellPadding
+                            );
+                            break;
+                        case 2:
+                            doc.text(this.formatNumber(statement.total), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[2] += parseFloat(statement.total) || 0;
+                            break;
+                        case 3:
+                            let monthlyRent = statement.unit ? parseFloat(statement.unit.monthly_rent) : 0;
+                            doc.text(this.formatNumber(monthlyRent), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[3] += monthlyRent || 0;
+                            break;
+                        case 4:
+                            let garbageFee = statement.unit ? parseFloat(statement.unit.garbage_fee) : 0;
+                            doc.text(this.formatNumber(garbageFee), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[4] += garbageFee || 0;
+                            break;
+                        case 5:
+                            let waterBill = parseFloat(statement.water_bill) || 0;
+                            doc.text(this.formatNumber(waterBill), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[5] += waterBill;
+                            break;
+                        case 6:
+                            let paidAmount = parseFloat(statement.paid) || 0;
+                            doc.text(this.formatNumber(paidAmount), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[6] += paidAmount;
+                            break;
+                        case 7:
+                            let balance = parseFloat(statement.balance) || 0;
+                            doc.text(this.formatNumber(balance), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            totals[7] += balance;
+                            break;
+                        case 8:
+                            doc.text(this.format_date(statement.paid_at ?? 'N/A'), xPos + cellPadding, yPos + cellHeight - cellPadding);
+                            break;
+                    }
+                    xPos += columnWidths[i];
+                }
+                currentRow++;
+            });
+
+            // Add totals row
+            let totalsYPos = headerYPos + (currentRow + 1) * lineHeight;
+            xPos = 20;
+            doc.setDrawColor(0);
+            for (let i = 0; i < columnWidths.length; i++) {
+                doc.rect(xPos, totalsYPos, columnWidths[i], cellHeight);
+                if (i > 1 && i < columnWidths.length - 1) { // Skip first two and last column
+                    doc.text(this.formatNumber(totals[i]), xPos + cellPadding, totalsYPos + cellHeight - cellPadding);
+                }
+                xPos += columnWidths[i];
+            }
+
+            // Add footer
+            doc.setFontSize(10);
+            doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
+            
+            
+            let fileName = this.property.name + " " + this.formatMonth(new Date()) + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
+            
+            // Save the PDF as a Blob
+            return new Promise((resolve, reject) => {
+                try {
+                    const pdfBlob = doc.output('blob'); // Generate the PDF as a Blob
+                    resolve(pdfBlob); // Return the Blob
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        },
+
+        async sendMail() {
+          // First, generate the invoice
+          const invoiceContent = this.buildInvoiceContent();  // Your invoice generating function
+          const blob = new Blob([invoiceContent], { type: 'text/html' }); // Convert invoice to Blob
+          const file = new File([blob], 'invoice.html', { type: 'text/html' }); // Create a file to attach
+
+          // First, generate the PDF
+          const pdfBlob = await this.generateEmailPDF();  // Wait for the PDF to be generated
+          const pdfFile = new File([pdfBlob], 'Rent_Statement.pdf', { type: 'application/pdf' }); // Create a file from the Blob
+
+
+          // Prepare form data to send the email request to the backend
+          const formData = new FormData();
+          formData.append('email', 'mmosobo@gmail.com'); // Recipient's email address
+          // formData.append('email', this.landlordEmail); // Recipient's email address
+          formData.append('subject', 'Invoice & Rent Statement'); // Email subject
+          formData.append('message', 'Attached is your invoice and rent statement for ' + this.currentMonth); // Email message
+          formData.append('invoice', file); // Attach the invoice
+          formData.append('pdfFile', pdfFile); // Attach the generated PDF
+
+          try {
+            // Make API call to the backend
+            await axios.post('/api/send-landlordinvoice', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+            alert('Email sent successfully!');
+          } catch (error) {
+            console.error('Error sending email:', error);
+            alert('Error sending email');
+          }
         },
         printReceipt(statement) {
             console.log("alone",statement);
@@ -1165,14 +1413,18 @@
               this.propertyCommission = this.commission;
               this.commercialPropertyAmount = ((this.commission/100) * this.commercialpropertymonthinvoices);
               this.residentialPropertyAmount = ((this.commission/100) * this.residentialpropertymonthinvoices);
+              this.totalCommission = ((this.commission/100) * this.totalPaid);
+              this.rentLessCommission = this.totalPaid - this.totalCommission;
+
             }
             else
             {
               this.propertyCommission = this.fixedCommission;
               this.commercialPropertyAmount = this.commercialpropertymonthinvoices - this.propertyCommission;
               this.residentialPropertyAmount = this.residentialpropertymonthinvoices - this.propertyCommission;
+              this.totalCommission = this.propertyCommission;
+              this.rentLessCommission = this.totalPaid - this.totalCommission;
             }
-            this.rentLessCommission = this.totalPaid - this.propertyCommission;
             console.log("kijamo", response)
           }).catch(() => {
               console.log('error')
