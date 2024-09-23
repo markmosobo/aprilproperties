@@ -100,9 +100,9 @@
                       </router-link> -->
                       <div class="row">
                         <div class="col d-flex">
-                          <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
-                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Landlord Invoice</button>
-                          <button v-if="statements.length !== 0" @click="generatePDF">Generate Rent Statement</button>
+                          <button class="me-2" v-if="allstatements.length !== 0" @click="exportToExcel">Export</button>
+                          <button v-if="allstatements.length !== 0" @click="printInvoice" class="me-2">Print Landlord Invoice</button>
+                          <button v-if="allstatements.length !== 0" @click="generatePDF">Generate Rent Statement</button>
                         </div>
                         <div class="col-auto d-flex justify-content-end">
                         <div class="btn-group" role="group">
@@ -146,7 +146,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="statement in statements" :key="statement.id">
+                          <tr v-for="statement in allstatements" :key="statement.id">
                             <td>{{ statement.unit_number ?? 'N/A' }}</td>
                             <td>{{ statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A' }}</td>
                             <td>{{formatNumber(statement.total)}}</td>
@@ -598,7 +598,7 @@
         },
 
         exportToExcel() {
-          const invoicesData = this.statements.map(statement => ({
+          const invoicesData = this.allstatements.map(statement => ({
             "PROPERTY": statement.property ? statement.property.name : 'N/A',
             "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
             "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
@@ -1223,7 +1223,7 @@
         calculateTotal(property) {
           // Function to calculate total for Total, Paid, and Bal columns
 
-          return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
+          return this.allstatements.reduce((total, statement) => total + (statement[property] || 0), 0);
         },
       },
       components : {

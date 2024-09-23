@@ -100,10 +100,10 @@
                       </router-link> -->
                       <div class="row">
                         <div class="col d-flex">
-                          <button class="me-2" v-if="statements.length !== 0" @click="exportToExcel">Export</button>
-                          <button v-if="statements.length !== 0" @click="printInvoice" class="me-2">Print Landlord Invoice</button>
-                          <button v-if="statements.length !== 0" @click="generatePDF" class="me-2">Generate Rent Statement</button>
-                          <button v-if="statements.length !== 0" @click="sendMail">Send Landlord Email</button>
+                          <button class="me-2" v-if="allstatements.length !== 0" @click="exportToExcel">Export</button>
+                          <button v-if="allstatements.length !== 0" @click="printInvoice" class="me-2">Print Landlord Invoice</button>
+                          <button v-if="allstatements.length !== 0" @click="generatePDF" class="me-2">Generate Rent Statement</button>
+                          <button v-if="allstatements.length !== 0" @click="sendMail">Send Landlord Email</button>
                         </div>
                         <div class="col-auto d-flex justify-content-end">
                         <div class="btn-group" role="group">
@@ -601,7 +601,7 @@
         
 
         exportToExcel() {
-          const invoicesData = this.statements.map(statement => ({
+          const invoicesData = this.allstatements.map(statement => ({
             "PROPERTY": statement.property ? statement.property.name : 'N/A',
             "H/S NO": statement.unit ? statement.unit.unit_number : 'N/A',
             "TENANT": statement.tenant ? statement.tenant.first_name + ' ' + statement.tenant.last_name : 'N/A',
@@ -1106,38 +1106,55 @@
         },
 
         async sendMail() {
-          // First, generate the invoice
-          const invoiceContent = this.buildInvoiceContent();  // Your invoice generating function
-          const blob = new Blob([invoiceContent], { type: 'text/html' }); // Convert invoice to Blob
-          const file = new File([blob], 'invoice.html', { type: 'text/html' }); // Create a file to attach
+            // First, generate the invoice content and create a Blob
+            const invoiceContent = this.buildInvoiceContent();
+            const blob = new Blob([invoiceContent], { type: 'text/html' });
+            const file = new File([blob], 'invoice.html', { type: 'text/html' });
 
-          // First, generate the PDF
-          const pdfBlob = await this.generateEmailPDF();  // Wait for the PDF to be generated
-          const pdfFile = new File([pdfBlob], 'Rent_Statement.pdf', { type: 'application/pdf' }); // Create a file from the Blob
+            // Generate the PDF and convert it to a File
+            const pdfBlob = await this.generateEmailPDF();
+            const pdfFile = new File([pdfBlob], 'Rent_Statement.pdf', { type: 'application/pdf' });
 
+            // Check if landlordEmail is provided
+            if (!this.landlordEmail) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: 'Please ensure ' + this.landlord + ' has a valid email address',
+                    icon: 'warning',
+                });
+                return;
+            }
 
-          // Prepare form data to send the email request to the backend
-          const formData = new FormData();
-          formData.append('email', 'mmosobo@gmail.com'); // Recipient's email address
-          // formData.append('email', this.landlordEmail); // Recipient's email address
-          formData.append('subject', 'Invoice & Rent Statement'); // Email subject
-          formData.append('message', 'Attached is your invoice and rent statement for ' + this.currentMonth); // Email message
-          formData.append('invoice', file); // Attach the invoice
-          formData.append('pdfFile', pdfFile); // Attach the generated PDF
+            // Prepare form data to send the email request to the backend
+            const formData = new FormData();
+            // formData.append('email', this.landlordEmail);
+            formData.append('email', 'mmosobo@gmail.com');
+            formData.append('subject', 'Invoice & Rent Statement');
+            formData.append('message', 'Attached is your invoice and rent statement for ' + this.currentMonth);
+            formData.append('invoice', file);
+            formData.append('pdfFile', pdfFile);
 
-          try {
-            // Make API call to the backend
-            await axios.post('/api/send-landlordinvoice', formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data'
-              }
-            });
-            alert('Email sent successfully!');
-          } catch (error) {
-            console.error('Error sending email:', error);
-            alert('Error sending email');
-          }
+            try {
+                // Make API call to send email
+                await axios.post('/api/send-landlordinvoice', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                toast.fire(
+                    'To: ' + this.landlordEmail,
+                    'Email has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            }
         },
+
         printReceipt(statement) {
             console.log("alone",statement);
             this.name = statement.property.name;
@@ -1467,7 +1484,7 @@
           const str = '0' + number.toString();
           // Format like '07200-2040' (You can adjust this based on your needs)
           return str.slice(0, 5) + '-' + str.slice(5);
-        }
+        },
       },
       components : {
           TheMaster,
