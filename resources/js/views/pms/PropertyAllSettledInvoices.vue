@@ -570,7 +570,7 @@
                 </div>
 
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong> ${this.landlord || 'N/A'}</p>
+                  <p><strong>Invoice To:</strong> ${this.landlord || 'N/A'}</p>
                   <p><strong>Property:</strong> ${this.property?.name || 'N/A'}</p>
                   <p><strong>Date:</strong> ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
                 </div>

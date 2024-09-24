@@ -526,7 +526,7 @@
                 </div>
 
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong> ${this.landlord || 'N/A'}</p>
+                  <p><strong>Invoice To:</strong> ${this.landlord || 'N/A'}</p>
                   <p><strong>Property:</strong> ${this.property?.name || 'N/A'}</p>
                   <p><strong>Date:</strong> ${this.format_date(new Date().toLocaleDateString())} at ${this.currentTime || 'N/A'}</p>
                 </div>
@@ -1127,8 +1127,7 @@
 
             // Prepare form data to send the email request to the backend
             const formData = new FormData();
-            // formData.append('email', this.landlordEmail);
-            formData.append('email', 'mmosobo@gmail.com');
+            formData.append('email', this.landlordEmail);
             formData.append('subject', 'Invoice & Rent Statement');
             formData.append('message', 'Attached is your invoice and rent statement for ' + this.currentMonth);
             formData.append('invoice', file);

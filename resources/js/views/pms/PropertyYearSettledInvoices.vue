@@ -451,7 +451,7 @@
                   </div>
                 </div>
                 <div class="receipt-info">
-                  <p><strong>Invoice For:</strong>${this.currentYear}</p>
+                  <p><strong>Invoice To:</strong>${this.currentYear}</p>
                   <p><strong></strong> ${this.landlord}</p>
                   <p><strong></strong> ${this.property.name} - ${this.unitsNo} Units</p>
                   <p><strong></strong>  ${new Date().toLocaleString()}</p>
