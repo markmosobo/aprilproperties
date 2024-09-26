@@ -269,6 +269,7 @@ Route::post('sendlandlordsms', [SearchController::class, 'sendLandlordSms'])->na
 
 //send mail
 Route::post('/send-landlordinvoice', [PmsInvoiceController::class, 'sendLandlordInvoice']);
+Route::post('/send-tenantinvoice', [PmsInvoiceController::class, 'sendTenantInvoice']);
 
 
 //generate invoices

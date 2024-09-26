@@ -640,7 +640,10 @@
             axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
               .then(response => {
                 this.invoiceStatement = response.data.statement
+                //function to share invoice via sms
                 // this.sendSms(this.invoiceStatement);
+                //share invoice via mail
+                this.sendMail(this.invoiceStatement);                
                 console.log("tems", this.invoiceStatement);
                 this.successMessage = 'Tenant invoiced!';
                 toast.fire(
@@ -1045,6 +1048,218 @@
             console.log(error);
           }
         },
+        buildInvContent() {
+          // Determine whether to include the row
+          const showExpensesDeductionRow = this.expenses !== 0;
+          const logoBase64 = this.logoBase64;
+          const watermarkText = this.paymentMethod;
+          // Build the HTML content for the receipt
+          const receiptHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Invoice Of Payment - ${this.refNo}</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f5f5f5;
+                }
+                .receipt {
+                  max-width: 600px;
+                  margin: 20px auto;
+                  padding: 20px;
+                  background-color: #fff;
+                  border: 2px solid #ccc;
+                  display: flex;
+                  flex-direction: column;
+                }
+                 .watermark {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 80px;
+                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
+                    white-space: nowrap;
+                    z-index: 0;
+                    pointer-events: none; /* Prevents watermark from interfering with other elements */
+                  }
+                .receipt-header {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 50px;
+                }
+                .company-info {
+                  text-align: left;
+                }
+                .company-info img {
+                  max-width: 150px;
+                  height: auto;
+                }
+                .receipt-info {
+                  margin-bottom: 50px;
+                }
+                .receipt-info p {
+                  margin: 5px 0;
+                  color: #555;
+                }
+                 .additional-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                }
+                .additional-info p {
+                  margin: 8px 0;
+                }
+                .payment-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                  text-align: center;
+                }
+                .payment-info p {
+                  margin: 8px 0;
+                }
+                .receipt-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 50px;
+                }
+                .receipt-table th, .receipt-table td {
+                  padding: 8px;
+                  border-bottom: 1px solid #ccc;
+                }
+                .receipt-table th {
+                  text-align: left;
+                  background-color: #f2f2f2;
+                  color: #333;
+                }
+                .receipt-table td {
+                  text-align: left;
+                  color: #666;
+                }
+                .receipt-footer {
+                  text-align: center;
+                  margin-top: auto;
+                }
+                .receipt-footer p {
+                  margin: 5px 0;
+                  color: #777;
+                }
+              </style>
+            </head>
+            <body>
+            <div class="watermark">${watermarkText}</div>
+              <div class="receipt">
+                <div class="receipt-header">
+                  <div class="company-logo">
+                    <img src="${logoBase64}" alt="Company Logo" style="max-width: 150px; height: auto;">
+                  </div>
+                  <div class="company-info">
+                    <p>Kakamega-Webuye Rd, ACK Building</p>
+                    <p>Phone: (0720) 020-401 </p>
+                    <p> Email: propertapril@gmail.com</p>
+                    <p> Website: www.aprilproperties.co.ke</p>
+                  </div>
+                </div>
+                <div class="receipt-info">
+                  <p><strong>#${this.refNo}</strong></p>
+                  <p><strong>Invoice Date:</strong> ${this.format_date(this.invoiceDate ?? 'N/A')}</p>
+                  <p><strong>Due Date:</strong>  ${this.format_date(this.dueDate ?? 'N/A')}</p>
+                  
+                </div>
+                <div class="additional-info">
+                    <p><strong>Invoiced To</strong></p>
+                    <p><strong></strong> ${this.tenant}</p>
+                    <p><strong></strong> ${this.name} - ${this.unitName}</p>
+                    <p><strong></strong> ${this.details}</p>
+                </div>
+                <table class="receipt-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total Rent Due ${this.water}</td>
+                      <td>KES ${this.formatNumber(this.total)}</td>
+                    </tr>
+                    <tr>
+                      <td>Total Amount Paid</td>
+                      <td>KES ${this.formatNumber(this.paid)}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>Total Balance:</th>
+                      <td>KES ${this.formatNumber(this.balance)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div class="payment-info">
+                  <p><strong>Payment Options:</strong></p>
+                  <p>Mobile Money: Paybill - ${this.paybillNo ?? 'N/A'} Account Number - ${this.accountNo ?? 'N/A'}</p>
+                </div>
+                <div class="receipt-footer">
+                  <p>Printed on ${this.format_date(new Date().toLocaleString())}</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `;
+
+          return receiptHTML;
+        },
+        async sendMail(statement)
+        {
+          console.log("motto", statement)
+          const dueAmount = statement.total;
+          const dueWater = statement.water_bill;
+          const tenantId = statement.pms_tenant_id;
+          const rentMonth = statement.rent_month;
+          const details = statement.details;
+
+          // Fetch tenant data and wait for it to complete
+          await this.getTenant(tenantId);
+
+          // Prepare form data to send the email request to the backend
+            const formData = new FormData();
+            formData.append('name', this.invoicedTenantName);
+            // formData.append('email', this.invoicedTenantMail);
+            formData.append('email', 'mmosobo@gmail.com');
+            formData.append('due_water', dueWater);
+            formData.append('due_amount', dueAmount);
+            formData.append('due_amount', dueAmount);
+            formData.append('subject', 'Invoice & Rent Statement');
+            formData.append('message', 'Attached is your invoice and rent statement for ' + rentMonth);
+
+            try {
+                // Make API call to send email
+                await axios.post('/api/send-tenantinvoice', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                toast.fire(
+                    'To: ' + this.invoicedTenantMail,
+                    'Email has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            }
+        },
 
         async sendSms(statement) {
               await this.loginUwazii();
@@ -1082,6 +1297,7 @@
                   console.log("omollo", this.tenant);
                   this.invoicedTenantName = this.tenant.first_name;
                   this.invoicedTenantPhone = this.tenant.phone_number;
+                  this.invoicedTenantMail = this.tenant.email_address;
               } catch (error) {
                   console.log('error', error);
               }

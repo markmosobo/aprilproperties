@@ -11,6 +11,7 @@ use App\Models\PmsStatement;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\LandlordInvoiceMail;
+use App\Mail\TenantInvoiceMail;
 
 class PmsInvoiceController extends Controller
 {
@@ -243,6 +244,33 @@ class PmsInvoiceController extends Controller
 
         // Send the email with attachments
         Mail::to($email)->send(new LandlordInvoiceMail($subject, $message, $invoicePath, $pdfPath));
+
+        return response()->json(['message' => 'Email sent successfully']);
+    }
+
+    public function sendTenantInvoice(Request $request)
+    {
+        // Validate the input and the files
+        $request->validate([
+            'email' => 'required|email',
+            'subject' => 'required|string',
+            'message' => 'required|string',
+            // 'invoice' => 'required|file|mimes:html',
+            // 'pdfFile' => 'required|file|mimes:pdf|max:10000' // Max 10MB
+        ]);
+
+        // Retrieve the email details
+        $email = $request->input('email');
+        $subject = $request->input('subject');
+        $message = $request->input('message');
+
+        // Store the uploaded files temporarily
+        // $invoicePath = $request->file('invoice')->store('invoices', 'public');
+        // $pdfPath = $request->file('pdfFile')->store('pdfs', 'public');
+
+        // Send the email with attachments
+        // Mail::to($email)->send(new TenantInvoiceMail($subject, $message, $invoicePath, $pdfPath));
+        Mail::to($email)->send(new TenantInvoiceMail($subject, $message));
 
         return response()->json(['message' => 'Email sent successfully']);
     }

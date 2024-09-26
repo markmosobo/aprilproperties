@@ -16,6 +16,7 @@ class PmsTenant extends Model
         'first_name',
         'last_name',
         'id_number',
+        'email_address',
         'phone_number',
         'pms_unit_id',
         'pms_property_id',
