@@ -258,6 +258,11 @@
                               <input type="number" name="water_bill" v-model="form.water_bill" class="form-control">
                               <div v-if="errors.water_bill" class="text-danger">{{ errors.water_bill }}</div>
                             </p>
+                            <p v-if="selectedStatement.pms_property_id == 11">
+                              <strong>Electricity Bill:</strong>
+                              <input type="number" name="electricity_bill" v-model="form.electricity_bill" class="form-control">
+                              <div v-if="errors.electricity_bill" class="text-danger">{{ errors.electricity_bill }}</div>
+                            </p>
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -623,28 +628,29 @@
           modal.show();
         },
         confirmInvoiceTenant() {
-          // Validate water_bill
-          // if (!this.form.water_bill) {
-          //   this.errors.water_bill = 'Water bill is required.';
-          //   return;
-          // }
-
           if (this.selectedStatement && this.selectedStatement.id) {
             // Show loading spinner
             this.invoicing = true;
             this.successMessage = '';
 
-            // Implement your logic to invoice the tenant here
+            // Logging the invoicing process
             console.log("Invoicing tenant with statement ID:", this.selectedStatement.id);
-            
-            axios.put("/api/pmsinvoicestatement/" + this.selectedStatement.id, this.form)
+
+            // Axios PUT request to invoice the tenant
+            axios.put(`/api/pmsinvoicestatement/${this.selectedStatement.id}`, this.form)
               .then(response => {
-                this.invoiceStatement = response.data.statement
-                //function to share invoice via sms
+                // Store the invoiced statement in the component's data
+                this.invoiceStatement = response.data.statement;
+
+                // Optionally send SMS with invoice
                 // this.sendSms(this.invoiceStatement);
-                //share invoice via mail
-                this.sendMail(this.invoiceStatement);                
-                console.log("tems", this.invoiceStatement);
+
+                // Share invoice via email
+                this.sendMail(this.invoiceStatement);
+
+                console.log("Invoiced statement:", this.invoiceStatement);
+
+                // Display success message and toast notification
                 this.successMessage = 'Tenant invoiced!';
                 toast.fire(
                   'Success!',
@@ -653,8 +659,9 @@
                 );
               })
               .catch(error => {
-                console.log(error);
-                // Handle the error appropriately
+                console.error(error);
+
+                // Display error toast notification
                 toast.fire(
                   'Error!',
                   'An error occurred while invoicing the tenant.',
@@ -669,13 +676,19 @@
                 const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
                 modal.hide();
 
-                // Reset form
+                // Reset form fields
                 this.form.water_bill = '';
                 this.form.cash = '';
+
+                // Reload the lists (loadLists ensures updated data is fetched)
                 this.loadLists();
               });
+          } else {
+            // Handle case where selectedStatement is not set
+            console.log("No statement selected for invoicing.");
           }
         },
+                
         settleTenant(id, tenantId){
             // this.$router.push('/settlestatement/'+id)
             this.$router.push({ 
@@ -1220,25 +1233,51 @@
         async sendMail(statement)
         {
           console.log("motto", statement)
-          const dueAmount = statement.total;
-          const dueWater = statement.water_bill;
-          const tenantId = statement.pms_tenant_id;
-          const rentMonth = statement.rent_month;
-          const details = statement.details;
+          this.dueAmount = statement.total;
+          this.dueWater = statement.water_bill;
+          this.tenantId = statement.pms_tenant_id;
+          this.rentMonth = statement.rent_month;
+          this.details = statement.details;
+          this.refNo = statement.ref_no;
+          this.createdAt = statement.created_at;
+          this.propertyId = statement.pms_property_id;
+          this.unitId = statement.pms_unit_id;
+          this.waterBillAmount = statement.water_bill;
+          this.getUnit(this.unitId);
 
           // Fetch tenant data and wait for it to complete
-          await this.getTenant(tenantId);
+          await this.getTenant(this.tenantId);
+
+          // Calculate the due date (5th of the rent month)
+          const dueDate = this.calculateDueDate(this.rentMonth);
+
+          //fetch payment details
+          if(this.propertyId == 5)
+          {
+            await this.getUnitInfo(this.unitId);              
+          }
+          else
+          {
+            await this.getProperty(this.propertyId);              
+          }
+
+          // First, generate the invoice content and create a Blob
+            const invoiceContent = this.buildInvoiceContent();
+            const blob = new Blob([invoiceContent], { type: 'text/html' });
+            const file = new File([blob], 'invoice.html', { type: 'text/html' });
 
           // Prepare form data to send the email request to the backend
             const formData = new FormData();
-            formData.append('name', this.invoicedTenantName);
+            formData.append('name', this.invoicedTenantFullName);
             // formData.append('email', this.invoicedTenantMail);
-            formData.append('email', 'mmosobo@gmail.com');
-            formData.append('due_water', dueWater);
-            formData.append('due_amount', dueAmount);
-            formData.append('due_amount', dueAmount);
-            formData.append('subject', 'Invoice & Rent Statement');
-            formData.append('message', 'Attached is your invoice and rent statement for ' + rentMonth);
+            formData.append('email', 'mmosobo@gmail.com'); //for testing
+            formData.append('due_water', this.dueWater);
+            formData.append('due_amount', this.dueAmount);
+            formData.append('account_no', this.accountNo);
+            formData.append('paybill_no', this.paybillNo);
+            formData.append('subject', this.rentMonth + ' Invoice Payment Reminder');
+            formData.append('message', 'Dear ' + this.invoicedTenantFullName +', this is a kind reminder that your invoice no. '+ this.refNo +' which was generated on '+ this.format_date(this.createdAt) +' is due on '+ dueDate + '. To service this invoice, pay via M-Pesa paybill number: '+ this.paybillNo + ' account number: ' + this.accountNo + ' amount: '+ this.dueAmount );
+            formData.append('invoice', file);
 
             try {
                 // Make API call to send email
@@ -1296,11 +1335,201 @@
                   this.tenant = response.data.tenant;
                   console.log("omollo", this.tenant);
                   this.invoicedTenantName = this.tenant.first_name;
+                  this.invoicedTenantLName = this.tenant.last_name;
+                  this.invoicedTenantFullName = this.invoicedTenantName + " " + this.invoicedTenantLName;
                   this.invoicedTenantPhone = this.tenant.phone_number;
                   this.invoicedTenantMail = this.tenant.email_address;
               } catch (error) {
                   console.log('error', error);
               }
+        },
+        async getProperty() {
+            try {
+                const response = await axios.get('/api/pmsproperty/' + this.propertyId);
+                this.property = response.data.property;
+                this.accountNo = response.data.property.account_number;
+                this.paybillNo = response.data.property.paybill_number;
+                // console.log("property", response);
+            } catch (error) {
+                console.error("Error fetching property data:", error);
+            }
+        },
+
+        async getUnitInfo() {
+            try {
+                const response = await axios.get(`/api/pmsunit/${this.unitId}`);
+                this.unit = response.data.unit;
+                this.accountNo = response.data.unit.account_number;
+                this.paybillNo = response.data.unit.paybill_number;
+                // console.log("aprilthings", response);
+            } catch (error) {
+                console.error("Error fetching unit data:", error);
+            }
+        },
+        getUnit(unitNumber) {
+            axios.get('/api/pmsunit/' + parseInt(unitNumber))
+                .then((response) => {
+                  this.unit = response.data.unit;
+                  this.unitName = this.unit.unit_number;
+                  this.unitRent = this.unit.monthly_rent;
+                  this.unitSecurityFee = this.unit.security_fee;
+                  this.unitGarbageFee = this.unit.garbage_fee;
+                  this.unitType = this.unit.type;
+                    console.log("unit", this.unit);
+                    // Further processing of the response data if needed
+                })
+                .catch((error) => {
+                    console.error("Error fetching unit:", error);
+                });
+        },
+
+        buildInvoiceContent(refNo) {
+         // Determine whether to include the row
+          const showGarbageFeeRow = this.unitGarbageFee !== 0;
+          const showSecurityFeeRow = this.unitSecurityFee !== 0;
+          const showWaterBillRow = this.waterBillAmount !== 0;
+          // Build the HTML content for the receipt
+          const receiptHTML = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Invoice Of Payment - ${this.refNo}</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f5f5f5;
+              }
+              .receipt {
+                max-width: 600px;
+                margin: 20px auto;
+                padding: 20px;
+                background-color: #fff;
+                border: 2px solid #ccc;
+                border-radius: 10px;
+              }
+              .receipt-header {
+                text-align: center;
+                margin-bottom: 20px;
+              }
+              .receipt-header h1 {
+                margin: 10px 0;
+                color: #333;
+              }
+              .receipt-info {
+                margin-bottom: 20px;
+              }
+              .receipt-info p {
+                margin: 5px 0;
+                color: #555;
+              }
+              .receipt-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+              }
+              .receipt-table th, .receipt-table td {
+                padding: 8px;
+                border-bottom: 1px solid #ccc;
+              }
+              .receipt-table th {
+                text-align: left;
+                background-color: #f2f2f2;
+                color: #333;
+              }
+              .receipt-table td {
+                text-align: left;
+                color: #666;
+              }
+              .receipt-footer {
+                text-align: center;
+              }
+              .receipt-footer p {
+                margin: 5px 0;
+                color: #777;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="@/assets/img/apex-logo.png" alt="Company Logo" style="display: block; margin: 0 auto; max-width: 100%;">
+
+            <div class="receipt">
+              <div class="receipt-header">
+                <h1>April Properties</h1>
+                <p>Kakamega-Webuye Rd, ACK Building</p>
+                <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+              </div>
+              <div class="receipt-info">
+                <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+                <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Rent Month:</strong> ${this.rentMonth}</p>
+                <p><strong>Tenant:</strong> ${this.tenant}</p>
+                <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
+              </div>
+              <table class="receipt-table">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Rent Payment</td>
+                    <td>KES ${this.formatNumber(this.unitRent)}</td>
+                  </tr>
+                  ${showWaterBillRow ? `
+                  <tr>
+                    <td>Water Bill</td>
+                    <td>KES ${this.formatNumber(this.waterBillAmount)}</td>
+                  </tr>
+                  ` : ''}
+                  <!-- Conditionally include garbage collection fee row -->
+                  ${showGarbageFeeRow ? `
+                  <tr>
+                    <td>Garbage Collection Fee</td>
+                    <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
+                  </tr>
+                  ` : ''}
+                  </tr>
+                  <!-- Conditionally include security fee row -->
+                  ${showSecurityFeeRow ? `
+                  <tr>
+                    <td>Security Fee</td>
+                    <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
+                  </tr>
+                  ` : ''}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th>Total Amount Due:</th>
+                    <td>KES ${this.formatNumber(this.dueAmount)}</td>
+                  </tr>
+                  <tr>
+                    <th>Amount Paid:</th>
+                    <td>KES ${this.formatNumber(this.amountPaid)}</td>
+                  </tr>
+                  <tr>
+                    <th>Balance:</th>
+                    <td>KES ${this.formatNumber(this.balAmount)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+              <div class="receipt-footer">
+                <p>You were served by ${this.user.first_name} ${this.user.last_name}.Thank you for your payment.</p>
+                <p>This receipt acknowledges the payment received for the above property management services.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+
+
+          `;
+
+          return receiptHTML;
         },
 
         formatPhoneNumber(number) {
@@ -1386,6 +1615,16 @@
     
              });
         },
+      calculateDueDate(rentMonth) {
+          let dueDate = new Date(rentMonth);
+          dueDate.setDate(5);
+
+          const day = String(dueDate.getDate()).padStart(2, '0');
+          const month = String(dueDate.getMonth() + 1).padStart(2, '0');
+          const year = dueDate.getFullYear();
+
+          return `${day}/${month}/${year}`;
+        },        
          filterTenants() {
           const query = this.searchQuery.toLowerCase();
           this.filteredTenants = this.tenants.filter(tenant => {

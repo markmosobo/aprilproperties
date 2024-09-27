@@ -177,11 +177,13 @@ class PmsStatementController extends Controller
                 'details' => "Rent+Deposit - ".$pmsstatement->details,
                 'total' => $pmsstatement->total,
                 'status' => 0, //status 0 for not settled 1 for settled
-                'water_bill' => $request->water_bill                  
+                'water_bill' => $request->water_bill,                  
+                'electricity_bill' => $request->electricity_bill                  
             ]);
 
             $pmsstatement->update([
                 'water_bill' => $request->water_bill,
+                'electricity_bill' => $request->electricity_bill,
                 'total' => $request->water_bill + $pmsstatement->total,
                 'status' => 0,
             ]);

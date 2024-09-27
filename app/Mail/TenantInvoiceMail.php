@@ -49,18 +49,18 @@ class TenantInvoiceMail extends Mailable
         ]);
 
     // Get the full paths for the files
-    // $invoiceFullPath = storage_path('app/public/' . $this->invoicePath);
-    // $pdfFullPath = storage_path('app/public/' . $this->pdfPath);
+    $invoiceFullPath = storage_path('app/public/' . $this->invoicePath);
+    $pdfFullPath = storage_path('app/public/' . $this->pdfPath);
 
-    // // Attach invoice file
-    // if (file_exists($invoiceFullPath)) {
-    //     $email->attach($invoiceFullPath, [
-    //         'as' => 'invoice.html',
-    //         'mime' => 'text/html',
-    //     ]);
-    // } else {
-    //     \Log::error('Invoice file not found.', ['path' => $invoiceFullPath]);
-    // }
+    // Attach invoice file
+    if (file_exists($invoiceFullPath)) {
+        $email->attach($invoiceFullPath, [
+            'as' => 'invoice.html',
+            'mime' => 'text/html',
+        ]);
+    } else {
+        \Log::error('Invoice file not found.', ['path' => $invoiceFullPath]);
+    }
 
     // // Attach PDF file
     // if (file_exists($pdfFullPath)) {
