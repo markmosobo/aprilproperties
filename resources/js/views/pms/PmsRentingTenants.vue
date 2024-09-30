@@ -72,7 +72,7 @@
                             <th scope="col">Full Name</th>
                             <th scope="col">Property</th>
                             <th scope="col">Unit No</th>
-                            <th scope="col">Status</th>
+                            <th scope="col">Email</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -82,10 +82,7 @@
                             <td>{{tenant.property.name}}</td>
                             <td>{{tenant.unit.unit_number}}</td>
                             <td>
-                              <span v-if="tenant.status == 0" class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacated</span>   
-                              <span v-else-if="tenant.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Renting</span>
-                              <span v-else class="badge bg-light text-dark"><i class="bi bi-star me-1"></i> Closed</span>
-
+                              {{tenant.email_address ?? 'N/A'}}
                             </td>
                             <td>
                               <div class="btn-group" role="group">
@@ -149,10 +146,6 @@
         }
       },
       methods: {
-        getPhoto()
-        {
-            return "/storage/properties/";
-        },
         navigateTo(location){
             this.$router.push(location)
         },

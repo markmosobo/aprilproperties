@@ -395,6 +395,8 @@
     import moment from 'moment';
     import jsPDF from 'jspdf';
     import * as XLSX from 'xlsx';
+    import aprilLogo from '@/assets/img/apex-logo.png';
+
     // Add CSRF token to Axios headers
     axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -418,6 +420,8 @@
           user: [],
           selectedStatement: {}, // Initialize as an empty object
           currentMonth: '',
+          logoBase64: '',
+
           form: {
             water_bill : '',
             rentMonth: '',
@@ -1061,11 +1065,25 @@
             console.log(error);
           }
         },
-        buildInvContent() {
+        loadLogo() {
+          fetch(aprilLogo)
+            .then(response => response.blob())
+            .then(blob => {
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                this.logoBase64 = reader.result;
+                // console.log(this.logoBase64)
+              };
+            })
+            .catch(error => {
+              console.error('Error converting image to base64:', error);
+            });
+        },
+        buildInvoiceContent() {
           // Determine whether to include the row
-          const showExpensesDeductionRow = this.expenses !== 0;
-          const logoBase64 = this.logoBase64;
-          const watermarkText = this.paymentMethod;
+          const logoBase64 = this.logoBase64 || ''; // Fallback if no logo is provided
+          const watermarkText = 'INVOICE';
           // Build the HTML content for the receipt
           const receiptHTML = `
             <!DOCTYPE html>
@@ -1182,15 +1200,15 @@
                 </div>
                 <div class="receipt-info">
                   <p><strong>#${this.refNo}</strong></p>
-                  <p><strong>Invoice Date:</strong> ${this.format_date(this.invoiceDate ?? 'N/A')}</p>
-                  <p><strong>Due Date:</strong>  ${this.format_date(this.dueDate ?? 'N/A')}</p>
+                  <p><strong>Invoice Date:</strong> ${this.format_date(this.invoicedAt ?? 'N/A')}</p>
+                  <p><strong>Due Date:</strong>  ${this.dueDate ?? 'N/A'}</p>
                   
                 </div>
                 <div class="additional-info">
                     <p><strong>Invoiced To</strong></p>
-                    <p><strong></strong> ${this.tenant}</p>
-                    <p><strong></strong> ${this.name} - ${this.unitName}</p>
-                    <p><strong></strong> ${this.details}</p>
+                    <p><strong></strong> ${this.invoicedTenantFullName}</p>
+                    <p><strong></strong> ${this.name ?? 'Victoria Apartments'} - ${this.unitName}</p>
+                    <p><strong></strong> ${this.rentMonth}</p>
                 </div>
                 <table class="receipt-table">
                   <thead>
@@ -1202,17 +1220,13 @@
                   <tbody>
                     <tr>
                       <td>Total Rent Due ${this.water}</td>
-                      <td>KES ${this.formatNumber(this.total)}</td>
-                    </tr>
-                    <tr>
-                      <td>Total Amount Paid</td>
-                      <td>KES ${this.formatNumber(this.paid)}</td>
+                      <td>KES ${this.formatNumber(this.dueAmount)}</td>
                     </tr>
                   </tbody>
                   <tfoot>
                     <tr>
-                      <th>Total Balance:</th>
-                      <td>KES ${this.formatNumber(this.balance)}</td>
+                      <th>Total Amount Due:</th>
+                      <td>KES ${this.formatNumber(this.dueAmount)}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -1240,16 +1254,35 @@
           this.details = statement.details;
           this.refNo = statement.ref_no;
           this.createdAt = statement.created_at;
+          this.invoicedAt = statement.updated_at;
           this.propertyId = statement.pms_property_id;
           this.unitId = statement.pms_unit_id;
           this.waterBillAmount = statement.water_bill;
+          if(this.waterBillAmount == 0)
+           {
+              this.water = '';
+           }
+           else
+           {
+              this.water = '(Incl. Water Bill)';
+           }
           this.getUnit(this.unitId);
 
           // Fetch tenant data and wait for it to complete
           await this.getTenant(this.tenantId);
 
+          // Check if tenantEmail is provided
+            if (!this.invoicedTenantMail) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: 'Please ensure ' + this.invoicedTenantFullName + ' has a valid email address',
+                    icon: 'warning',
+                });
+                return;
+            }
+
           // Calculate the due date (5th of the rent month)
-          const dueDate = this.calculateDueDate(this.rentMonth);
+          this.dueDate = this.calculateDueDate(this.rentMonth);
 
           //fetch payment details
           if(this.propertyId == 5)
@@ -1276,7 +1309,7 @@
             formData.append('account_no', this.accountNo);
             formData.append('paybill_no', this.paybillNo);
             formData.append('subject', this.rentMonth + ' Invoice Payment Reminder');
-            formData.append('message', 'Dear ' + this.invoicedTenantFullName +', this is a kind reminder that your invoice no. '+ this.refNo +' which was generated on '+ this.format_date(this.createdAt) +' is due on '+ dueDate + '. To service this invoice, pay via M-Pesa paybill number: '+ this.paybillNo + ' account number: ' + this.accountNo + ' amount: '+ this.dueAmount );
+            formData.append('message', 'Dear ' + this.invoicedTenantFullName +', this is a kind reminder that your invoice no. '+ this.refNo +' which was generated on '+ this.format_date(this.createdAt) +' is due on '+ this.dueDate + '. To service this invoice, pay via M-Pesa paybill number: '+ this.paybillNo + ' account number: ' + this.accountNo + ' amount: '+ this.dueAmount );
             formData.append('invoice', file);
 
             try {
@@ -1347,6 +1380,7 @@
             try {
                 const response = await axios.get('/api/pmsproperty/' + this.propertyId);
                 this.property = response.data.property;
+                this.name = response.data.property.name;
                 this.accountNo = response.data.property.account_number;
                 this.paybillNo = response.data.property.paybill_number;
                 // console.log("property", response);
@@ -1381,155 +1415,6 @@
                 .catch((error) => {
                     console.error("Error fetching unit:", error);
                 });
-        },
-
-        buildInvoiceContent(refNo) {
-         // Determine whether to include the row
-          const showGarbageFeeRow = this.unitGarbageFee !== 0;
-          const showSecurityFeeRow = this.unitSecurityFee !== 0;
-          const showWaterBillRow = this.waterBillAmount !== 0;
-          // Build the HTML content for the receipt
-          const receiptHTML = `
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Invoice Of Payment - ${this.refNo}</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f5f5f5;
-              }
-              .receipt {
-                max-width: 600px;
-                margin: 20px auto;
-                padding: 20px;
-                background-color: #fff;
-                border: 2px solid #ccc;
-                border-radius: 10px;
-              }
-              .receipt-header {
-                text-align: center;
-                margin-bottom: 20px;
-              }
-              .receipt-header h1 {
-                margin: 10px 0;
-                color: #333;
-              }
-              .receipt-info {
-                margin-bottom: 20px;
-              }
-              .receipt-info p {
-                margin: 5px 0;
-                color: #555;
-              }
-              .receipt-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 20px;
-              }
-              .receipt-table th, .receipt-table td {
-                padding: 8px;
-                border-bottom: 1px solid #ccc;
-              }
-              .receipt-table th {
-                text-align: left;
-                background-color: #f2f2f2;
-                color: #333;
-              }
-              .receipt-table td {
-                text-align: left;
-                color: #666;
-              }
-              .receipt-footer {
-                text-align: center;
-              }
-              .receipt-footer p {
-                margin: 5px 0;
-                color: #777;
-              }
-            </style>
-          </head>
-          <body>
-            <img src="@/assets/img/apex-logo.png" alt="Company Logo" style="display: block; margin: 0 auto; max-width: 100%;">
-
-            <div class="receipt">
-              <div class="receipt-header">
-                <h1>April Properties</h1>
-                <p>Kakamega-Webuye Rd, ACK Building</p>
-                <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
-              </div>
-              <div class="receipt-info">
-                <p><strong>Invoice Number:</strong> ${this.refNo}</p>
-                <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
-                <p><strong>Rent Month:</strong> ${this.rentMonth}</p>
-                <p><strong>Tenant:</strong> ${this.tenant}</p>
-                <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
-              </div>
-              <table class="receipt-table">
-                <thead>
-                  <tr>
-                    <th>Description</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Rent Payment</td>
-                    <td>KES ${this.formatNumber(this.unitRent)}</td>
-                  </tr>
-                  ${showWaterBillRow ? `
-                  <tr>
-                    <td>Water Bill</td>
-                    <td>KES ${this.formatNumber(this.waterBillAmount)}</td>
-                  </tr>
-                  ` : ''}
-                  <!-- Conditionally include garbage collection fee row -->
-                  ${showGarbageFeeRow ? `
-                  <tr>
-                    <td>Garbage Collection Fee</td>
-                    <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
-                  </tr>
-                  ` : ''}
-                  </tr>
-                  <!-- Conditionally include security fee row -->
-                  ${showSecurityFeeRow ? `
-                  <tr>
-                    <td>Security Fee</td>
-                    <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
-                  </tr>
-                  ` : ''}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <th>Total Amount Due:</th>
-                    <td>KES ${this.formatNumber(this.dueAmount)}</td>
-                  </tr>
-                  <tr>
-                    <th>Amount Paid:</th>
-                    <td>KES ${this.formatNumber(this.amountPaid)}</td>
-                  </tr>
-                  <tr>
-                    <th>Balance:</th>
-                    <td>KES ${this.formatNumber(this.balAmount)}</td>
-                  </tr>
-                </tfoot>
-              </table>
-              <div class="receipt-footer">
-                <p>You were served by ${this.user.first_name} ${this.user.last_name}.Thank you for your payment.</p>
-                <p>This receipt acknowledges the payment received for the above property management services.</p>
-              </div>
-            </div>
-          </body>
-          </html>
-
-
-          `;
-
-          return receiptHTML;
         },
 
         formatPhoneNumber(number) {
@@ -1676,6 +1561,7 @@
         this.userId = this.user.id;
         this.getUserPermissions(this.userId);
         this.currentMonth = this.getCurrentMonth();
+        this.loadLogo();
 
       }
     }

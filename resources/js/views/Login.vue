@@ -87,11 +87,11 @@
                       <div class="col-12">
                         <button class="btn btn-success rounded-pill w-100" type="submit">
                           <span v-if="loading">
-                                <i class="fa fa-spinner fa-spin"></i> Logging in...
-                              </span>
-                              <span v-else>
-                                Login
-                              </span>
+                            <i class="fa fa-spinner fa-spin"></i> Logging in...
+                          </span>
+                          <span v-else>
+                            Login
+                          </span>
                         </button>
                       </div>
                       <div class="col-12">

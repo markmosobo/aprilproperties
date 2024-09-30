@@ -15,7 +15,7 @@ class TenantInvoiceMail extends Mailable
 
     public $subject;
     protected $message;
-    // protected $invoicePath;
+    protected $invoicePath;
     // protected $pdfPath;
 
     /**
@@ -27,11 +27,11 @@ class TenantInvoiceMail extends Mailable
      * @param string $pdfPath
      */
     // public function __construct($subject, $message, $invoicePath, $pdfPath)
-    public function __construct($subject, $message)
+    public function __construct($subject, $message, $invoicePath)
     {
         $this->subject = $subject;        
         $this->message = is_array($message) ? implode(", ", array_map('strval', $message)) : $message;
-        // $this->invoicePath = $invoicePath;
+        $this->invoicePath = $invoicePath;
         // $this->pdfPath = $pdfPath;
     }
 
@@ -50,7 +50,7 @@ class TenantInvoiceMail extends Mailable
 
     // Get the full paths for the files
     $invoiceFullPath = storage_path('app/public/' . $this->invoicePath);
-    $pdfFullPath = storage_path('app/public/' . $this->pdfPath);
+    // $pdfFullPath = storage_path('app/public/' . $this->pdfPath);
 
     // Attach invoice file
     if (file_exists($invoiceFullPath)) {

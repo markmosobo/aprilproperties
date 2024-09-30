@@ -35,18 +35,60 @@
                       </div>
                    </div>
                    <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Middle Name</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="Middle Name"
+                            id="middle_name"
+                            name="middle_name"
+                            v-model="form.middle_name"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter middle name!</div>
+                      </div>
+                   </div>
+ 
+                </div>
+                <div class="row mb-3"></div>
+
+                <div class="form-group row">
+                   <input
+                      type="hidden"
+                      id="user_id"
+                      name="user_id"
+                      value="1"
+                      class="form-control"
+                   />
+                   <div class="col-sm-6">
                       <label for="inputPassword" class="form-label">Last Name*</label>
                       <div class="col-sm-10">
                         <input
                             type="text"
                             placeholder="Last Name"
-                            id="last_name"
+                            id="title"
                             name="last_name"
                             v-model="form.last_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
+                        <div class="invalid-feedback">Please enter last name!</div>
+                      </div>
+                   </div>
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Email Address</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="Email Address"
+                            id="email"
+                            name="email_address"
+                            v-model="form.email_address"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback" v-if="!form.phone_number">Please enter email!</div>
                       </div>
                    </div>
  
@@ -64,7 +106,7 @@
                       <label for="inputPassword" class="form-label">ID Number*</label>
                       <div class="col-sm-10">
                         <input
-                            type="text"
+                            type="number"
                             placeholder="ID Number"
                             id="title"
                             name="title"
@@ -79,7 +121,7 @@
                       <label for="inputPassword" class="form-label">Phone Number*</label>
                       <div class="col-sm-10">
                         <input
-                            type="text"
+                            type="number"
                             placeholder="Phone Number"
                             id="phone_number"
                             name="phone_number"

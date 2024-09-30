@@ -146,6 +146,7 @@
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null && settleInvoicePermission" @click="settleTenant(statement)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a> 
+
                                   <a v-if="editInvoicePermission" @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>  
                                   <a v-if="deleteInvoicePermission" @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>                                 
                                   </div>
@@ -240,7 +241,25 @@
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="confirmSettleTenant">Settle Tenant</button>
+                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary me-2" @click.prevent="confirmSettleTenant">
+                                <i class="fas fa-print"></i> Settle & Print
+                            </button>
+
+                            <button type="button" style="background-color: green; border-color: green;" class="btn btn-primary" :disabled="loading" @click.prevent="mailSettleTenant">
+                                <i class="fas fa-envelope"></i>
+                               
+                                <span v-if="loading">
+                                  <i class="fa fa-spinner fa-spin"></i> Settling...
+                                </span>
+                                <span v-else-if="mailing">
+                                  <i class="fa fa-spinner fa-spin"></i> Mailing...
+                                </span>
+
+                                <span v-else>
+                                  Settle & Mail
+                                </span>                                     
+                            </button>
+
                           </div>
                         </div>
                       </div>
@@ -356,6 +375,8 @@
           lastmonthstatement: [],
           lastmonthBalance: '',
           overPayment: false,
+          loading: false,
+          mailing: false,
 
           form: {
             payment_method: '',
@@ -460,6 +481,7 @@
             this.lastName = this.selectedStatement.tenant.last_name;
             this.tenant = this.firstName + " " + this.lastName;
             this.date = this.selectedStatement.created_at;
+            this.rentMonth = this.selectedStatement.rent_month;
             this.waterBillAmount = this.selectedStatement.water_bill;
 
             // Fetch last month's statement asynchronously
@@ -532,6 +554,152 @@
             this.loadLists()
           }
         },
+        async mailSettleTenant()
+        {
+           // Validate amount
+          if (!this.form.cash) {
+            this.errors.cash = 'Amount paid is required.';
+            return;
+          }
+          if (this.selectedStatement && this.selectedStatement.id) {
+            // Implement your logic to invoice the tenant here
+            console.log("Settling tenant with statement ID:", this.selectedStatement.id);
+            this.loading = true;
+            await this.settleInvoice();
+            this.loading = false;
+            toast.fire(
+                'Success!',
+                'Invoice updated!',
+                'success'
+            );
+
+            
+          }
+
+        },
+        async sendMail(statement)
+        {
+          console.log("motto", statement)
+          this.dueAmount = statement.total;
+          this.dueWater = statement.water_bill;
+          this.tenantId = statement.pms_tenant_id;
+          this.rentMonth = statement.rent_month;
+          this.details = statement.details;
+          this.refNo = statement.ref_no;
+          this.createdAt = statement.created_at;
+          this.invoicedAt = statement.updated_at;
+          this.paidAt = statement.paid_at;
+          this.propertyId = statement.pms_property_id;
+          this.unitId = statement.pms_unit_id;
+          this.waterBillAmount = statement.water_bill;
+          if(this.waterBillAmount == 0)
+           {
+              this.water = '';
+           }
+           else
+           {
+              this.water = '(Incl. Water Bill)';
+           }
+          this.mailing = true;
+
+          this.getUnit(this.unitId);
+
+          // Fetch tenant data and wait for it to complete
+          await this.getTenant(this.tenantId);
+
+          // Check if tenantEmail is provided
+            // if (!this.invoicedTenantMail) {
+            //     Swal.fire({
+            //         title: 'Error sending email',
+            //         text: 'Please ensure ' + this.invoicedTenantFullName + ' has a valid email address',
+            //         icon: 'warning',
+            //     });
+            //     return;
+            // }
+
+          // Calculate the due date (5th of the rent month)
+          this.dueDate = this.calculateDueDate(this.rentMonth);
+
+          //fetch payment details
+          if(this.propertyId == 5)
+          {
+            await this.getUnitInfo(this.unitId);              
+          }
+          else
+          {
+            await this.getProperty(this.propertyId);              
+          }
+
+          // First, generate the invoice content and create a Blob
+            const invoiceContent = this.buildReceiptContent();
+            const blob = new Blob([invoiceContent], { type: 'text/html' });
+            const file = new File([blob], 'invoice.html', { type: 'text/html' });
+
+          // Prepare form data to send the email request to the backend
+            const formData = new FormData();
+            formData.append('name', this.invoicedTenantFullName);
+            // formData.append('email', this.invoicedTenantMail);
+            formData.append('email', 'mmosobo@gmail.com'); //for testing
+            formData.append('due_water', this.dueWater);
+            formData.append('due_amount', this.dueAmount);
+            formData.append('account_no', this.accountNo);
+            formData.append('paybill_no', this.paybillNo);
+            formData.append('subject', this.rentMonth + ' Invoice Payment Confirmation');
+            formData.append('message', 'Dear ' + this.invoicedTenantFullName +', this is a payment receipt for invoice no. '+ this.refNo +' sent on '+ this.format_date(this.paidAt));
+            formData.append('invoice', file);
+
+            try {
+                // Make API call to send email
+                await axios.post('/api/send-tenantinvoice', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                this.mailing = false;
+                // Close the modal after invoicing
+                const modal = bootstrap.Modal.getInstance(document.getElementById('settleTenantModal'));
+                modal.hide();
+                //reset form
+                this.form.cash = '';
+                this.form.payment_method = 'Mpesa';
+                this.loadLists()
+                toast.fire(
+                    'To: ' + this.invoicedTenantMail,
+                    'Email has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            }
+        },
+        async getTenant(id) {
+              try {
+                  const response = await axios.get('/api/pmstenant/' + id);
+                  this.tenant = response.data.tenant;
+                  console.log("omollo", this.tenant);
+                  this.invoicedTenantName = this.tenant.first_name;
+                  this.invoicedTenantLName = this.tenant.last_name;
+                  this.invoicedTenantFullName = this.invoicedTenantName + " " + this.invoicedTenantLName;
+                  this.invoicedTenantPhone = this.tenant.phone_number;
+                  this.invoicedTenantMail = this.tenant.email_address;
+              } catch (error) {
+                  console.log('error', error);
+              }
+        },
+        calculateDueDate(rentMonth) {
+          let dueDate = new Date(rentMonth);
+          dueDate.setDate(5);
+
+          const day = String(dueDate.getDate()).padStart(2, '0');
+          const month = String(dueDate.getMonth() + 1).padStart(2, '0');
+          const year = dueDate.getFullYear();
+
+          return `${day}/${month}/${year}`;
+        }, 
         settleInvoice() {
             return new Promise((resolve, reject) => {
                 let payload; // Define payload variable outside the if-else blocks
@@ -565,6 +733,8 @@
                         this.statement = response.data.statement;
                         this.amountPaid = this.statement.paid;
                         this.balAmount = this.statement.balance;
+                        // Share invoice via email
+                        this.sendMail(this.statement);
                         // self.step = 1;
                         // toast.fire(
                         //     'Success!',
@@ -668,22 +838,41 @@
             const printWindow = window.open("", "_blank");
 
             // Build the content for printing
-            const receiptContent = this.buildPrintContent();
+            const invoiceContent = this.buildPrintContent();
 
             // Write the content to the new window
-            printWindow.document.write(receiptContent);
+            printWindow.document.write(invoiceContent);
 
             // Close the document stream
             printWindow.document.close();
 
-            // Trigger the print dialog
-            printWindow.print();
+            // Wait for the content to be fully loaded
+            printWindow.onload = function() {
+                // Find the logo image element
+                const logoImage = printWindow.document.querySelector('img');
+
+                if (logoImage) {
+                    // Ensure the image is loaded
+                    logoImage.onload = function() {
+                        // Trigger the print dialog after the image has loaded
+                        printWindow.print();
+                    };
+
+                    // Handle case where the image might already be cached
+                    if (logoImage.complete) {
+                        logoImage.onload();  // Manually trigger onload if image is already loaded
+                    }
+                } else {
+                    // If there's no image, just print immediately
+                    printWindow.print();
+                }
+            };
         },
         buildPrintContent() {
           // Determine whether to include the row
           const showExpensesDeductionRow = this.expenses !== 0;
           const logoBase64 = this.logoBase64;
-          const watermarkText = this.paymentMethod;
+          const watermarkText = 'INVOICE';
           // Build the HTML content for the receipt
           const receiptHTML = `
             <!DOCTYPE html>
@@ -960,9 +1149,9 @@
               </div>
               <div class="receipt-info">
                 <p><strong>Invoice Number:</strong> ${this.refNo}</p>
-                <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
-                <p><strong>Rent Month:</strong> ${this.formatMonth(this.date)}</p>
-                <p><strong>Tenant:</strong> ${this.tenant}</p>
+                <p><strong>Receipt Date:</strong> ${this.format_date(new Date().toLocaleString())}</p>
+                <p><strong>Rent Month:</strong> ${this.rentMonth}</p>
+                <p><strong>Tenant:</strong> ${this.invoicedTenantFullName}</p>
                 <p><strong>Property:</strong> ${this.name} - ${this.unitName}</p>
                 <p><strong>Payment Mode:</strong> ${this.form.payment_method}</p>
               </div>
