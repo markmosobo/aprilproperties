@@ -119,6 +119,7 @@
                             <th scope="col">Bal</th>
                             <th scope="col">Transaction On</th>                            
                             <th scope="col">Status</th>
+                            <th scope="col">Remind</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -137,18 +138,36 @@
                               <span v-else class="badge bg-info text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacant</span>
                             </td>
                             <td>
+                              <div class="d-flex align-items-center">
+                                <!-- WhatsApp Share Option -->
+                                <a :href="generateWhatsAppLink(statement)" class="dropdown-item me-1" target="_blank">
+                                  <i class="fab fa-whatsapp mr-1"></i>
+                                </a>
+                                <!-- Mail Share Option -->
+                                <a @click="generateMailLink(statement)" class="dropdown-item me-1">
+                                  <i class="fas fa-envelope mr-1"></i>
+                                </a>
+                                <!-- SMS Share Option -->
+                     <!--            <a @click="generateSmsLink(statement)" class="dropdown-item">
+                                  <i class="fas fa-sms mr-1"></i>
+                                </a> -->
+                              </div>
+                            </td>
+                                                     
+                            <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
+                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoice</a> <a @click="navigateTo('/pmstenant/'+statement.tenant.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Tenant</a>                                              
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null && settleInvoicePermission" @click="settleTenant(statement)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a> 
 
                                   <a v-if="editInvoicePermission" @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>  
-                                  <a v-if="deleteInvoicePermission" @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>                                 
+                                  <a v-if="deleteInvoicePermission" @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a> 
+                                                               
                                   </div>
                               </div>
                             </td>
@@ -399,6 +418,300 @@
         navigateTo(location){
             this.$router.push(location)
         },
+        buildInvoiceContent() {
+          // Determine whether to include the row
+          const logoBase64 = this.logoBase64 || ''; // Fallback if no logo is provided
+          const watermarkText = 'INVOICE';
+          // Build the HTML content for the receipt
+          const receiptHTML = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Invoice Of Payment - ${this.refNo}</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f5f5f5;
+                }
+                .receipt {
+                  max-width: 600px;
+                  margin: 20px auto;
+                  padding: 20px;
+                  background-color: #fff;
+                  border: 2px solid #ccc;
+                  display: flex;
+                  flex-direction: column;
+                }
+                 .watermark {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                    font-size: 80px;
+                    color: rgba(0, 0, 0, 0.1); /* Adjust the transparency as needed */
+                    white-space: nowrap;
+                    z-index: 0;
+                    pointer-events: none; /* Prevents watermark from interfering with other elements */
+                  }
+                .receipt-header {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 50px;
+                }
+                .company-info {
+                  text-align: left;
+                }
+                .company-info img {
+                  max-width: 150px;
+                  height: auto;
+                }
+                .receipt-info {
+                  margin-bottom: 50px;
+                }
+                .receipt-info p {
+                  margin: 5px 0;
+                  color: #555;
+                }
+                 .additional-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                }
+                .additional-info p {
+                  margin: 8px 0;
+                }
+                .payment-info {
+                  margin-bottom: 30px;
+                  font-size: 16px;
+                  color: #333333;
+                  text-align: center;
+                }
+                .payment-info p {
+                  margin: 8px 0;
+                }
+                .receipt-table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 50px;
+                }
+                .receipt-table th, .receipt-table td {
+                  padding: 8px;
+                  border-bottom: 1px solid #ccc;
+                }
+                .receipt-table th {
+                  text-align: left;
+                  background-color: #f2f2f2;
+                  color: #333;
+                }
+                .receipt-table td {
+                  text-align: left;
+                  color: #666;
+                }
+                .receipt-footer {
+                  text-align: center;
+                  margin-top: auto;
+                }
+                .receipt-footer p {
+                  margin: 5px 0;
+                  color: #777;
+                }
+              </style>
+            </head>
+            <body>
+            <div class="watermark">${watermarkText}</div>
+              <div class="receipt">
+                <div class="receipt-header">
+                  <div class="company-logo">
+                    <img src="${logoBase64}" alt="Company Logo" style="max-width: 150px; height: auto;">
+                  </div>
+                  <div class="company-info">
+                    <p>Kakamega-Webuye Rd, ACK Building</p>
+                    <p>Phone: (0720) 020-401 </p>
+                    <p> Email: propertapril@gmail.com</p>
+                    <p> Website: www.aprilproperties.co.ke</p>
+                  </div>
+                </div>
+                <div class="receipt-info">
+                  <p><strong>#${this.refNo}</strong></p>
+                  <p><strong>Invoice Date:</strong> ${this.format_date(this.invoicedAt ?? 'N/A')}</p>
+                  <p><strong>Due Date:</strong>  ${this.dueDate ?? 'N/A'}</p>
+                  
+                </div>
+                <div class="additional-info">
+                    <p><strong>Invoiced To</strong></p>
+                    <p><strong></strong> ${this.invoicedTenantFullName}</p>
+                    <p><strong></strong> ${this.name ?? 'Victoria Apartments'} - ${this.unitName}</p>
+                    <p><strong></strong> ${this.rentMonth}</p>
+                </div>
+                <table class="receipt-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total Rent Due ${this.water}</td>
+                      <td>KES ${this.formatNumber(this.dueAmount)}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th>Total Amount Due:</th>
+                      <td>KES ${this.formatNumber(this.dueAmount)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div class="payment-info">
+                  <p><strong>Payment Options:</strong></p>
+                  <p>Mobile Money: Paybill - ${this.paybillNo ?? 'N/A'} Account Number - ${this.accountNo ?? 'N/A'}</p>
+                </div>
+                <div class="receipt-footer">
+                  <p>Printed on ${this.format_date(new Date().toLocaleString())}</p>
+                </div>
+              </div>
+            </body>
+            </html>
+          `;
+
+          return receiptHTML;
+        },
+        generateMailLink(statement)
+        {
+          this.dueAmount = statement.total;
+          this.dueWater = statement.water_bill;
+          this.tenantId = statement.pms_tenant_id;
+          this.rentMonth = statement.rent_month;
+          this.details = statement.details;
+          this.refNo = statement.ref_no;
+          this.createdAt = statement.created_at;
+          this.invoicedAt = statement.updated_at;
+          this.propertyId = statement.pms_property_id;
+          this.unitId = statement.pms_unit_id;
+          this.waterBillAmount = statement.water_bill;
+          if(this.waterBillAmount == 0)
+           {
+              this.water = '';
+           }
+           else
+           {
+              this.water = '(Incl. Water Bill)';
+           }
+
+           // Check if tenantEmail is provided
+            if (!statement.tenant.email_address) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: 'Please ensure ' + statement.tenant.first_name + ' '+ statement.tenant.last_name  + ' has a valid email address',
+                    icon: 'warning',
+                });
+                return;
+            }
+
+          // Calculate the due date (5th of the rent month)
+          this.dueDate = this.calculateDueDate(statement.rent_month);
+
+          // Check the property ID and get the relevant info
+          if (statement.pms_property_id == 5) {
+            this.accountNo = statement.unit.account_number;
+            this.paybillNo = statement.unit.paybill_number;
+          } else {
+            this.accountNo = statement.property.account_number;
+            this.paybillNo = statement.property.paybill_number;
+          }
+
+          // First, generate the invoice content and create a Blob
+            const invoiceContent = this.buildInvoiceContent();
+            const blob = new Blob([invoiceContent], { type: 'text/html' });
+            const file = new File([blob], 'invoice.html', { type: 'text/html' });
+
+          // Prepare form data to send the email request to the backend
+            const formData = new FormData();
+            formData.append('name', statement.tenant.first_name + ' ' + statement.tenant.last_name);
+            // formData.append('email', this.invoicedTenantMail);
+            formData.append('email', 'mmosobo@gmail.com'); //for testing
+            formData.append('due_water', this.dueWater);
+            formData.append('due_amount', this.dueAmount);
+            formData.append('account_no', this.accountNo);
+            formData.append('paybill_no', this.paybillNo);
+            formData.append('subject', this.rentMonth + ' Invoice Payment Reminder');
+            formData.append('message', 'Dear ' + statement.tenant.first_name + ' ' + statement.tenant.last_name +', this is a kind reminder that your invoice no. '+ this.refNo +' which was generated on '+ this.format_date(this.createdAt) +' is due on '+ this.dueDate + '. To service this invoice, pay via M-Pesa paybill number: '+ this.paybillNo + ' account number: ' + this.accountNo + ' amount: '+ this.dueAmount );
+            formData.append('invoice', file);
+
+            try {
+                // Make API call to send email
+                axios.post('/api/send-tenantinvoice', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                toast.fire(
+                    'To: ' + statement.tenant.email_address,
+                    'Email has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            }
+        },
+        generateSmsLink(statement){
+
+        },
+        generateWhatsAppLink(statement) {
+          this.unitId = statement.pms_unit_id;
+          this.rentMonth = statement.rent_month;
+          
+          // Ensure the tenant's phone number exists
+          if (!statement.tenant || !statement.tenant.phone_number) {
+            return '#'; // If no phone number, return a placeholder link
+          }
+          if (!statement.tenant.phone_number) {
+              Swal.fire({
+                  title: 'Error sending Whatsapp',
+                  text: 'Please ensure ' + statement.tenant.first_name + ' has a valid phone number',
+                  icon: 'warning',
+              });
+              return;
+          }
+
+          // Check the property ID and get the relevant info
+          if (statement.pms_property_id == 5) {
+            this.accountNo = statement.unit.account_number;
+            this.paybillNo = statement.unit.paybill_number;
+          } else {
+            this.accountNo = statement.property.account_number;
+            this.paybillNo = statement.property.paybill_number;
+          }
+
+          // Calculate the due date (5th of the rent month)
+          this.dueDate = this.calculateDueDate(this.rentMonth);
+
+          // Prepare the message with a more professional format
+          const message = `Dear ${statement.tenant.first_name} ${statement.tenant.last_name},\n\n` +
+            `This is a kind reminder that your invoice for ${statement.rent_month}, Invoice No. ${statement.ref_no}, ` +
+            `which was generated on ${this.format_date(statement.created_at)}, is due on ${this.dueDate}.\n\n` +
+            `To service this invoice, please make your payment via M-Pesa Paybill Number: ${this.paybillNo},\n` +
+            `Account Number: ${this.accountNo}, for the amount of ${this.formatNumber(statement.total)}.\n\n` +
+            `Thank you for your prompt attention to this matter.\n\n` +
+            `Best regards,\n` +
+            `April Properties`;
+
+          // WhatsApp URL scheme with tenant's phone number and the encoded message
+          const whatsappUrl = `https://api.whatsapp.com/send?phone=${statement.tenant.phone_number}&text=${encodeURIComponent(message)}`;
+
+          return whatsappUrl; // Return the generated URL
+        },
+
          invoiceTenant(id){
             this.$router.push('invoicestatement/'+id)
         },
@@ -691,15 +1004,21 @@
               }
         },
         calculateDueDate(rentMonth) {
+          // Convert rentMonth to a Date object, ensuring it's in the correct format
           let dueDate = new Date(rentMonth);
+          
+          // Set the due date to the 5th day of the month
           dueDate.setDate(5);
 
+          // Format day, month, and year to ensure 2 digits
           const day = String(dueDate.getDate()).padStart(2, '0');
-          const month = String(dueDate.getMonth() + 1).padStart(2, '0');
+          const month = String(dueDate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed in JS
           const year = dueDate.getFullYear();
 
+          // Return the formatted date as dd/mm/yyyy
           return `${day}/${month}/${year}`;
-        }, 
+        },
+ 
         settleInvoice() {
             return new Promise((resolve, reject) => {
                 let payload; // Define payload variable outside the if-else blocks

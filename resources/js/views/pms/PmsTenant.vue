@@ -9,7 +9,7 @@
               <!-- <img :src="getPhoto() + user.image" class="rounded-circle" alt="Profile" /> -->
 
               <h2>{{user.first_name}} {{user.last_name}}</h2>
-              <h3>Tenant</h3>
+              <h3>Tenant</h3><p>since {{format_date(user.created_at)}}</p>
 <!--               <div class="social-links mt-2">
                 <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
                 <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
@@ -61,7 +61,7 @@
                     <div class="col-lg-9 col-md-8">0{{user.phone_number}}</div>
                   </div>
 
-                  <div class="row">
+                  <div v-if="user.id_number" class="row">
                     <div class="col-lg-3 col-md-4 label">National ID Number</div>
                     <div class="col-lg-9 col-md-8">{{user.id_number}}</div>
                   </div>
@@ -76,9 +76,9 @@
                     <div class="col-lg-9 col-md-8">{{user.unit}}</div>
                   </div> -->
 
-                   <div class="row">
-                    <div class="col-lg-3 col-md-4 label">Added On</div>
-                    <div class="col-lg-9 col-md-8">{{format_date(user.created_at)}}</div>
+                   <div v-if="user.email_address" class="row">
+                    <div class="col-lg-3 col-md-4 label">Email Address</div>
+                    <div class="col-lg-9 col-md-8">{{user.email_address}}</div>
                   </div>
 
                    <div class="row">
@@ -97,11 +97,13 @@
 
                 </div>
 
-                <div class="row mb-3">
-                  <div class="bg-light clearfix">
-                      <button type="button" @click="goToUsers" class="btn btn-sm btn-success float-right rounded-pill">Back</button>
-                  </div>  
+               <div class="row mb-3">
+                <div class="bg-light clearfix">
+                  <button type="button" @click="goBack" class="btn btn-sm btn-success float-right rounded-pill me-2">Back</button>
+                  <button type="button" @click="openEditModal" class="btn btn-sm btn-primary float-right rounded-pill">Edit</button>
                 </div>
+              </div>
+
               </div><!-- End Bordered Tabs -->
 
             </div>
@@ -146,14 +148,13 @@ export default {
             return moment(String(value)).format('lll')
           }
         },
-      goToUsers()
-      {
-        this.$router.push('/pmstenants')
-      },
-      getPhoto()
-      {
-        return "/storage/users/";
-      },
+        goBack()
+        {
+          this.$router.go(-1);
+        },
+        openEditModal() {
+          // Logic to open the edit tenant modal
+        }
     },
     mounted()
     {

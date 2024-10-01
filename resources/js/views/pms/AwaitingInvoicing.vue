@@ -213,6 +213,7 @@
                                       <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                       <a @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a> 
                                       <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                      
                                     </div>
                                   </div>
                                 </td>
@@ -263,10 +264,11 @@
                               <input type="number" name="electricity_bill" v-model="form.electricity_bill" class="form-control">
                               <div v-if="errors.electricity_bill" class="text-danger">{{ errors.electricity_bill }}</div>
                             </p>
+
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                              <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant">
+                              <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click="confirmInvoiceTenant" :disabled="invoicing">
                               <span v-if="invoicing">
                                 <i class="fa fa-spinner fa-spin"></i> Invoicing...
                               </span>
@@ -1500,7 +1502,7 @@
     
              });
         },
-      calculateDueDate(rentMonth) {
+        calculateDueDate(rentMonth) {
           let dueDate = new Date(rentMonth);
           dueDate.setDate(5);
 
