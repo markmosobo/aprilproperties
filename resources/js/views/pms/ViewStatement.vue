@@ -70,6 +70,33 @@
                                         <div><strong>{{details}}</strong></div>
                                     </div>
                                 </div>
+                            </div>  
+
+                            <div v-if="emailCount > 0" class="row mb-3">
+                                <div class="col-lg-12">
+                                    <div class="d-flex justify-content-between">
+                                        <div>Email Reminder(s)</div>
+                                        <div><strong>{{emailCount}}</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="whatsappCount > 0" class="row mb-3">
+                                <div class="col-lg-12">
+                                    <div class="d-flex justify-content-between">
+                                        <div>Whatsapp Reminder(s)</div>
+                                        <div><strong>{{whatsappCount}}</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="smsCount > 0" class="row mb-3">
+                                <div class="col-lg-12">
+                                    <div class="d-flex justify-content-between">
+                                        <div>SMS Reminder(s)</div>
+                                        <div><strong>{{smsCount}}</strong></div>
+                                    </div>
+                                </div>
                             </div>                             
 
                             <div class="row mt-4">
@@ -100,7 +127,7 @@
                                             <th scope="col">Rent</th>
                                             <th scope="col">Garbage</th>
                                             <th scope="col">Water</th>
-                                            <th scope="col">Status</th>
+                                            <th scope="col">Security</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -109,14 +136,21 @@
                                             <td>{{formatNumber(unitGarbageFee)}}</td>
                                             <td v-if="waterBill !== null">{{formatNumber(waterBill)}}</td>
                                             <td v-else>N/A</td>
+                                            <td>{{formatNumber(unitSecurityFee)}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Status</th>
+                                            <td></td>
+                                            <td></td>
                                             <td v-if="status == 1" scope="row"><span style="color: green;">Settled</span></td>
                                             <td v-else scope="row"><span style="color: red;">Unsettled</span></td>
                                         </tr>
+                                                                                                                       
                                         <tr>
-                                            <th scope="row">Security</th>
+                                            <th scope="row">Due</th>
                                             <td></td>
                                             <td></td>
-                                            <td>{{formatNumber(unitSecurityFee)}}</td>
+                                            <td><strong>KES. {{formatNumber(total)}}</strong></td>
                                         </tr>
                                         <tr>
                                             <th scope="row">Paid</th>
@@ -129,13 +163,7 @@
                                             <td></td>
                                             <td></td>
                                             <td>{{formatNumber(balance)}}</td>
-                                        </tr>                                                                                
-                                        <tr>
-                                            <th scope="row">Due</th>
-                                            <td></td>
-                                            <td></td>
-                                            <td><strong>KES. {{formatNumber(total)}}</strong></td>
-                                        </tr>
+                                        </tr> 
                                     </tbody>
                                 </table>
                                 <!-- End Default Table Example -->
@@ -187,6 +215,9 @@ export default {
             status: '',
             paid: '',
             balance: '',
+            emailCount: '',
+            whatsappCount: '',
+            smsCount: '',
             total: '',
             statementId: '',
             waterBill: '',
@@ -221,6 +252,9 @@ export default {
                 this.status = this.statement.status;
                 this.paid = this.statement.paid;
                 this.balance = this.statement.balance;
+                this.emailCount = this.statement.email_count;
+                this.whatsappCount = this.statement.whatsapp_count;
+                this.smsCount = this.statement.sms_count;
                 this.total = this.statement.total;
                 this.payment = this.statement.payment_method;
                 this.statementId = this.statement.id;

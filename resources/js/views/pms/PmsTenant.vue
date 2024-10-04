@@ -9,7 +9,7 @@
               <!-- <img :src="getPhoto() + user.image" class="rounded-circle" alt="Profile" /> -->
 
               <h2>{{user.first_name}} {{user.last_name}}</h2>
-              <h3>Tenant</h3>
+              <h3>Tenant</h3><p>since {{format_date(user.created_at)}}</p>
 <!--               <div class="social-links mt-2">
                 <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
                 <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
@@ -32,11 +32,11 @@
                   <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
                 </li>
 
-<!--                 <li class="nav-item">
-                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
+                <li class="nav-item">
+                  <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Tenant</button>
                 </li>
 
-                <li class="nav-item">
+<!--                 <li class="nav-item">
                   <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-settings">Settings</button>
                 </li>
 
@@ -61,12 +61,12 @@
                     <div class="col-lg-9 col-md-8">0{{user.phone_number}}</div>
                   </div>
 
-                  <div class="row">
+                  <div v-if="user.id_number" class="row">
                     <div class="col-lg-3 col-md-4 label">National ID Number</div>
                     <div class="col-lg-9 col-md-8">{{user.id_number}}</div>
                   </div>
 
-<!--                    <div class="row">
+                    <!--                    <div class="row">
                     <div class="col-lg-3 col-md-4 label">Property</div>
                     <div class="col-lg-9 col-md-8">{{user.property}}</div>
                   </div>
@@ -77,8 +77,8 @@
                   </div> -->
 
                    <div class="row">
-                    <div class="col-lg-3 col-md-4 label">Added On</div>
-                    <div class="col-lg-9 col-md-8">{{format_date(user.created_at)}}</div>
+                    <div class="col-lg-3 col-md-4 label">Email Address</div>
+                    <div class="col-lg-9 col-md-8">{{user.email_address ?? 'N/A'}}</div>
                   </div>
 
                    <div class="row">
@@ -91,15 +91,61 @@
                     <!-- <div class="col-lg-3 col-md-4 label">Role</div> -->
                     <div class="col-lg-9 col-md-8"></div>
                   </div>
-<!-- 
+                   <!-- 
                   <h5 class="card-title">Description</h5>
                   <p class="small fst-italic">{{product.description}}</p> -->
 
                 </div>
 
+                <div class="tab-pane fade show profile-edit" id="profile-edit">
+                  <h5 class="card-title">Edit Tenant Details</h5>
+
+                  <div class="row mb-3"> <!-- Added mb-3 for margin-bottom -->
+                    <div class="col-lg-3 col-md-4 label">First Name</div>
+                    <div class="col-lg-9 col-md-8">
+                      <input type="text" v-model="user.first_name" class="form-control" placeholder="First Name" />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3"> <!-- Added mb-3 for margin-bottom -->
+                    <div class="col-lg-3 col-md-4 label">Last Name</div>
+                    <div class="col-lg-9 col-md-8">
+                      <input type="text" v-model="user.last_name" class="form-control" placeholder="Last Name" />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3"> <!-- Added mb-3 for margin-bottom -->
+                    <div class="col-lg-3 col-md-4 label">Phone Number</div>
+                    <div class="col-lg-9 col-md-8">
+                      <input type="text" v-model="user.phone_number" class="form-control" placeholder="Phone Number" />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3"> <!-- Added mb-3 for margin-bottom -->
+                    <div class="col-lg-3 col-md-4 label">National ID Number</div>
+                    <div class="col-lg-9 col-md-8">
+                      <input type="text" v-model="user.id_number" class="form-control" placeholder="National ID Number" />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3"> <!-- Added mb-3 for margin-bottom -->
+                    <div class="col-lg-3 col-md-4 label">Email Address</div>
+                    <div class="col-lg-9 col-md-8">
+                      <input type="email" v-model="user.email_address" class="form-control" placeholder="Email Address" />
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-9 col-md-8 offset-lg-3">
+                      <button @click="submitDetails" type="submit" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary">Submit</button> <!-- Added Submit Button -->
+                    </div>
+                  </div>
+                </div>
+                
+
                 <div class="row mb-3">
                   <div class="bg-light clearfix">
-                      <button type="button" @click="goToUsers" class="btn btn-sm btn-success float-right rounded-pill">Back</button>
+                      <button type="button" @click="goBack" class="btn btn-sm btn-success float-right">Back</button>
                   </div>  
                 </div>
               </div><!-- End Bordered Tabs -->
@@ -141,19 +187,39 @@ export default {
                 console.log("user", this.user)
             })
         },
+        submitDetails() {
+            axios.put("/api/pmstenant/"+this.user.id, this.user)
+            .then(function (response) {
+               console.log(response);
+               // this.step = 1;
+               toast.fire(
+                  'Success!',
+                  'Tenant updated!',
+                  'success'
+               )
+            })
+            .catch(function (error) {
+               console.log(error);
+               Swal.fire(
+                  'error!',
+                  error,
+                  'error'
+               )
+            });
+        },
         format_date(value){
           if(value){
             return moment(String(value)).format('lll')
           }
         },
-      goToUsers()
-      {
-        this.$router.push('/pmstenants')
-      },
-      getPhoto()
-      {
-        return "/storage/users/";
-      },
+        goBack()
+        {
+          this.$router.back();
+        },
+        getPhoto()
+        {
+          return "/storage/users/";
+        },
     },
     mounted()
     {

@@ -567,64 +567,106 @@ class PmsStatementController extends Controller
     //         'unit' => $unit
     //     ], 200);
     // }
-public function createInvoice(Request $request)
-{
-    $tenant = PmsTenant::findOrFail($request->pms_tenant_id);
-    $unit = PmsUnit::findOrFail($tenant->pms_unit_id);
-    $waterBill = $request->water_bill;
+    public function createInvoice(Request $request)
+    {
+        $tenant = PmsTenant::findOrFail($request->pms_tenant_id);
+        $unit = PmsUnit::findOrFail($tenant->pms_unit_id);
+        $waterBill = $request->water_bill;
 
-    $formattedDate = $request->rentMonth;
-    $tenantUnit = $tenant->unit_number;
-    $unitId = $tenant->pms_unit_id;
-    $orgDate = now();
-    $date = str_replace('-"', '/', $orgDate);
-    $newDate = date("YmdHis", strtotime($date));
-    $monthlyTotal = $tenant->unit->monthly_rent + $tenant->unit->garbage_fee + $tenant->unit->security_fee;
-    $refno = "INV" . $newDate . $tenant->id;
+        $formattedDate = $request->rentMonth;
+        $tenantUnit = $tenant->unit_number;
+        $unitId = $tenant->pms_unit_id;
+        $orgDate = now();
+        $date = str_replace('-"', '/', $orgDate);
+        $newDate = date("YmdHis", strtotime($date));
+        $monthlyTotal = $tenant->unit->monthly_rent + $tenant->unit->garbage_fee + $tenant->unit->security_fee;
+        $refno = "INV" . $newDate . $tenant->id;
 
-    // Debug: Print variables to check data
-    error_log('Checking for duplicate entry');
-    error_log('Tenant ID: ' . $tenant->id);
-    error_log('Unit ID: ' . $unitId);
-    error_log('Rent Month: ' . $formattedDate);
+        // Debug: Print variables to check data
+        error_log('Checking for duplicate entry');
+        error_log('Tenant ID: ' . $tenant->id);
+        error_log('Unit ID: ' . $unitId);
+        error_log('Rent Month: ' . $formattedDate);
 
-    // Check if an entry with the same tenant ID, unit ID, and rent month already exists
-    $existingEntry = PmsStatement::where('pms_tenant_id', $tenant->id)
-        ->where('pms_unit_id', $unitId)
-        ->where('rent_month', $formattedDate)
-        ->first();
+        // Check if an entry with the same tenant ID, unit ID, and rent month already exists
+        $existingEntry = PmsStatement::where('pms_tenant_id', $tenant->id)
+            ->where('pms_unit_id', $unitId)
+            ->where('rent_month', $formattedDate)
+            ->first();
 
-    if ($existingEntry) {
-        error_log('Duplicate entry found');
+        if ($existingEntry) {
+            error_log('Duplicate entry found');
+            return response()->json([
+                'status' => false,
+                'message' => "An invoice for this tenant and rent month already exists.",
+            ], 409); // 409 Conflict
+        }
+
+        $data = [
+            'ref_no' => $refno,
+            'pms_property_id' => $tenant->pms_property_id,
+            'pms_tenant_id' => $tenant->id,
+            'pms_unit_id' => $unitId,
+            'unit_number' => $tenant->unit->unit_number,
+            'details' => "Rent-" . $tenant->unit->unit_number . "-" . $formattedDate,
+            'rent_month' => $request->rentMonth,
+            'status' => 0, // status for rented units
+            'total' => $monthlyTotal, // You can set the default total
+            'paid' => 0, // You can set the default paid amount
+            'balance' => 0, // You can set the default balance
+        ];
+
+        PmsStatement::create($data);
+
         return response()->json([
-            'status' => false,
-            'message' => "An invoice for this tenant and rent month already exists.",
-        ], 409); // 409 Conflict
+            'status' => true,
+            'message' => "Invoice created successfully.",
+            'tenant' => $tenant,
+            'unit' => $unit,
+        ], 200);
     }
 
-    $data = [
-        'ref_no' => $refno,
-        'pms_property_id' => $tenant->pms_property_id,
-        'pms_tenant_id' => $tenant->id,
-        'pms_unit_id' => $unitId,
-        'unit_number' => $tenant->unit->unit_number,
-        'details' => "Rent-" . $tenant->unit->unit_number . "-" . $formattedDate,
-        'rent_month' => $request->rentMonth,
-        'status' => 0, // status for rented units
-        'total' => $monthlyTotal, // You can set the default total
-        'paid' => 0, // You can set the default paid amount
-        'balance' => 0, // You can set the default balance
-    ];
+    public function updateEmailCount(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'id' => 'required|integer|exists:pms_statements,id',
+        ]);
 
-    PmsStatement::create($data);
+        // Find the statement by ID and increment the email_count
+        $statement = PmsStatement::find($request->id);
+        $statement->increment('email_count');
 
-    return response()->json([
-        'status' => true,
-        'message' => "Invoice created successfully.",
-        'tenant' => $tenant,
-        'unit' => $unit,
-    ], 200);
-}
+        return response()->json(['message' => 'Email count updated successfully']);
+    }
+
+     public function updateWhatsappCount(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'id' => 'required|integer|exists:pms_statements,id',
+        ]);
+
+        // Find the statement by ID and increment the email_count
+        $statement = PmsStatement::find($request->id);
+        $statement->increment('whatsapp_count');
+
+        return response()->json(['message' => 'Whatsapp count updated successfully']);
+    }
+
+     public function updateSmsCount(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'id' => 'required|integer|exists:pms_statements,id',
+        ]);
+
+        // Find the statement by ID and increment the email_count
+        $statement = PmsStatement::find($request->id);
+        $statement->increment('sms_count');
+
+        return response()->json(['message' => 'SMS count updated successfully']);
+    }
 
 
 

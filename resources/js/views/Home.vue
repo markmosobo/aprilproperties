@@ -1,424 +1,340 @@
 <template>
-    <TheMaster>
-      <section v-if="user.role_id == 1" class="section dashboard">
+  <TheMaster>
+    <section v-if="user.role_id == 1" class="section dashboard">
       <div class="row">
-
-        <!-- Left side columns -->
         <div class="col-lg-12">
           <div class="row">
 
-            <!-- Sales Card -->
-            <div class="col-xxl-4 col-md-4">
-              <div class="card info-card sales-card">
-
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Properties Card -->
+            <div @click="goProperties" class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card sales-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">All Properties <span>| All Time</span></h5>
-
+                  <h5 class="card-title text-success">All Properties <span>| All Time</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                    <span style="color: darkgreen;"><i class="bi bi-building"></i></span>
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <span style="color: darkgreen;"><i class="bi bi-building"></i></span>
                     </div>
                     <div class="ps-3">
-                      <h6>{{pmsPropertyCount}}</h6>
-                      <!-- <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
-
+                      <h6>{{ pmsPropertyCount }}</h6>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </div><!-- End Sales Card -->
+            </div><!-- End Properties Card -->
 
-            <!-- Revenue Card -->
-            <div class="col-xxl-4 col-md-4">
-              <div class="card info-card revenue-card">
-
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Rented Units Card -->
+            <div class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">Rented Units <span>| All Time</span></h5>
-
+                  <h5 class="card-title text-warning">Rented Units <span>| All Time</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
                       <i class="bi bi-house-door" style="color: orange;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{pmsrentedpropertycount}}</h6>
-                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
-
+                      <h6>{{ pmsrentedpropertycount }}</h6>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </div>
-            <!-- End Revenue Card -->
-            <div class="col-xxl-4 col-md-4">
-              <div class="card info-card revenue-card">
+            </div><!-- End Rented Units Card -->
 
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Vacant Units Card -->
+            <div class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">Vacant Units <span>| All Time</span></h5>
-
+                  <h5 class="card-title text-danger">Vacant Units <span>| All Time</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-house"></i>
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-house" style="color: red;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{pmsvacantpropertycount}}</h6>
-                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
-
+                      <h6>{{ pmsvacantpropertycount }}</h6>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </div>
+            </div><!-- End Vacant Units Card -->
 
-            <!-- Customers Card -->
-            <div class="col-xxl-4 col-xl-4">
-
-              <div class="card info-card customers-card">
-
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Users Card -->
+            <div @click="goUsers" class="col-xxl-4 col-xl-4 mb-4">
+              <div class="card info-card customers-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">Users <span>| All System Users</span></h5>
-
+                  <h5 class="card-title text-primary">Users <span>| All System Users</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-people" style="color: darkgreen;"></i>
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-people" style="color: blue;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{userscount}}</h6>
-                      <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
-
+                      <h6>{{ userscount }}</h6>
                     </div>
                   </div>
-
                 </div>
               </div>
+            </div><!-- End Users Card -->
 
-            </div>
-            <!-- End Customers Card -->
-            <div class="col-xxl-4 col-xl-4">
-
-              <div class="card info-card customers-card">
-
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Landlords Card -->
+            <div @click="goLandlords" class="col-xxl-4 col-xl-4 mb-4">
+              <div class="card info-card customers-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">Landlords <span>| All Landlords</span></h5>
-
+                  <h5 class="card-title text-info">Landlords <span>| All Landlords</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-person-lines-fill"></i>
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-person-lines-fill" style="color: teal;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{landlordscount}}</h6>
-                      <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
-
+                      <h6>{{ landlordscount }}</h6>
                     </div>
                   </div>
-
                 </div>
               </div>
+            </div><!-- End Landlords Card -->
 
-            </div>
-
-            <div class="col-xxl-4 col-xl-4">
-
-              <div class="card info-card customers-card">
-
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Tenants Card -->
+            <div @click="goTenants" class="col-xxl-4 col-xl-4 mb-4">
+              <div class="card info-card customers-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">Tenants <span>| All Tenants</span></h5>
-
+                  <h5 class="card-title text-secondary">Tenants <span>| All Tenants</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-person-badge"></i>
-
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-person-badge" style="color: darkslategray;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{tenantscount}}</h6>
-                      <!-- <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">decrease</span> -->
-
+                      <h6>{{ tenantscount }}</h6>
                     </div>
                   </div>
-
                 </div>
               </div>
-
-            </div>
-
+            </div><!-- End Tenants Card -->
 
           </div>
         </div><!-- End Left side columns -->
-
-        <!-- Right side columns -->
-
-
       </div>
-      </section>
+    </section>
 
-      <section v-if="user.role_id == 2" class="section dashboard">
+    <section v-if="user.role_id == 2" class="section dashboard">
       <div class="row">
-
-        <!-- Left side columns -->
         <div class="col-lg-12">
           <div class="row">
 
-            <!-- Sales Card -->
-            <div class="col-xxl-4 col-md-4">
-              <div class="card info-card sales-card">
-
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Awaiting Invoicing Card -->
+            <div @click="goAwaitingInvoicing" class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card sales-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">All Properties <span>| All Time</span></h5>
-
+                  <h5 class="card-title text-success">Awaiting Invoicing <span>| All Time</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                    <span style="color: darkgreen;"><i class="bi bi-building"></i></span>
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <span style="color: darkgreen;"><i class="bi bi-file-earmark-text" style="color: darkgreen;"></i></span>
                     </div>
                     <div class="ps-3">
-                      <h6>{{pmsPropertyCount}}</h6>
-                      <!-- <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
-
+                      <h6>{{ awaitingInvoicingCount }}</h6>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </div><!-- End Sales Card -->
+            </div>
+            <!-- End Awaiting Invoicing Card -->
 
-            <!-- Revenue Card -->
-            <div class="col-xxl-4 col-md-4">
-              <div class="card info-card revenue-card">
-
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Awaiting Settling Card -->
+            <div @click="goAwaitingSettling" class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">Rented Units <span>| All Time</span></h5>
-
+                  <h5 class="card-title text-warning" style="color: darkorange;">Awaiting Settling <span>| All Time</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-clipboard" style="color: darkorange;"></i>
+
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{ awaitingSettlingCount }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Awaiting Settling Card -->
+
+            <!-- Settled Invoices Card -->
+            <div @click="goSettledInvoices" class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-danger">Settled Invoices <span>| All Time</span></h5>
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-file-earmark-check" style="color: red;"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{ settledInvoicesCount }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Settled Invoices Card -->
+
+            <!-- All Properties Card -->
+            <div @click="goProperties" class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card sales-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-success">All Properties <span>| All Time</span></h5>
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <span style="color: darkgreen;"><i class="bi bi-building"></i></span>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{ pmsPropertyCount }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- End All Properties Card -->
+
+            <!-- Rented Units Card -->
+            <div class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-warning">Rented Units <span>| All Time</span></h5>
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
                       <i class="bi bi-house-door" style="color: orange;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{pmsrentedpropertycount}}</h6>
-                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
-
+                      <h6>{{ pmsrentedpropertycount }}</h6>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </div>
-            <!-- End Revenue Card -->
-            <div class="col-xxl-4 col-md-4">
-              <div class="card info-card revenue-card">
+            </div><!-- End Rented Units Card -->
 
-                <div class="filter">
-                  <!--<a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
-                    </li>
-
-                    <li><a class="dropdown-item" href="#">Today</a></li>
-                    <li><a class="dropdown-item" href="#">This Month</a></li>
-                    <li><a class="dropdown-item" href="#">This Year</a></li>
-                  </ul> -->
-                </div>
-
+            <!-- Vacant Units Card -->
+            <div class="col-xxl-4 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
-                  <h5 class="card-title">Vacant Units <span>| All Time</span></h5>
-
+                  <h5 class="card-title text-danger">Vacant Units <span>| All Time</span></h5>
                   <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-house"></i>
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-house" style="color: red;"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>{{pmsvacantpropertycount}}</h6>
-                      <!-- <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">increase</span> -->
-
+                      <h6>{{ pmsvacantpropertycount }}</h6>
                     </div>
                   </div>
                 </div>
-
               </div>
-            </div>
+            </div><!-- End Vacant Units Card -->
 
           </div>
         </div><!-- End Left side columns -->
-
-        <!-- Right side columns -->
-
-
       </div>
-      </section>
-    </TheMaster>
-    </template>
-    
-    <script>
-    import TheMaster from '@/components/dashboard/TheMaster.vue'
-    import axios from 'axios';
-    import Swal from 'sweetalert2';
-    import "jquery/dist/jquery.min.js";
-    import "datatables.net-dt/js/dataTables.dataTables";
-    import "datatables.net-dt/css/jquery.dataTables.min.css";
-    import $ from "jquery";
-    
-    const toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000
-    });
-    
-    window.toast = toast;
-    // import store from '../store'
+    </section>
+  </TheMaster>
+</template>
 
-    export default {
-      name: 'Home',
-      components: {
-        TheMaster,
-      },
-      data(){
-        return {
-          user: [],
-          properties: [],
-          blogs: [],
-          openproperties: [],
-          closedproperties: [],
-          users: [],
-          pmsPropertyCount: [],
-          pmsvacantpropertycount: [],
-          pmsrentedpropertycount: [],
-          userscount: [],
-          landlordscount: [],
-          tenantscount: [],
+<script>
+import TheMaster from '@/components/dashboard/TheMaster.vue';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
-        }
-      },
-      methods: {
-        navigateTo(location){
-            this.$router.push(location)
-        },
-        loadLists(){
-          axios.get('api/lists').then((response) => {
-            this.properties = response.data.lists.properties;
-            this.openproperties = response.data.lists.openproperties;
-            this.closedproperties = response.data.lists.closedproperties;
-            this.users = response.data.lists.users;
-            this.pmsPropertyCount = response.data.lists.pmspropertycount;
-            this.pmsvacantpropertycount = response.data.lists.pmsvacantpropertycount;
-            this.pmsrentedpropertycount = response.data.lists.pmsrentedpropertycount;
-            this.userscount = response.data.lists.userscount;
-            this.landlordscount = response.data.lists.landlordscount;
-            this.tenantscount = response.data.lists.tenantscount;
+const toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000
+});
 
-          })
-        }
-      },
-      mounted(){
-        this.user = localStorage.getItem('user');
-        this.user = JSON.parse(this.user);
-        this.loadLists();
-      }
+window.toast = toast;
+
+export default {
+  name: 'Home',
+  components: {
+    TheMaster,
+  },
+  data() {
+    return {
+      user: {},
+      properties: [],
+      openproperties: [],
+      closedproperties: [],
+      users: [],
+      pmsPropertyCount: 0,
+      pmsvacantpropertycount: 0,
+      pmsrentedpropertycount: 0,
+      userscount: 0,
+      landlordscount: 0,
+      tenantscount: 0,
+      awaitingInvoicingCount: 0, // New data property for awaiting invoicing
+      awaitingSettlingCount: 0, // New data property for awaiting settling
+      settledInvoicesCount: 0, // New data property for settled invoices
+    };
+  },
+  methods: {
+    navigateTo(location) {
+      this.$router.push(location);
+    },
+    goAwaitingInvoicing()
+    {
+      this.$router.push('/awaitinginvoicing')
+    },
+    goAwaitingSettling()
+    {
+      this.$router.push('/invoicestosettle')
+    },
+    goSettledInvoices()
+    {
+      this.$router.push('/settledinvoices')
+    },
+    goProperties()
+    {
+      this.$router.push('/managedproperties')
+    },
+    goUsers()
+    {
+      this.$router.push('/all-users')
+    },
+    goLandlords()
+    {
+      this.$router.push('/pmslandlords')
+    },
+    goTenants()
+    {
+      this.$router.push('/pmstenants')
+    },
+    loadLists() {
+      axios.get('api/lists').then(response => {
+        const data = response.data.lists;
+        this.properties = data.properties;
+        this.openproperties = data.openproperties;
+        this.closedproperties = data.closedproperties;
+        this.users = data.users;
+        this.pmsPropertyCount = data.pmspropertycount;
+        this.pmsvacantpropertycount = data.pmsvacantpropertycount;
+        this.pmsrentedpropertycount = data.pmsrentedpropertycount;
+        this.userscount = data.userscount;
+        this.landlordscount = data.landlordscount;
+        this.tenantscount = data.tenantscount;
+        this.awaitingInvoicingCount = data.allawaitinginvoicing.length; // Fetch new data
+        this.awaitingSettlingCount = data.invoicestosettle.length; // Fetch new data
+        this.settledInvoicesCount = data.settledinvoices.length; // Fetch new data
+      });
     }
-    </script>
-    
+  },
+  mounted() {
+    this.user = JSON.parse(localStorage.getItem('user')) || {};
+    this.loadLists();
+  }
+};
+</script>
+
+<style scoped>
+.card {
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.bg-light {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+</style>

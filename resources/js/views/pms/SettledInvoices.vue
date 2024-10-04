@@ -123,6 +123,7 @@
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a>
+                                  <a v-if="editInvoicePermission" @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
                                   <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a> 
                                   </div>
                               </div>
@@ -136,6 +137,53 @@
                         Bal: {{ formatNumber(calculateTotal('balance')) }}
                       </strong>
                       </div>     
+                    </div>
+
+                    <!--Edit Invoice Modal -->
+                    <div class="modal fade" id="EditInvoiceModal" tabindex="-1" aria-labelledby="EditInvoiceModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="EditInvoiceModalLabel">Edit Invoice</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>#{{selectedStatement.ref_no}}</p>
+                            <p>{{ tenant}}</p>
+                            <p v-if="selectedStatement">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Amount Due(Inclusive of Water Bill):</strong> 
+                                 <input type="text" name="total" v-model="form.total" class="form-control">
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Amount Paid:</strong>
+                                 <input type="text" name="paid" v-model="form.paid" class="form-control">
+                                </div>
+                              </div>   
+                            </p>
+                            <p v-if="selectedStatement">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Balance:</strong> 
+                                 <input type="text" name="balance" v-model="form.balance" class="form-control">
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Water Bill:</strong>
+                                 <input type="text" name="water_bill" v-model="form.water_bill" class="form-control">
+                                </div>
+                              </div>   
+                            </p>
+
+                            
+
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="confirmEditInvoice">Save changes</button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
     
                   </div>
@@ -181,11 +229,78 @@
           paymentMethod: '',
           accountNo: '',
           paybillNo: '',
+          form: {
+            payment_method: '',
+            cash: '',
+            mpesa_code: '',
+            balance: '',
+            amountPaid: '',
+            balAmount: ''
+          },
+          errors: {
+            cash: '',
+            mpesa_code: ''
+          },
+          editInvoicePermission: '',
         }
       },
       methods: {
         navigateTo(location){
             this.$router.push(location)
+        },
+        editInvoice(statement)
+        {
+          this.selectedStatement = statement;
+          this.form.paid = this.selectedStatement.paid;
+          this.form.balance = this.selectedStatement.balance;
+          this.form.total = this.selectedStatement.total;
+          this.form.water_bill = this.selectedStatement.water_bill;
+          this.firstName = this.selectedStatement.tenant.first_name;
+          this.lastName = this.selectedStatement.tenant.last_name;
+          this.tenant = this.firstName + " " + this.lastName;
+          // Show the modal after fetching data
+            const modal = new bootstrap.Modal(document.getElementById('EditInvoiceModal'));
+            modal.show();
+        },
+        async confirmEditInvoice() {
+          if (this.selectedStatement && this.selectedStatement.id) {
+            // Implement your logic to invoice the tenant here
+            console.log("Editing invoice with statement ID:", this.selectedStatement.id);
+            await this.saveEditInvoice();
+
+            // Close the modal after invoicing
+            const modal = bootstrap.Modal.getInstance(document.getElementById('EditInvoiceModal'));
+            modal.hide();
+            this.loadLists()
+          }
+        },
+        saveEditInvoice() {
+            return new Promise((resolve, reject) => {
+                let payload; // Define payload variable outside the if-else blocks
+
+                  payload = {
+                      total: this.form.total,
+                      paid: this.form.paid,
+                      balance: this.form.balance,
+                      water_bill: this.form.water_bill,
+                  };
+               
+
+                axios.put("/api/edit-statement/" + this.selectedStatement.id, payload)
+                    .then(response => {
+                        console.log(response);
+                         toast.fire(
+                              'Success!',
+                              'Invoice updated!',
+                              'success'
+                          );
+                        resolve(); // Resolve the promise when settleTenant completes successfully
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        reject(error); // Reject the promise if there's an error
+                    });
+            });
         },
         deleteInvoice(id){
           Swal.fire({
@@ -850,6 +965,62 @@
 
           return this.statements.reduce((total, statement) => total + (statement[property] || 0), 0);
         },
+        getUserPermissions(id) {
+          axios.get('api/userpermissions/' + id)
+            .then((response) => {
+              this.permissions = response.data.permissions;
+              console.log(this.permissions)
+
+              // Define the permission id you want to check for
+              const requiredSettlePermissionId = 5;
+              const requiredEditPermissionId = 2;
+              const requiredDeletePermissionId = 3;
+              const requiredStatus = 1;
+
+              // Check if the user has the required permissions
+              const hasSettlePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredSettlePermissionId && permission.status === requiredStatus);
+
+              const hasEditPermission = this.permissions.some(permission => 
+                permission.permission_id === requiredEditPermissionId && permission.status === requiredStatus);
+
+              const hasDeletePermission = this.permissions.some(permission => 
+                permission.permission_id === requiredDeletePermissionId && permission.status === requiredStatus);
+
+              if (hasSettlePermission) {
+                // User has the required permission, allow them to view things
+                this.settleInvoicePermission = true;
+                console.log(`User has permission: ${this.settleInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.settleInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasEditPermission) {
+                // User has the required permission, allow them to view things
+                this.editInvoicePermission = true;
+                console.log(`User has permission: ${this.editInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.editInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+
+              if (hasDeletePermission) {
+                // User has the required permission, allow them to view things
+                this.deleteInvoicePermission = true;
+                console.log(`User has permission: ${this.deleteInvoicePermission}`);
+              } else {
+                // User does not have the required permission
+                this.deleteInvoicePermission = false;
+                console.log('User does not have the required permission');
+              }
+              })
+              .catch(error => {
+                console.error('Error fetching permissions:', error);
+              });
+        },
       },
       components : {
           TheMaster,
@@ -874,6 +1045,8 @@
         this.loadLogo();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
+        this.userId = this.user.id;
+        this.getUserPermissions(this.userId);
 
       }
     }

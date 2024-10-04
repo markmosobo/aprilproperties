@@ -248,6 +248,12 @@
                               <strong>Tenant Name:</strong> N/A
                             </p>
                             <p v-if="selectedStatement">
+                              <strong>Rent Month:</strong> {{ selectedStatement.rent_month }}
+                            </p>
+                            <p v-else>
+                              <strong>Rent Month:</strong> N/A
+                            </p>
+                            <p v-if="selectedStatement">
                               <strong>Amount Due:</strong> {{ formatNumber(selectedStatement.total) }}
                             </p>
                             <p v-else>
@@ -270,8 +276,11 @@
                               <span v-if="invoicing">
                                 <i class="fa fa-spinner fa-spin"></i> Invoicing...
                               </span>
+                              <span v-else-if="mailing">
+                                <i class="fa fa-spinner fa-spin"></i> Mailing...
+                              </span>
                               <span v-else>
-                                Invoice Tenant
+                                Invoice & Mail
                               </span>
                             </button>
                           </div>
@@ -674,11 +683,11 @@
               })
               .finally(() => {
                 // Hide loading spinner
-                this.invoicing = false;
+                // this.invoicing = false;
 
-                // Close the modal after invoicing
-                const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
-                modal.hide();
+                // // Close the modal after invoicing
+                // const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
+                // modal.hide();
 
                 // Reset form fields
                 this.form.water_bill = '';
@@ -1271,8 +1280,17 @@
           // Fetch tenant data and wait for it to complete
           await this.getTenant(this.tenantId);
 
+          this.mailing = true;
+          this.invoicing = false;
+
           // Check if tenantEmail is provided
             if (!this.invoicedTenantMail) {
+              this.mailing = false;
+              this.invoicing = false;
+              // Close the modal after invoicing
+                const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
+                modal.hide();
+                
                 Swal.fire({
                     title: 'Error sending email',
                     text: 'Please ensure ' + this.invoicedTenantFullName + ' has a valid email address',
@@ -1319,6 +1337,11 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 });
+                this.mailing = false;                
+                // Close the modal after invoicing
+                const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
+                modal.hide();
+
                 toast.fire(
                     'To: ' + this.invoicedTenantMail,
                     'Email has been sent successfully.',

@@ -212,7 +212,7 @@
           </li>                          
         </ul>
       </li>
-      <li v-show="user.role_id == 1" class="nav-item">
+      <li v-show="user.role_id == 1 || user.role_id == 2" class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#sms-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-people"></i><span>Manage About Info</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>

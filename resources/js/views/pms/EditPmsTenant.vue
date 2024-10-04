@@ -260,7 +260,7 @@
        submit(){
           axios.put("/api/pmstenant/"+this.$route.params.id, this.form)
           .then(function (response) {
-             console.log(response);
+             console.log(this.form);
              // this.step = 1;
              toast.fire(
                 'Success!',

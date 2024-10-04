@@ -381,6 +381,7 @@
           // Determine whether to display each row based on the amounts
           const showCommercialProperty = this.commercialPropertyAmount > 0;
           const showResidentialProperty = this.residentialPropertyAmount > 0;
+          const showPropertyExpense = this.totalAmountPaid > 0;
 
           const receiptHTML = `
             <!DOCTYPE html>
@@ -544,16 +545,23 @@
                   <tbody>
                     ${showCommercialProperty ? `
                     <tr>
-                      <td>Commercial Property Units</td>
+                      <td>${this.unitsNo} Commercial Property Unit(s)</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
                     </tr>
                     ` : ''}
                     ${showResidentialProperty ? `
                     <tr>
-                      <td>Residential Property Units</td>
+                      <td>${this.unitsNo} Residential Property Unit(s)</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
+                    </tr>
+                    ` : ''}
+                    ${showPropertyExpense ? `
+                    <tr>
+                      <td>Property Expenses</td>
+                      <td></td>
+                      <td>KES ${this.formatNumber(this.totalAmountPaid )}</td>
                     </tr>
                     ` : ''}
                   </tbody>
@@ -561,7 +569,7 @@
                     <tr>
                       <th>Total:</th>
                       <th></th>
-                      <td>KES ${this.formatNumber(this.residentialPropertyAmount + this.commercialPropertyAmount)}</td>
+                      <td>KES ${this.formatNumber(this.residentialPropertyAmount + this.commercialPropertyAmount + this.totalAmountPaid)}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -1423,10 +1431,10 @@
             this.landlordPhone = this.property.landlord.phone_no;
             this.landlordAddress = this.property.landlord.address;
             this.landlordEmail = this.property.landlord.email;
-            this.unitsNo = this.property.units_no;
+            this.unitsNo = this.property.unis.length;
             if(this.commission !== null)
             {
-              this.propertyCommission = this.commission;
+              this.propertyCommission = this.commission + ' %';
               this.commercialPropertyAmount = ((this.commission/100) * this.commercialpropertymonthinvoices);
               this.residentialPropertyAmount = ((this.commission/100) * this.residentialpropertymonthinvoices);
               this.totalCommission = ((this.commission/100) * this.totalPaid);
@@ -1481,9 +1489,13 @@
         formatPhoneNumber(number) {
           // Convert number to string and prepend '0'
           const str = '0' + number.toString();
-          // Format like '07200-2040' (You can adjust this based on your needs)
-          return str.slice(0, 5) + '-' + str.slice(5);
-        },
+          
+          // Use a regular expression to format the number
+          const formatted = str.replace(/^(\d{5})(\d{4})$/, '$1-$2');
+          
+          return formatted;
+        }
+
       },
       components : {
           TheMaster,
