@@ -175,9 +175,9 @@
 
                                   <a v-if="editInvoicePermission" @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit Invoice</a>  
                                   <a v-if="deleteInvoicePermission" @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete Invoice</a>
-                       <!--            <a @click="openMailModal(statement)" class="dropdown-item" href="#">
+                                  <a @click="openMailModal(statement)" class="dropdown-item" href="#">
                                       <i class="ri-mail-send-line mr-2"></i>Custom Mail
-                                  </a> -->                                 
+                                  </a>                                 
                                   </div>
                               </div>
                             </td>
@@ -341,7 +341,7 @@
                       </div>
                     </div>
 
-                    <!-- Modal Structure -->
+                    <!-- Custom Mail Modal -->
                     <div class="modal fade" id="customMailModal" tabindex="-1" aria-labelledby="customMailModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -350,26 +350,44 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <form @submit.prevent="submitCustomMail">
+                                    <form id="customMailForm" enctype="multipart/form-data">
+                                        <!-- To Input -->
+                                        <div class="mb-3">
+                                            <label v-if="toEmail" for="emailSubject" class="form-label">To: {{ toEmail }} for {{ toName }}</label>
+                                            <label v-else for="emailSubject" class="form-label" style="color: red;">Please provide a valid email address for {{ toName }}</label>
+                                        </div>
+
                                         <!-- Subject Input -->
                                         <div class="mb-3">
                                             <label for="emailSubject" class="form-label">Email Subject</label>
                                             <input type="text" class="form-control" id="emailSubject" v-model="emailSubject" />
+                                            <div v-if="errors.emailSubject" class="text-danger">{{ errors.emailSubject }}</div>
                                         </div>
 
                                         <!-- Email Body Input -->
                                         <div class="mb-3">
                                             <label for="emailBody" class="form-label">Email Body</label>
                                             <textarea class="form-control" id="emailBody" v-model="emailBody" rows="3"></textarea>
+                                            <div v-if="errors.emailBody" class="text-danger">{{ errors.emailBody }}</div>
+                                        </div>
+
+                                        <!-- File Attachment Input -->
+                                        <div class="mb-3">
+                                            <label for="fileAttachment" class="form-label">Attach File</label>
+                                            <input type="file" class="form-control" id="fileAttachment" @change="handleFileUpload" />
                                         </div>
 
                                         <input type="hidden" v-model="selectedInvoiceId" />
-                                        <button type="submit" class="btn btn-primary">Send Mail</button>
                                     </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button  @click="submitCustomMail" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">Send Mail</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
 
     
                   </div>
@@ -433,6 +451,8 @@
           total: '',
           emailBody: '',
           emailSubject : '',
+          toEmail: '',
+          toName: '',
           isAmountValid: true,
           lastmonthstatement: [],
           lastmonthBalance: '',
@@ -451,7 +471,9 @@
           },
           errors: {
             cash: '',
-            mpesa_code: ''
+            mpesa_code: '',
+            emailSubject: '',
+            emailBody: ''
           },
           settleInvoicePermission: '',
           editInvoicePermission: '',
@@ -464,23 +486,90 @@
         },
         openMailModal(statement) {
             console.log("asp", statement)
+            this.toEmail = statement.tenant.email_address;
+            this.toName = statement.tenant.first_name + " " + statement.tenant.last_name; 
             this.emailBody = ''; // Reset email body
             this.emailSubject = ''; // Reset email subject
             const modal = new bootstrap.Modal(document.getElementById('customMailModal'));
             modal.show(); // Show the modal
         },
-        submitCustomMail()
-        {
-          // Check if tenantEmail is provided
-            // if (!statement.tenant.email_address) {
-            //     statement.loading = false; // Stop loading on error
-            //     Swal.fire({
-            //         title: 'Error sending email',
-            //         text: 'Please ensure ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ' has a valid email address. To update, click on View Tenant on the Action button',
-            //         icon: 'warning',
-            //     });
-            //     return;
-            // }
+        methods: {
+            async submitCustomMail() {
+                // Clear previous errors
+                this.errors = {};
+
+                // Validate subject
+                if (!this.emailSubject) {
+                    this.errors.emailSubject = 'Email subject is required.';
+                    return;
+                }
+
+                // Validate body
+                if (!this.emailBody) {
+                    this.errors.emailBody = 'Email body is required.';
+                    return;
+                }
+
+                // Check if tenantEmail is provided
+                if (!this.statement.tenant.email_address) {
+                    this.statement.loading = false; // Stop loading on error
+                    Swal.fire({
+                        title: 'Error sending email',
+                        text: 'Please ensure ' + this.statement.tenant.first_name + ' ' + this.statement.tenant.last_name + ' has a valid email address. To update, click on View Tenant on the Action button.',
+                        icon: 'warning',
+                    });
+                    return;
+                }
+
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('subject', this.emailSubject);
+                formData.append('body', this.emailBody);
+                formData.append('invoiceId', this.selectedInvoiceId);
+
+                if (this.file) {
+                    formData.append('file', this.file);
+                }
+
+                // Try to send the email
+                try {
+                    this.statement.loading = true; // Set loading state
+                    await axios.post('/your-api-endpoint', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+
+                    // Show success message
+                    Swal.fire({
+                        title: 'Email Sent!',
+                        text: 'Your email has been successfully sent.',
+                        icon: 'success',
+                    });
+
+                    // Reset form fields after submission
+                    this.emailSubject = '';
+                    this.emailBody = '';
+                    this.selectedInvoiceId = '';
+                    this.file = null;
+                    this.statement.loading = false; // Stop loading after successful send
+
+                    // Optionally close the modal here
+                    $('#customMailModal').modal('hide'); // Use jQuery to hide the modal
+                } catch (error) {
+                    this.statement.loading = false; // Stop loading on error
+                    console.error('Error sending email:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred while sending the email. Please try again later.',
+                        icon: 'error',
+                    });
+                }
+            },
+        },
+
+        handleFileUpload(event) {
+            this.file = event.target.files[0]; // Get the first selected file
         },
         async generateWhatsAppLink(statement, event) {
             // Prevent the default anchor behavior
