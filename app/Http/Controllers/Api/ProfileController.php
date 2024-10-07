@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail;
+use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
@@ -36,10 +39,14 @@ class ProfileController extends Controller
         }
     }
 
-   public function resetPassword(Request $request, $id)
-    {
-        // Find the user by ID
-        $user = User::find($id);
+   public function resetPassword(Request $request) {
+        // Validate the request
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        // Find the user by email
+        $user = User::where('email', $request->email)->first();
 
         // Check if the user exists
         if (!$user) {
@@ -49,15 +56,28 @@ class ProfileController extends Controller
             ], 404);
         }
 
+        // Generate a random password
+        $newPassword = Str::random(10); // Generates a 10-character random password
+
         // Update the user's password
-        $user->password = Hash::make('aprilproperties');
+        $user->password = Hash::make($newPassword); // Hash the new password
         $user->save();
+
+        // Retrieve the email details
+        $email = $user->email;
+        $subject = 'Password Reset';
+        $message = "Use the following password to login: $newPassword";
+
+        // Send the email with the new password
+        Mail::to($email)->send(new ResetPasswordMail($subject, $message));
 
         // Return a success response
         return response()->json([
             'status' => 200,
-            'message' => 'Password reset successfully',
+            'message' => 'Password reset successfully, an email has been sent with the new password.',
         ]);
     }
+
+   
 
 }

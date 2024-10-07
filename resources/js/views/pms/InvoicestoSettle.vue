@@ -350,7 +350,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <form id="customMailForm" enctype="multipart/form-data">
+                                    <form id="customMailForm" v-on:submit.prevent="submitCustomMail" enctype="multipart/form-data">
                                         <!-- To Input -->
                                         <div class="mb-3">
                                             <label v-if="toEmail" for="emailSubject" class="form-label">To: {{ toEmail }} for {{ toName }}</label>
@@ -375,6 +375,7 @@
                                         <div class="mb-3">
                                             <label for="fileAttachment" class="form-label">Attach File</label>
                                             <input type="file" class="form-control" id="fileAttachment" @change="handleFileUpload" />
+                                            <div v-if="errors.file" class="text-danger">{{ errors.file }}</div>
                                         </div>
 
                                         <input type="hidden" v-model="selectedInvoiceId" />
@@ -382,11 +383,20 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button  @click="submitCustomMail" class="btn btn-primary" style="background-color: darkgreen; border-color: darkgreen;">Send Mail</button>
+                                    <button class="btn btn-primary" type="button" style="background-color: darkgreen; border-color: darkgreen;" @click="submitCustomMail">
+                                    <span v-if="loading">
+                                      <i class="fa fa-spinner fa-spin"></i> Mailing...
+                                    </span>
+
+                                    <span v-else>
+                                      Send Mail
+                                    </span>
+                                    </button>    
                                 </div>
                             </div>
                         </div>
                     </div>
+
 
 
     
@@ -453,6 +463,7 @@
           emailSubject : '',
           toEmail: '',
           toName: '',
+          file: '',
           isAmountValid: true,
           lastmonthstatement: [],
           lastmonthBalance: '',
@@ -473,7 +484,8 @@
             cash: '',
             mpesa_code: '',
             emailSubject: '',
-            emailBody: ''
+            emailBody: '',
+            file: '',
           },
           settleInvoicePermission: '',
           editInvoicePermission: '',
@@ -493,79 +505,87 @@
             const modal = new bootstrap.Modal(document.getElementById('customMailModal'));
             modal.show(); // Show the modal
         },
-        methods: {
-            async submitCustomMail() {
-                // Clear previous errors
-                this.errors = {};
+        async submitCustomMail() {
+            // Clear previous errors
+            this.errors = {};
 
-                // Validate subject
-                if (!this.emailSubject) {
-                    this.errors.emailSubject = 'Email subject is required.';
-                    return;
-                }
+            // Validate subject
+            if (!this.emailSubject) {
+                this.errors.emailSubject = 'Email subject is required.';
+                return;
+            }
 
-                // Validate body
-                if (!this.emailBody) {
-                    this.errors.emailBody = 'Email body is required.';
-                    return;
-                }
+            // Validate body
+            if (!this.emailBody) {
+                this.errors.emailBody = 'Email body is required.';
+                return;
+            }
 
-                // Check if tenantEmail is provided
-                if (!this.statement.tenant.email_address) {
-                    this.statement.loading = false; // Stop loading on error
-                    Swal.fire({
-                        title: 'Error sending email',
-                        text: 'Please ensure ' + this.statement.tenant.first_name + ' ' + this.statement.tenant.last_name + ' has a valid email address. To update, click on View Tenant on the Action button.',
-                        icon: 'warning',
-                    });
-                    return;
-                }
+            // Validate file
+            if (!this.file) {
+                this.errors.file = 'File attachment is required.';
+                return;
+            }
 
-                // Prepare form data
-                const formData = new FormData();
-                formData.append('subject', this.emailSubject);
-                formData.append('body', this.emailBody);
-                formData.append('invoiceId', this.selectedInvoiceId);
+            // Check if tenantEmail is provided
+            if (!this.toEmail) {
+                this.loading = false; // Stop loading on error
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: 'Please ensure ' + this.toName + ' has a valid email address. To update, click on View Tenant on the Action button.',
+                    icon: 'warning',
+                });
+                return;
+            }
 
-                if (this.file) {
-                    formData.append('file', this.file);
-                }
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('email', this.toEmail);
+            formData.append('subject', this.emailSubject);
+            formData.append('message', this.emailBody);
+            // formData.append('invoiceId', this.selectedInvoiceId);
 
-                // Try to send the email
-                try {
-                    this.statement.loading = true; // Set loading state
-                    await axios.post('/your-api-endpoint', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    });
+            if (this.file) {
+                formData.append('file', this.file);
+            }
 
-                    // Show success message
-                    Swal.fire({
-                        title: 'Email Sent!',
-                        text: 'Your email has been successfully sent.',
-                        icon: 'success',
-                    });
+            // Try to send the email
+            try {
+                this.loading = true; // Set loading state
+                await axios.post('/api/send-custom-mail', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
 
-                    // Reset form fields after submission
-                    this.emailSubject = '';
-                    this.emailBody = '';
-                    this.selectedInvoiceId = '';
-                    this.file = null;
-                    this.statement.loading = false; // Stop loading after successful send
+                // Close the modal using existing modal instance
+                const modalEl = document.getElementById('customMailModal');
+                const modal = bootstrap.Modal.getInstance(modalEl); // Use existing instance
+                modal.hide(); // Hide the modal
 
-                    // Optionally close the modal here
-                    $('#customMailModal').modal('hide'); // Use jQuery to hide the modal
-                } catch (error) {
-                    this.statement.loading = false; // Stop loading on error
-                    console.error('Error sending email:', error);
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'An error occurred while sending the email. Please try again later.',
-                        icon: 'error',
-                    });
-                }
-            },
+                // Show success message
+                toast.fire({
+                    title: 'To: '+ this.toEmail,
+                    text: 'Email has been sent successfully.',
+                    icon: 'success',
+                });
+
+                // Reset form fields after submission
+                this.emailSubject = '';
+                this.emailBody = '';
+                this.selectedInvoiceId = '';
+                this.file = null;
+                this.loading = false; // Stop loading after successful send
+
+            } catch (error) {
+                this.loading = false; // Stop loading on error
+                console.error('Error sending email:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: error.response.data.message,
+                    icon: 'error',
+                });
+            }
         },
 
         handleFileUpload(event) {

@@ -9,24 +9,19 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class TenantInvoiceMail extends Mailable
+class CustomMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $subject;
     protected $message;
     protected $invoicePath;
-    // protected $pdfPath;
 
     /**
      * Create a new message instance.
      *
-     * @param string $subject
-     * @param string $message
-     * @param string $invoicePath
-     * @param string $pdfPath
+     * @return void
      */
-    // public function __construct($subject, $message, $invoicePath, $pdfPath)
     public function __construct($subject, $message, $invoicePath)
     {
         $this->subject = $subject;        
@@ -35,14 +30,9 @@ class TenantInvoiceMail extends Mailable
         // $this->pdfPath = $pdfPath;
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
-        $email = $this->view('emails.landlord_invoice')
+        $email = $this->view('emails.custom_mail')
             ->subject($this->subject)
             ->with([
                 'messageContent' => $this->message,
@@ -52,12 +42,9 @@ class TenantInvoiceMail extends Mailable
         $invoiceFullPath = storage_path('app/public/' . $this->invoicePath);
         // $pdfFullPath = storage_path('app/public/' . $this->pdfPath);
 
-        // Attach invoice file
+        // Attach invoice file in original format
         if (file_exists($invoiceFullPath)) {
-            $email->attach($invoiceFullPath, [
-                'as' => 'invoice.html',
-                'mime' => 'text/html',
-            ]);
+            $email->attach($invoiceFullPath);
         } else {
             \Log::error('Invoice file not found.', ['path' => $invoiceFullPath]);
         }
@@ -73,5 +60,15 @@ class TenantInvoiceMail extends Mailable
         // }
 
         return $email;
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array
+     */
+    public function attachments()
+    {
+        return [];
     }
 }

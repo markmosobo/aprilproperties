@@ -255,7 +255,7 @@ Route::put('deactivatesocial/{id}',[SocialLinkController::class,'deactivate']);
 Route::get('myproperties/{id}', [PropertyController::class,'myProperty']);
 Route::put('profile/{id}',[ProfileController::class, 'update']);
 Route::put('changepassword/{id}',[ProfileController::class, 'changePassword']);
-Route::put('resetpassword/{id}',[ProfileController::class, 'resetPassword']);
+Route::put('/resetpassword',[ProfileController::class, 'resetPassword']);
 
 Route::put('activateuser/{id}',[UserController::class,'activate']);
 Route::put('deactivateuser/{id}',[UserController::class,'deactivate']);
@@ -270,6 +270,9 @@ Route::post('sendlandlordsms', [SearchController::class, 'sendLandlordSms'])->na
 //send mail
 Route::post('/send-landlordinvoice', [PmsInvoiceController::class, 'sendLandlordInvoice']);
 Route::post('/send-tenantinvoice', [PmsInvoiceController::class, 'sendTenantInvoice']);
+Route::post('/send-custom-mail', [PmsInvoiceController::class, 'sendCustomMail']);
+
+//update reminder counts
 Route::post('/update-email-count', [PmsStatementController::class, 'updateEmailCount']);
 Route::post('/update-whatsapp-count', [PmsStatementController::class, 'updateWhatsappCount']);
 Route::post('/update-sms-count', [PmsStatementController::class, 'updateSmsCount']);

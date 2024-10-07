@@ -79,6 +79,15 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+const toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000
+});
+
+window.toast = toast;
+
 export default {
   data() {
     return {
@@ -109,17 +118,17 @@ export default {
 
       try {
         // Send password reset request
-        const response = await axios.post('api/password/reset', this.form);
+        const response = await axios.put('api/resetpassword', this.form);
 
         // Reset form fields
         this.form.email = '';
         this.loading = false; // Set loading to false
 
         // Show success message and handle further logic
-        if (response.data.status === 'success') {
-          Swal.fire({
+        if (response.data.status === 200) {
+          toast.fire({
             title: 'Success',
-            text: 'Password reset successful!',
+            text: 'Password reset successful!Check your email.',
             icon: 'success'
           });
           // Redirect or handle further actions
@@ -136,7 +145,7 @@ export default {
         this.loading = false; // Set loading to false
         Swal.fire({
           title: 'Error',
-          text: 'An error occurred. Please try again.',
+          text: error.response.data.message,
           icon: 'error'
         });
       }
