@@ -115,19 +115,30 @@
                             </td>
                             <td>
                               <div class="btn-group" role="group">
-                                  <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
-                                  </button>
-                                  <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
+                                  <a @click="navigateTo('/viewstatement/'+statement.id)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
-                                  <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print</a>
-                                  <a v-if="editInvoicePermission" @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-                                  <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a> 
-                                  </div>
+                                  <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print Receipt</a>
+                                  <a v-if="editInvoicePermission" @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit Invoice</a>
+                                  <a @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete Invoice</a>
+                                  
+                                  <!-- WhatsApp Share -->
+                                  <a href="#" @click="whatsappReceipt(statement, $event)" target="_blank" class="dropdown-item">
+                                    <i class="ri-whatsapp-fill mr-2"></i>Receipt via WhatsApp
+                                  </a>
+
+                                  <!-- Email Share -->
+                                  <a :href="'mailto:?subject=Invoice&body=' + encodeURIComponent('Please find your invoice here: ' + invoiceLink(statement.id))" class="dropdown-item">
+                                    <i class="ri-mail-fill mr-2"></i>Receipt via Email
+                                  </a>
+                                </div>
                               </div>
                             </td>
+
                           </tr>
                         </tbody>
                       </table>
@@ -247,6 +258,71 @@
       methods: {
         navigateTo(location){
             this.$router.push(location)
+        },
+        invoiceLink(invoiceId) {
+          return `${window.location.origin}/viewstatement/${invoiceId}`;
+        },
+        async whatsappReceipt(statement, event) {
+            // Prevent the default anchor behavior
+            event.preventDefault();
+
+            this.unitId = statement.pms_unit_id;
+            this.rentMonth = statement.rent_month;
+
+            // Ensure the tenant's phone number exists
+            if (!statement.tenant || !statement.tenant.phone_number) {
+                Swal.fire({
+                    title: 'Error sending WhatsApp',
+                    text: 'Please ensure ' + (statement.tenant ? statement.tenant.first_name : 'the tenant') + ' has a valid phone number',
+                    icon: 'warning',
+                });
+                return;
+            }
+
+            // Check the property ID and get the relevant info
+            if (statement.pms_property_id == 5) {
+                this.accountNo = statement.unit.account_number;
+                this.paybillNo = statement.unit.paybill_number;
+            } else {
+                this.accountNo = statement.property.account_number;
+                this.paybillNo = statement.property.paybill_number;
+            }
+
+            // Calculate the due date (5th of the rent month)
+            this.dueDate = this.calculateDueDate(this.rentMonth);
+
+            // Prepare the message with a more professional format
+            const message = `Dear ${statement.tenant.first_name} ${statement.tenant.last_name},\n\n` +
+                `This is a kind reminder that your invoice for ${statement.rent_month}, Invoice No. ${statement.ref_no}, ` +
+                `which was generated on ${this.format_date(statement.created_at)}, is due on ${this.dueDate}.\n\n` +
+                `To service this invoice, please make your payment via M-Pesa Paybill Number: ${this.paybillNo},\n` +
+                `Account Number: ${this.accountNo}, for the amount of ${this.formatNumber(statement.total)}.\n\n` +
+                `Thank you for your prompt attention to this matter.\n\n` +
+                `Best regards,\n` +
+                `April Properties`;
+
+            // WhatsApp URL scheme with tenant's phone number and the encoded message
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${statement.tenant.phone_number}&text=${encodeURIComponent(message)}`;
+
+            try {
+                // Open the WhatsApp URL in a new tab
+                window.open(whatsappUrl, '_blank');
+
+                // Increment the WhatsApp count in the pms_statements table
+                await axios.post('/api/update-whatsapp-count', { id: statement.id });
+
+                toast.fire(
+                    'WhatsApp message sent to: ' + statement.tenant.phone_number,
+                    'WhatsApp message has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending WhatsApp',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            }
         },
         editInvoice(statement)
         {
