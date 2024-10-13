@@ -168,6 +168,27 @@
                                 </table>
                                 <!-- End Default Table Example -->
 
+                                <!-- Email Receipts Section -->
+                                <div v-if="emailReceiptCount > 0" class="row mb-3">
+                                  <div class="col-lg-12">
+                                    <div class="d-flex justify-content-between">
+                                      <div @click="viewEmailReceipts" style="cursor: pointer;">Email Receipt(s)</div>
+                                      <div><strong>{{emailReceiptCount}}</strong></div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <!-- WhatsApp Receipts Section -->
+                                <div v-if="whatsappReceiptCount > 0" class="row mb-3">
+                                  <div class="col-lg-12">
+                                    <div class="d-flex justify-content-between">
+                                      <div @click="viewWhatsAppReceipts" style="cursor: pointer;">WhatsApp Receipt(s)</div>
+                                      <div><strong>{{whatsappReceiptCount}}</strong></div>
+                                    </div>
+                                  </div>
+                                </div>
+
+
                                 <div class="row mt-4">
                                     <div class="col-sm-6">
                                         <button @click.prevent="cancel()" class="btn btn-dark w-100">Back</button>
@@ -218,6 +239,8 @@ export default {
             emailCount: '',
             whatsappCount: '',
             smsCount: '',
+            whatsappReceiptCount: '',
+            emailReceiptCount: '',
             total: '',
             statementId: '',
             waterBill: '',
@@ -235,6 +258,18 @@ export default {
         TheMaster,
     },
     methods: {
+        viewEmailReceipts() {
+            // Logic to view email receipts, e.g., open a modal or redirect to a new page
+            console.log("Viewing email receipts");
+            // You can use router navigation or show a modal here
+            this.$router.push('/email-receipts'); // Example of navigation
+          },
+          viewWhatsAppReceipts() {
+            // Logic to view WhatsApp receipts, e.g., open a modal or redirect to a new page
+            console.log("Viewing WhatsApp receipts");
+            // You can use router navigation or show a modal here
+            this.$router.push('/whatsapp-receipts'); // Example of navigation
+          },
         getStatement() {
             axios.get('/api/pmsstatement/' + this.$route.params.id).then((response) => {
                 this.statement = response.data.pmsstatement[0]
@@ -255,6 +290,8 @@ export default {
                 this.emailCount = this.statement.email_count;
                 this.whatsappCount = this.statement.whatsapp_count;
                 this.smsCount = this.statement.sms_count;
+                this.whatsappReceiptCount = this.statement.whatsapp_receipt_count;
+                this.emailReceiptCount = this.statement.email_receipt_count;
                 this.total = this.statement.total;
                 this.payment = this.statement.payment_method;
                 this.statementId = this.statement.id;

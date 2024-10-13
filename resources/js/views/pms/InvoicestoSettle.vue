@@ -169,7 +169,8 @@
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">                                            
-                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoice</a> <a @click="navigateTo('/pmstenant/'+statement.tenant.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Tenant</a>
+                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoice</a> 
+                                  <a @click="navigateTo('/pmstenant/'+statement.tenant.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Tenant</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null && settleInvoicePermission" @click="settleTenant(statement)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle Invoice</a>
                                   <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print Invoice</a> 
 
@@ -177,7 +178,16 @@
                                   <a v-if="deleteInvoicePermission" @click="deleteInvoice(statement.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete Invoice</a>
                                   <a @click="openMailModal(statement)" class="dropdown-item" href="#">
                                       <i class="ri-mail-send-line mr-2"></i>Custom Mail
-                                  </a>                                 
+                                  </a>   
+                                  <!-- WhatsApp Share -->
+                                  <a href="#" @click="whatsappReceipt(statement, $event)" target="_blank" class="dropdown-item">
+                                    <i class="ri-whatsapp-fill mr-2"></i>WhatsApp Receipt
+                                  </a>
+
+                                  <!-- Email Share -->
+                                  <a href="#" @click.prevent = "emailReceipt(statement)" class="dropdown-item">
+                                    <i class="ri-mail-fill mr-2"></i>Email Receipt
+                                  </a>                         
                                   </div>
                               </div>
                             </td>
@@ -495,6 +505,158 @@
       methods: {
         navigateTo(location){
             this.$router.push(location)
+        },
+        async emailReceipt(statement) {
+            // Set the specific statement's loading to true
+            this.dueAmount = statement.total;
+            this.dueBalance = statement.balance;
+            this.dueWater = statement.water_bill;
+            this.tenantId = statement.pms_tenant_id;
+            this.rentMonth = statement.rent_month;
+            this.details = statement.details;
+            this.refNo = statement.ref_no;
+            this.createdAt = statement.created_at;
+            this.invoicedAt = statement.updated_at;
+            this.paidAt = statement.paid_at;
+            this.propertyId = statement.pms_property_id;
+            this.unitId = statement.pms_unit_id;
+            this.waterBillAmount = statement.water_bill;
+            if(this.waterBillAmount == 0)
+             {
+                this.water = '';
+             }
+             else
+             {
+                this.water = '(Incl. Water Bill)';
+             }
+
+            // Check if tenantEmail is provided
+            if (!statement.tenant.email_address) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: 'Please ensure ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ' has a valid email address. To update, click on View Tenant on the Action button',
+                    icon: 'warning',
+                });
+                return;
+            }
+
+            // Calculate the due date (5th of the rent month)
+            this.dueDate = this.calculateDueDate(statement.rent_month);
+
+            // Check the property ID and get the relevant info
+            if (statement.pms_property_id == 5) {
+                this.accountNo = statement.unit.account_number;
+                this.paybillNo = statement.unit.paybill_number;
+            } else {
+                this.accountNo = statement.property.account_number;
+                this.paybillNo = statement.property.paybill_number;
+            }
+            
+            // Generate the invoice content and create a Blob
+            const invoiceContent = this.buildReceiptContent();
+            const blob = new Blob([invoiceContent], { type: 'text/html' });
+            const file = new File([blob], 'invoice.html', { type: 'text/html' });
+
+            // Prepare form data to send the email request to the backend
+            const formData = new FormData();
+            formData.append('name', statement.tenant.first_name + ' ' + statement.tenant.last_name);
+            formData.append('email', statement.tenant.email_address); // For prod
+            // formData.append('email', 'mmosobo@gmail.com'); // For testing
+            formData.append('due_water', this.dueWater);
+            formData.append('due_amount', this.dueAmount);
+            formData.append('account_no', this.accountNo);
+            formData.append('paybill_no', this.paybillNo);
+            formData.append('subject', this.rentMonth + ' Invoice Payment Confirmation');
+            formData.append('message', 'Dear ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ', this is a payment confirmation that ' + this.formatNumber(statement.paid) + ' was paid on ' + this.format_date(statement.paid_at) + ' for your invoice #' + this.refNo  +'. Your current balance is ' + this.formatNumber(this.dueBalance) + '. To service this invoice, pay via M-Pesa paybill number: ' + this.paybillNo + ' account number: ' + this.accountNo + ' amount: ' + this.formatNumber(this.dueBalance));
+            formData.append('invoice', file);
+
+            try {
+                // Send the email
+                await axios.post('/api/send-tenantinvoice', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                // Increment the email_rceipt_count in the pms_statements table
+                await axios.post('/api/update-email-receipt-count', { id: statement.id });
+
+                toast.fire(
+                    'To: ' + statement.tenant.email_address,
+                    'Email has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            } finally {
+                statement.loading = false; // Stop loading in both success and error cases
+            }
+        },
+        async whatsappReceipt(statement, event) {
+            // Prevent the default anchor behavior
+            event.preventDefault();
+
+            this.unitId = statement.pms_unit_id;
+            this.rentMonth = statement.rent_month;
+
+            // Ensure the tenant's phone number exists
+            if (!statement.tenant || !statement.tenant.phone_number) {
+                Swal.fire({
+                    title: 'Error sending WhatsApp',
+                    text: 'Please ensure ' + (statement.tenant ? statement.tenant.first_name : 'the tenant') + ' has a valid phone number',
+                    icon: 'warning',
+                });
+                return;
+            }
+
+            // Check the property ID and get the relevant info
+            if (statement.pms_property_id == 5) {
+                this.accountNo = statement.unit.account_number;
+                this.paybillNo = statement.unit.paybill_number;
+            } else {
+                this.accountNo = statement.property.account_number;
+                this.paybillNo = statement.property.paybill_number;
+            }
+
+            // Calculate the due date (5th of the rent month)
+            this.dueDate = this.calculateDueDate(this.rentMonth);
+
+            // Prepare the message with a more professional format
+            const message = `Dear ${statement.tenant.first_name} ${statement.tenant.last_name},\n\n` +
+                `This is a payment confirmation that ${this.formatNumber(statement.paid)} was paid on ${this.format_date(statement.paid_at)} for your invoice #${statement.ref_no} for ${statement.rent_month}. ` +
+                ` Your current balance is ${this.formatNumber(statement.balance)}.\n\n` +
+                `To service this invoice, please make your payment via M-Pesa Paybill Number: ${this.paybillNo},\n` +
+                `Account Number: ${this.accountNo}, for the amount of ${this.formatNumber(statement.balance)}.\n\n` +
+                `Thank you for your prompt attention to this matter.\n\n` +
+                `Best regards,\n` +
+                `April Properties`;
+
+            // WhatsApp URL scheme with tenant's phone number and the encoded message
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${statement.tenant.phone_number}&text=${encodeURIComponent(message)}`;
+
+            try {
+                // Open the WhatsApp URL in a new tab
+                window.open(whatsappUrl, '_blank');
+
+                // Increment the WhatsApp count in the pms_statements table
+                await axios.post('/api/update-whatsapp-receipt-count', { id: statement.id });
+
+                toast.fire(
+                    'WhatsApp message sent to: ' + statement.tenant.phone_number,
+                    'WhatsApp message has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending WhatsApp',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            }
         },
         openMailModal(statement) {
             console.log("asp", statement)
@@ -867,7 +1029,8 @@
             // Prepare form data to send the email request to the backend
             const formData = new FormData();
             formData.append('name', statement.tenant.first_name + ' ' + statement.tenant.last_name);
-            formData.append('email', 'mmosobo@gmail.com'); // For testing
+            formData.append('email', statement.tenant.email_address); // For prod
+            // formData.append('email', 'mmosobo@gmail.com'); // For testing
             formData.append('due_water', this.dueWater);
             formData.append('due_amount', this.dueAmount);
             formData.append('account_no', this.accountNo);

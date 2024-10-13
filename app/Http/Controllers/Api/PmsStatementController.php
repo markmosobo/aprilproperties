@@ -9,6 +9,8 @@ use App\Models\PmsTenant;
 use App\Models\PmsUnit;
 use App\Models\Invoice;
 use App\Models\Landlord;
+use App\Models\WhatsappReceipt;
+use App\Models\EmailReceipt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 
@@ -666,6 +668,48 @@ class PmsStatementController extends Controller
         $statement->increment('sms_count');
 
         return response()->json(['message' => 'SMS count updated successfully']);
+    }
+
+    public function updateEmailReceiptCount(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'id' => 'required|integer|exists:pms_statements,id',
+        ]);
+
+        // Find the statement by ID and increment the email_count
+        $statement = PmsStatement::find($request->id);
+        $statement->increment('email_receipt_count');
+
+        //save message
+        EmailReceipt::create([
+            'statement_id' => $request->id,
+            'pms_tenant_id' => $request->tenantId,
+            'message' => $request->message,
+        ]);
+
+        return response()->json(['message' => 'Email receipt count updated successfully']);
+    }
+
+    public function updateWhatsappReceiptCount(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'id' => 'required|integer|exists:pms_statements,id',
+        ]);
+
+        // Find the statement by ID and increment the email_count
+        $statement = PmsStatement::find($request->id);
+        $statement->increment('whatsapp_receipt_count');
+
+        //save message
+        WhatsappReceipt::create([
+            'statement_id' => $request->id,
+            'pms_tenant_id' => $request->tenantId,
+            'message' => $request->message,
+        ]);
+
+        return response()->json(['message' => 'Whatsapp receipt count updated successfully']);
     }
 
 

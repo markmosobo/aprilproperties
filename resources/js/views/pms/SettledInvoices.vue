@@ -120,6 +120,7 @@
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
                                   <a @click="navigateTo('/viewstatement/'+statement.id)" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoice</a>
+                                  <a @click="navigateTo('/pmstenant/'+statement.tenant.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Tenant</a>
                                   <a v-if="statement.status == 0 && statement.water_bill == null" @click="invoiceTenant(statement.id)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Invoice</a>
                                   <a v-if="statement.status == 0 && statement.water_bill !== null" @click="settleTenant(statement.id, statement.pms_tenant_id)" class="dropdown-item" href="#"><i class="ri-check-fill mr-2"></i>Settle</a>
                                   <a @click="print(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print Receipt</a>
@@ -128,12 +129,12 @@
                                   
                                   <!-- WhatsApp Share -->
                                   <a href="#" @click="whatsappReceipt(statement, $event)" target="_blank" class="dropdown-item">
-                                    <i class="ri-whatsapp-fill mr-2"></i>Receipt via WhatsApp
+                                    <i class="ri-whatsapp-fill mr-2"></i>WhatsApp Receipt
                                   </a>
 
                                   <!-- Email Share -->
-                                  <a :href="'mailto:?subject=Invoice&body=' + encodeURIComponent('Please find your invoice here: ' + invoiceLink(statement.id))" class="dropdown-item">
-                                    <i class="ri-mail-fill mr-2"></i>Receipt via Email
+                                  <a href="#" @click.prevent = "emailReceipt(statement)" class="dropdown-item">
+                                    <i class="ri-mail-fill mr-2"></i>Email Receipt
                                   </a>
                                 </div>
                               </div>
@@ -259,8 +260,222 @@
         navigateTo(location){
             this.$router.push(location)
         },
-        invoiceLink(invoiceId) {
-          return `${window.location.origin}/viewstatement/${invoiceId}`;
+        buildReceiptContent(refNo) {
+            // Build the HTML content for the receipt
+            const receiptHTML = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Receipt Of Payment</title>
+                  <style>
+                    body {
+                      font-family: Arial, sans-serif;
+                      margin: 0;
+                      padding: 0;
+                      background-color: #f5f5f5;
+                    }
+                    .receipt {
+                      max-width: 600px;
+                      margin: 20px auto;
+                      padding: 20px;
+                      background-color: #fff;
+                      border: 2px solid #ccc;
+                      border-radius: 10px;
+                    }
+                    .receipt-header {
+                      text-align: center;
+                      margin-bottom: 20px;
+                    }
+                    .receipt-header h1 {
+                      margin: 10px 0;
+                      color: #333;
+                    }
+                    .receipt-info {
+                      margin-bottom: 20px;
+                    }
+                    .receipt-info p {
+                      margin: 5px 0;
+                      color: #555;
+                    }
+                    .receipt-table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin-bottom: 20px;
+                    }
+                    .receipt-table th, .receipt-table td {
+                      padding: 8px;
+                      border-bottom: 1px solid #ccc;
+                    }
+                    .receipt-table th {
+                      text-align: left;
+                      background-color: #f2f2f2;
+                      color: #333;
+                    }
+                    .receipt-table td {
+                      text-align: left;
+                      color: #666;
+                    }
+                    .receipt-footer {
+                      text-align: center;
+                    }
+                    .receipt-footer p {
+                      margin: 5px 0;
+                      color: #777;
+                    }
+                  </style>
+                </head>
+                <body>
+                  <div class="receipt">
+                    <div class="receipt-header">
+                      <h1>April Properties</h1>
+                      <p>Kakamega-Webuye Rd, ACK Building</p>
+                      <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
+                    </div>
+                    <div class="receipt-info">
+                      <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+                      <p><strong>Receipt Date:</strong> ${this.formattedTodayDate}</p>
+                      <p><strong>Details:</strong> ${this.details}</p>
+                      <p><strong>Tenant:</strong> ${this.tenant}</p>
+                      <p><strong>Property:</strong> ${this.name}</p>
+                    </div>
+                    <table class="receipt-table">
+                      <thead>
+                        <tr>
+                          <th>Description</th>
+                          <th>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Rent Payment</td>
+                          <td>KES ${this.formatNumber(this.unitRent)}</td>
+                        </tr>
+                        <tr>
+                          <td>Garbage Collection Fee</td>
+                          <td>KES ${this.formatNumber(this.unitGarbageFee)}</td>
+                        </tr>
+                        <tr>
+                          <td>Security Fee</td>
+                          <td>KES ${this.formatNumber(this.unitSecurityFee)}</td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th>Total:</th>
+                          <td>KES ${this.formatNumber(this.total)}</td>
+                        </tr>
+                        <tr>
+                          <th>Paid:</th>
+                          <td>KES ${this.formatNumber(this.paid)}</td>
+                        </tr>
+                        <tr>
+                          <th>Balance:</th>
+                          <td>KES ${this.formatNumber(this.balance)}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                    <div class="receipt-footer">
+                      <p>You were served by ${this.user.first_name} ${this.user.last_name}. Thank you for your payment.</p>
+                      <p>This receipt acknowledges the payment received for the above property management services.</p>
+                    </div>
+                  </div>
+                </body>
+                </html>
+            `;
+
+            return receiptHTML;
+        },
+        async emailReceipt(statement) {
+            // Set the specific statement's loading to true
+            this.dueAmount = statement.total;
+            this.dueBalance = statement.balance;
+            this.dueWater = statement.water_bill;
+            this.tenantId = statement.pms_tenant_id;
+            this.rentMonth = statement.rent_month;
+            this.details = statement.details;
+            this.refNo = statement.ref_no;
+            this.createdAt = statement.created_at;
+            this.invoicedAt = statement.updated_at;
+            this.paidAt = statement.paid_at;
+            this.propertyId = statement.pms_property_id;
+            this.unitId = statement.pms_unit_id;
+            this.waterBillAmount = statement.water_bill;
+            if(this.waterBillAmount == 0)
+             {
+                this.water = '';
+             }
+             else
+             {
+                this.water = '(Incl. Water Bill)';
+             }
+
+            // Check if tenantEmail is provided
+            if (!statement.tenant.email_address) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: 'Please ensure ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ' has a valid email address. To update, click on View Tenant on the Action button',
+                    icon: 'warning',
+                });
+                return;
+            }
+
+            // Calculate the due date (5th of the rent month)
+            this.dueDate = this.calculateDueDate(statement.rent_month);
+
+            // Check the property ID and get the relevant info
+            if (statement.pms_property_id == 5) {
+                this.accountNo = statement.unit.account_number;
+                this.paybillNo = statement.unit.paybill_number;
+            } else {
+                this.accountNo = statement.property.account_number;
+                this.paybillNo = statement.property.paybill_number;
+            }
+            
+            // Generate the invoice content and create a Blob
+            const invoiceContent = this.buildReceiptContent();
+            const blob = new Blob([invoiceContent], { type: 'text/html' });
+            const file = new File([blob], 'invoice.html', { type: 'text/html' });
+
+            // Prepare form data to send the email request to the backend
+            const formData = new FormData();
+            formData.append('name', statement.tenant.first_name + ' ' + statement.tenant.last_name);
+            formData.append('email', statement.tenant.email_address); // For prod
+            // formData.append('email', 'mmosobo@gmail.com'); // For testing
+            formData.append('due_water', this.dueWater);
+            formData.append('due_amount', this.dueAmount);
+            formData.append('account_no', this.accountNo);
+            formData.append('paybill_no', this.paybillNo);
+            formData.append('subject', this.rentMonth + ' Invoice Payment Confirmation');
+            formData.append('message', 'Dear ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ', this is a payment confirmation that ' + this.formatNumber(statement.paid) + ' was paid on ' + this.format_date(statement.paid_at) + ' for your invoice #' + this.refNo  +'. Your current balance is ' + this.formatNumber(this.dueBalance) + '. ');
+            formData.append('invoice', file);
+
+            try {
+                // Send the email
+                await axios.post('/api/send-tenantinvoice', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                // Increment the email_count in the pms_statements table
+                await axios.post('/api/update-email-receipt-count', { id: statement.id });
+
+                toast.fire(
+                    'To: ' + statement.tenant.email_address,
+                    'Email has been sent successfully.',
+                    'success'
+                );
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error sending email',
+                    text: error.response?.data?.message || error.message,
+                    icon: 'warning',
+                });
+            } finally {
+                statement.loading = false; // Stop loading in both success and error cases
+            }
         },
         async whatsappReceipt(statement, event) {
             // Prevent the default anchor behavior
@@ -293,10 +508,8 @@
 
             // Prepare the message with a more professional format
             const message = `Dear ${statement.tenant.first_name} ${statement.tenant.last_name},\n\n` +
-                `This is a kind reminder that your invoice for ${statement.rent_month}, Invoice No. ${statement.ref_no}, ` +
-                `which was generated on ${this.format_date(statement.created_at)}, is due on ${this.dueDate}.\n\n` +
-                `To service this invoice, please make your payment via M-Pesa Paybill Number: ${this.paybillNo},\n` +
-                `Account Number: ${this.accountNo}, for the amount of ${this.formatNumber(statement.total)}.\n\n` +
+                `This is a payment confirmation that ${this.formatNumber(statement.paid)} was paid on ${this.format_date(statement.paid_at)} for your invoice #${statement.ref_no} for ${statement.rent_month}. ` +
+                ` Your current balance is ${this.formatNumber(statement.balance)}.\n\n` +
                 `Thank you for your prompt attention to this matter.\n\n` +
                 `Best regards,\n` +
                 `April Properties`;
@@ -309,7 +522,11 @@
                 window.open(whatsappUrl, '_blank');
 
                 // Increment the WhatsApp count in the pms_statements table
-                await axios.post('/api/update-whatsapp-count', { id: statement.id });
+                await axios.post('/api/update-whatsapp-receipt-count', {
+                 id: statement.id,
+                 tenantId: statement.tenant.id,
+                 message: message 
+                });
 
                 toast.fire(
                     'WhatsApp message sent to: ' + statement.tenant.phone_number,
@@ -324,6 +541,16 @@
                 });
             }
         },
+        calculateDueDate(rentMonth) {
+          let dueDate = new Date(rentMonth);
+          dueDate.setDate(5);
+
+          const day = String(dueDate.getDate()).padStart(2, '0');
+          const month = String(dueDate.getMonth() + 1).padStart(2, '0');
+          const year = dueDate.getFullYear();
+
+          return `${day}/${month}/${year}`;
+        }, 
         editInvoice(statement)
         {
           this.selectedStatement = statement;

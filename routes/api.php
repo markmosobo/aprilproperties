@@ -277,6 +277,8 @@ Route::post('/update-email-count', [PmsStatementController::class, 'updateEmailC
 Route::post('/update-whatsapp-count', [PmsStatementController::class, 'updateWhatsappCount']);
 Route::post('/update-sms-count', [PmsStatementController::class, 'updateSmsCount']);
 
+Route::post('/update-email-receipt-count', [PmsStatementController::class, 'updateEmailReceiptCount']);
+Route::post('/update-whatsapp-receipt-count', [PmsStatementController::class, 'updateWhatsappReceiptCount']);
 
 //generate invoices
 Route::post('/generate-monthly-statements', [PmsStatementController::class, 'generateMonthlyStatements']);
