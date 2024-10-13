@@ -682,11 +682,12 @@ class PmsStatementController extends Controller
         $statement->increment('email_receipt_count');
 
         //save message
-        EmailReceipt::create([
+        $emailreceipt = EmailReceipt::create([
             'statement_id' => $request->id,
             'pms_tenant_id' => $request->tenantId,
             'message' => $request->message,
         ]);
+        $emailreceipt->save();
 
         return response()->json(['message' => 'Email receipt count updated successfully']);
     }
@@ -703,13 +704,17 @@ class PmsStatementController extends Controller
         $statement->increment('whatsapp_receipt_count');
 
         //save message
-        WhatsappReceipt::create([
+        $whatsappreceipt = WhatsappReceipt::create([
             'statement_id' => $request->id,
             'pms_tenant_id' => $request->tenantId,
             'message' => $request->message,
         ]);
+        $whatsappreceipt->save();
 
-        return response()->json(['message' => 'Whatsapp receipt count updated successfully']);
+        return response()->json([
+            'message' => 'Whatsapp receipt count updated successfully',
+            'data' => $whatsappreceipt
+        ]);
     }
 
 

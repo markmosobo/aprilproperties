@@ -8,7 +8,7 @@
                   <div class="card top-selling overflow-auto">
     
                     <div class="filter">
-<!--                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                        <!--                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <li class="dropdown-header text-start">
                           <h6>Filter</h6>
@@ -190,7 +190,7 @@
                                   </a>                         
                                   </div>
                               </div>
-                            </td>
+                            </td>  
                           </tr>
                         </tbody>
                       </table>
@@ -413,7 +413,7 @@
                   </div>
                 </div><!-- End Top Selling -->
     
-            </div>
+          </div>
         </section>
     </TheMaster>
     </template>
@@ -481,6 +481,7 @@
           loading: false,
           isLoading: false, // Loading state
           mailing: false,
+          emailing: false,
 
           form: {
             payment_method: '',
@@ -540,6 +541,7 @@
                 return;
             }
 
+            this.emailing = true;
             // Calculate the due date (5th of the rent month)
             this.dueDate = this.calculateDueDate(statement.rent_month);
 
@@ -578,8 +580,13 @@
                     }
                 });
 
-                // Increment the email_rceipt_count in the pms_statements table
-                await axios.post('/api/update-email-receipt-count', { id: statement.id });
+                // Increment the email_receipt_count in the pms_statements table
+                await axios.post('/api/update-email-receipt-count', { 
+                  id: statement.id,
+                  tenantId: statement.tenant.id,
+                  subject: this.rentMonth + ' Invoice Payment Confirmation',
+                  message: 'Dear ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ', this is a payment confirmation that ' + this.formatNumber(statement.paid) + ' was paid on ' + this.format_date(statement.paid_at) + ' for your invoice #' + this.refNo  +'. Your current balance is ' + this.formatNumber(this.dueBalance) + '. To service this invoice, pay via M-Pesa paybill number: ' + this.paybillNo + ' account number: ' + this.accountNo + ' amount: ' + this.formatNumber(this.dueBalance), 
+                });
 
                 toast.fire(
                     'To: ' + statement.tenant.email_address,
@@ -593,7 +600,7 @@
                     icon: 'warning',
                 });
             } finally {
-                statement.loading = false; // Stop loading in both success and error cases
+                this.emailing = false; // Stop loading in both success and error cases
             }
         },
         async whatsappReceipt(statement, event) {
@@ -642,8 +649,14 @@
                 // Open the WhatsApp URL in a new tab
                 window.open(whatsappUrl, '_blank');
 
-                // Increment the WhatsApp count in the pms_statements table
-                await axios.post('/api/update-whatsapp-receipt-count', { id: statement.id });
+                // Increment the WhatsApp receipt count in the pms_statements table
+                await axios.post('/api/update-whatsapp-receipt-count', { 
+                  id: statement.id,
+                  tenantId: statement.tenant.id,
+                  subject: this.rentMonth + ' Invoice Payment Confirmation',
+                  message: message,
+
+                   });
 
                 toast.fire(
                     'WhatsApp message sent to: ' + statement.tenant.phone_number,
