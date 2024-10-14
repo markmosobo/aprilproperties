@@ -82,10 +82,10 @@ class PmsInvoiceController extends Controller
         $propertymonthinvoices = PmsStatement::latest()->whereNotNull('water_bill')->with('tenant','property','unit')->where('pms_property_id', $property->id)->where('rent_month',$month)->get();
         $commercialpropertymonthinvoices = $propertymonthinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Commercial';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
         $residentialpropertymonthinvoices = $propertymonthinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Residential';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
 
         return response()->json([
             'status' => true,
@@ -106,10 +106,10 @@ class PmsInvoiceController extends Controller
         $propertylastmonthinvoices = PmsStatement::latest()->whereNotNull('water_bill')->with('tenant','property','unit')->where('pms_property_id', $property->id)->where('rent_month',$lastMonth)->get();
         $commercialpropertylastmonthinvoices = $propertylastmonthinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Commercial';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
         $residentialpropertylastmonthinvoices = $propertylastmonthinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Residential';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
 
         return response()->json([
             'status' => true,
@@ -130,10 +130,10 @@ class PmsInvoiceController extends Controller
         [Carbon::now()->subDays(89)->startOfDay(), Carbon::now()->endOfDay()])->get();
         $commercialpropertylastninetyinvoices = $propertylastninetyinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Commercial';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
         $residentialpropertylastninetyinvoices = $propertylastninetyinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Residential';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
 
         return response()->json([
             'status' => true,
@@ -170,10 +170,10 @@ class PmsInvoiceController extends Controller
         [Carbon::now()->startOfQuarter(), Carbon::now()->endOfDay()])->get();
         $commercialpropertyquarterinvoices = $propertyquarterinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Commercial';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
         $residentialpropertyquarterinvoices = $propertyquarterinvoices->filter(function ($invoice) {
             return $invoice['unit']['type'] === 'Residential';
-        })->sum('paid');
+        })->sum('unit.monthly_rent');
 
         return response()->json([
             'status' => true,

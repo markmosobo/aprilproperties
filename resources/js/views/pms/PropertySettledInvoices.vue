@@ -179,6 +179,7 @@
                         </tbody>
                       </table>
                       <div><strong>Total: 
+                        Rent: {{ formatNumber(calculateTotalRent()) }}
                         Due: {{ formatNumber(calculateTotal('total')) }},
                         Paid: {{ formatNumber(calculateTotal('paid')) }},
                         Bal: {{ formatNumber(calculateTotal('balance')) }}
@@ -264,6 +265,14 @@
       //   this.loadLogo();
       // },
       methods: {
+        calculateTotalRent() {
+          return this.allstatements.reduce((total, statement) => {
+            if (statement.unit && statement.unit.monthly_rent) {
+              return total + parseFloat(statement.unit.monthly_rent);
+            }
+            return total;
+          }, 0);
+        },
         navigateTo(location){
             this.$router.push(location)
         },
@@ -545,14 +554,14 @@
                   <tbody>
                     ${showCommercialProperty ? `
                     <tr>
-                      <td>${this.unitsNo} Commercial Property Unit(s)</td>
+                      <td>Commercial Property Unit(s)</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.commercialPropertyAmount)}</td>
                     </tr>
                     ` : ''}
                     ${showResidentialProperty ? `
                     <tr>
-                      <td>${this.unitsNo} Residential Property Unit(s)</td>
+                      <td>Residential Property Unit(s)</td>
                       <td>${this.propertyCommission || 'N/A'}</td>
                       <td>KES ${this.formatNumber(this.residentialPropertyAmount)}</td>
                     </tr>
@@ -678,8 +687,8 @@
             doc.text(titleText, titleX, titleY);
 
             const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = this.propertyCommission / 100 * this.totalPaid;
-            const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
+            const commissionTotal = this.propertyCommission / 100 * this.totalRent;
+            const netRemissionTotal = Math.round(this.totalRent - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
             doc.setFontSize(14);
@@ -959,7 +968,7 @@
             doc.text(titleText, titleX, titleY);
 
             const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = this.propertyCommission / 100 * this.totalPaid;
+            const commissionTotal = this.propertyCommission / 100 * this.totalRent;
             const netRemissionTotal = Math.round(this.totalPaid - (this.totalAmountPaid + commissionTotal));
 
             // Add content headers
@@ -1394,7 +1403,7 @@
              this.allstatements = response.data.propertymonthinvoices;
              this.commercialpropertymonthinvoices = response.data.commercialpropertymonthinvoices;
              this.residentialpropertymonthinvoices = response.data.residentialpropertymonthinvoices;
-             console.log("all",this.allstatements)
+             console.log("kisumu",this.residentialpropertymonthinvoices);
              
              // Calculate the total amount paid
              setTimeout(() => {
@@ -1431,15 +1440,14 @@
             this.landlordPhone = this.property.landlord.phone_no;
             this.landlordAddress = this.property.landlord.address;
             this.landlordEmail = this.property.landlord.email;
-            this.unitsNo = this.property.unis.length;
+            this.unitsNo = this.property.units_no;
             if(this.commission !== null)
             {
               this.propertyCommission = this.commission + ' %';
               this.commercialPropertyAmount = ((this.commission/100) * this.commercialpropertymonthinvoices);
               this.residentialPropertyAmount = ((this.commission/100) * this.residentialpropertymonthinvoices);
-              this.totalCommission = ((this.commission/100) * this.totalPaid);
-              this.rentLessCommission = this.totalPaid - this.totalCommission;
-
+              this.totalCommission = ((this.commission/100) * this.totalRent);
+              this.rentLessCommission = this.totalRent - this.totalCommission;
             }
             else
             {
@@ -1447,11 +1455,10 @@
               this.commercialPropertyAmount = this.commercialpropertymonthinvoices - this.propertyCommission;
               this.residentialPropertyAmount = this.residentialpropertymonthinvoices - this.propertyCommission;
               this.totalCommission = this.propertyCommission;
-              this.rentLessCommission = this.totalPaid - this.totalCommission;
+              this.rentLessCommission = this.totalRent - this.totalCommission;
             }
-            console.log("kijamo", response)
-          }).catch(() => {
-              console.log('error')
+          }).catch((error) => {
+              console.log('error', error)
           })
         },
         getPropertyExpenses()
@@ -1462,10 +1469,10 @@
             // this.fixedCommission = this.property.landlord.fixed_commission;
             this.totalAmountPaid = this.calculateTotalAmountPaid();
             this.netRemmission = this.rentLessCommission - (this.totalAmountPaid);            
-            console.log("2", this.totalAmountPaid)
-            console.log("ruto", this.expenses)
-          }).catch(() => {
-              console.log('error')
+            // console.log("2", this.totalAmountPaid)
+            // console.log("ruto", this.expenses)
+          }).catch((error) => {
+              console.log('error', error)
           })
         },
         calculateTotalAmountPaid() {
@@ -1513,6 +1520,10 @@
         // Computed property to calculate total balance
         totalBalance() {
           return this.calculateTotal('balance');
+        },
+        totalRent()
+        {
+          return this.calculateTotal('rent');          
         }
       },      
       mounted(){
@@ -1531,7 +1542,7 @@
         this.updateTime();
         // Update the time every second
         setInterval(this.updateTime, 1000);
-
+        this.totalRent = this.calculateTotalRent();
       }
     }
     </script>
