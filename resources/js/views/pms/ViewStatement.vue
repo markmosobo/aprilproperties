@@ -72,32 +72,45 @@
                                 </div>
                             </div>  
 
+                            <!-- Email Reminder Section -->
                             <div v-if="emailCount > 0" class="row mb-3">
-                                <div class="col-lg-12">
-                                    <div class="d-flex justify-content-between">
-                                        <div>Email Reminder(s)</div>
-                                        <div><strong>{{emailCount}}</strong></div>
-                                    </div>
+                              <div class="col-lg-12">
+                                <div class="d-flex justify-content-between">
+                                  <div>
+                                    <i class="fas fa-envelope"></i> <!-- FontAwesome Email Icon -->
+                                    View Email Reminder(s)
+                                  </div>
+                                  <div><strong>{{emailCount}}</strong></div>
                                 </div>
+                              </div>
                             </div>
 
+                            <!-- WhatsApp Reminder Section -->
                             <div v-if="whatsappCount > 0" class="row mb-3">
-                                <div class="col-lg-12">
-                                    <div class="d-flex justify-content-between">
-                                        <div>Whatsapp Reminder(s)</div>
-                                        <div><strong>{{whatsappCount}}</strong></div>
-                                    </div>
+                              <div class="col-lg-12">
+                                <div class="d-flex justify-content-between">
+                                  <div>
+                                    <i class="fab fa-whatsapp"></i> <!-- FontAwesome WhatsApp Icon -->
+                                    View WhatsApp Reminder(s)
+                                  </div>
+                                  <div><strong>{{whatsappCount}}</strong></div>
                                 </div>
+                              </div>
                             </div>
 
+                            <!-- SMS Reminder Section -->
                             <div v-if="smsCount > 0" class="row mb-3">
-                                <div class="col-lg-12">
-                                    <div class="d-flex justify-content-between">
-                                        <div>SMS Reminder(s)</div>
-                                        <div><strong>{{smsCount}}</strong></div>
-                                    </div>
+                              <div class="col-lg-12">
+                                <div class="d-flex justify-content-between">
+                                  <div>
+                                    <i class="fas fa-sms"></i> <!-- FontAwesome SMS Icon -->
+                                    View SMS Reminder(s)
+                                  </div>
+                                  <div><strong>{{smsCount}}</strong></div>
                                 </div>
-                            </div>                             
+                              </div>
+                            </div>
+                             
 
                             <div class="row mt-4">
                                 <div class="col-sm-6">
@@ -172,7 +185,10 @@
                                 <div v-if="emailReceiptCount > 0" class="row mb-3">
                                   <div class="col-lg-12">
                                     <div class="d-flex justify-content-between">
-                                      <div @click="viewEmailReceipts" style="cursor: pointer;">Email Receipt(s)</div>
+                                      <div @click="viewEmailReceipts" style="cursor: pointer;">
+                                        <i class="fas fa-envelope"></i> <!-- FontAwesome Email Icon -->
+                                        View Email Receipt(s) 
+                                      </div>
                                       <div><strong>{{emailReceiptCount}}</strong></div>
                                     </div>
                                   </div>
@@ -182,11 +198,15 @@
                                 <div v-if="whatsappReceiptCount > 0" class="row mb-3">
                                   <div class="col-lg-12">
                                     <div class="d-flex justify-content-between">
-                                      <div @click="viewWhatsAppReceipts" style="cursor: pointer;">WhatsApp Receipt(s)</div>
+                                      <div @click="viewWhatsAppReceipts" style="cursor: pointer;">
+                                        <i class="fab fa-whatsapp"></i> <!-- FontAwesome WhatsApp Icon -->
+                                        View WhatsApp Receipt(s) 
+                                      </div>
                                       <div><strong>{{whatsappReceiptCount}}</strong></div>
                                     </div>
                                   </div>
                                 </div>
+
 
 
                                 <div class="row mt-4">
