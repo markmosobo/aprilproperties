@@ -84,6 +84,15 @@
                             </div> 
                 
                         </p>
+
+                        <!-- Spinner that shows when 'emailing' is true -->
+                      <div v-if="emailing" class="spinner-overlay">
+                        <div class="spinner-container">
+                          <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Sending e-mail...</span>
+                          </div>
+                        </div>
+                      </div>
     
                       <table id="AllStatementsTable" class="table table-borderless">
                         <thead>
@@ -235,6 +244,7 @@
           collectedTotal: 0,
           expensesTotal: 0,
           user: [],
+          emailing: false,
           selectedStatement: {}, // Initialize as an empty object
           property: '',
           logoBase64: '',
@@ -421,6 +431,7 @@
                 return;
             }
 
+            this.emailing = true;
             // Calculate the due date (5th of the rent month)
             this.dueDate = this.calculateDueDate(statement.rent_month);
 
@@ -459,8 +470,13 @@
                     }
                 });
 
-                // Increment the email_count in the pms_statements table
-                await axios.post('/api/update-email-receipt-count', { id: statement.id });
+                // Increment the email_receipt_count in the pms_statements table
+                await axios.post('/api/update-email-receipt-count', { 
+                  id: statement.id,
+                  tenantId: statement.tenant.id,
+                  subject: this.rentMonth + ' Invoice Payment Confirmation',
+                  message: 'Dear ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ', this is a payment confirmation that ' + this.formatNumber(statement.paid) + ' was paid on ' + this.format_date(statement.paid_at) + ' for your invoice #' + this.refNo  +'. Your current balance is ' + this.formatNumber(this.dueBalance), 
+                });
 
                 toast.fire(
                     'To: ' + statement.tenant.email_address,
@@ -474,7 +490,7 @@
                     icon: 'warning',
                 });
             } finally {
-                statement.loading = false; // Stop loading in both success and error cases
+                this.emailing = false; // Stop loading in both success and error cases
             }
         },
         async whatsappReceipt(statement, event) {
@@ -510,8 +526,6 @@
             const message = `Dear ${statement.tenant.first_name} ${statement.tenant.last_name},\n\n` +
                 `This is a payment confirmation that ${this.formatNumber(statement.paid)} was paid on ${this.format_date(statement.paid_at)} for your invoice #${statement.ref_no} for ${statement.rent_month}. ` +
                 ` Your current balance is ${this.formatNumber(statement.balance)}.\n\n` +
-                `Thank you for your prompt attention to this matter.\n\n` +
-                `Best regards,\n` +
                 `April Properties`;
 
             // WhatsApp URL scheme with tenant's phone number and the encoded message
@@ -525,6 +539,7 @@
                 await axios.post('/api/update-whatsapp-receipt-count', {
                  id: statement.id,
                  tenantId: statement.tenant.id,
+                 subject: this.rentMonth + ' Invoice Payment Confirmation',
                  message: message 
                 });
 
@@ -655,30 +670,24 @@
           return str.charAt(0).toUpperCase() + str.slice(1);
         },
         formatNumber(value) {
-            // Check if the value is not a number
-            if (isNaN(value)) {
-                return value; // Return as it is
+            // Check if the value is a valid number
+            if (isNaN(parseFloat(value))) {
+                return value; // Return as it is if not a number
             }
-            
-            // Convert the value to a string
-            let stringValue = value.toString();
+
+            // Convert the value to a float and ensure two decimal places
+            let floatValue = parseFloat(value).toFixed(2);
 
             // Split the string into integer and decimal parts
-            let parts = stringValue.split('.');
+            let parts = floatValue.split('.');
 
             // Format the integer part with commas
             parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-            // If there's a decimal part, limit it to 2 decimal places
-            if (parts.length > 1) {
-                parts[1] = parts[1].substring(0, 2);
-            } else {
-                parts.push('00'); // If no decimal part exists, append '00'
-            }
-
-            // Join the parts back together with a decimal point
+            // Join the parts back together
             return parts.join('.');
         },
+
 
         format_date(value){
           if(value){

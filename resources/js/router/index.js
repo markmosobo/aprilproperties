@@ -108,6 +108,10 @@ import PmsAllTenantStatements from '../views/pms/PmsAllTenantStatements.vue'
 import PmsLandlordStatements from '../views/pms/PmsLandlordStatements.vue'
 import PmsLandlordProperties from '../views/pms/PmsLandlordProperties.vue'
 import ViewStatement from '../views/pms/ViewStatement.vue'
+import ViewEmailReceipts from '../views/pms/ViewEmailReceipts.vue'
+import ViewWhatsappReceipts from '../views/pms/ViewWhatsappReceipts.vue'
+import ViewEmailReminders from '../views/pms/ViewEmailReminders.vue'
+import ViewWhatsappReminders from '../views/pms/ViewWhatsappReminders.vue'
 import EditStatement from '../views/pms/EditStatement.vue'
 import SettleStatement from '../views/pms/SettleStatement.vue'
 import InvoiceStatement from '../views/pms/InvoiceStatement.vue'
@@ -944,6 +948,30 @@ const routes = [
         path:'/viewstatement/:id',
         name: 'viewstatement',
         component: ViewStatement,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/viewemailreceipts/:id',
+        name: 'viewemailreceipts',
+        component: ViewEmailReceipts,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/viewwhatsappreceipts/:id',
+        name: 'viewwhatsappreceipts',
+        component: ViewWhatsappReceipts,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/viewemailreminders/:id',
+        name: 'viewemailreminders',
+        component: ViewEmailReminders,
+        beforeEnter : guardMyroute,
+    },
+    {
+        path:'/viewwhatsappreminders/:id',
+        name: 'viewwhatsappreminders',
+        component: ViewWhatsappReminders,
         beforeEnter : guardMyroute,
     },
     {

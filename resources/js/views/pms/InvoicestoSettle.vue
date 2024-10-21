@@ -107,6 +107,15 @@
                         </div> 
             
                       </p>
+
+                      <!-- Spinner that shows when 'emailing' is true -->
+                      <div v-if="emailing" class="spinner-overlay">
+                        <div class="spinner-container">
+                          <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Sending e-mail...</span>
+                          </div>
+                        </div>
+                      </div>
     
                       <table id="AllStatementsTable" class="table table-borderless">
                         <thead>
@@ -638,8 +647,6 @@
                 ` Your current balance is ${this.formatNumber(statement.balance)}.\n\n` +
                 `To service this invoice, please make your payment via M-Pesa Paybill Number: ${this.paybillNo},\n` +
                 `Account Number: ${this.accountNo}, for the amount of ${this.formatNumber(statement.balance)}.\n\n` +
-                `Thank you for your prompt attention to this matter.\n\n` +
-                `Best regards,\n` +
                 `April Properties`;
 
             // WhatsApp URL scheme with tenant's phone number and the encoded message
@@ -801,8 +808,6 @@
                 `which was generated on ${this.format_date(statement.created_at)}, is due on ${this.dueDate}.\n\n` +
                 `To service this invoice, please make your payment via M-Pesa Paybill Number: ${this.paybillNo},\n` +
                 `Account Number: ${this.accountNo}, for the amount of ${this.formatNumber(statement.total)}.\n\n` +
-                `Thank you for your prompt attention to this matter.\n\n` +
-                `Best regards,\n` +
                 `April Properties`;
 
             // WhatsApp URL scheme with tenant's phone number and the encoded message
@@ -813,7 +818,12 @@
                 window.open(whatsappUrl, '_blank');
 
                 // Increment the WhatsApp count in the pms_statements table
-                await axios.post('/api/update-whatsapp-count', { id: statement.id });
+                await axios.post('/api/update-whatsapp-count', { 
+                  id: statement.id,
+                  tenantId: statement.tenant.id,
+                  subject: this.rentMonth + ' Invoice Payment Reminder',
+                  message: message,
+                  });
 
                 toast.fire(
                     'WhatsApp message sent to: ' + statement.tenant.phone_number,
@@ -1061,7 +1071,12 @@
                 });
 
                 // Increment the email_count in the pms_statements table
-                await axios.post('/api/update-email-count', { id: statement.id });
+                await axios.post('/api/update-email-count', { 
+                  id: statement.id,
+                  tenantId: statement.tenant.id,
+                  subject: this.rentMonth + ' Invoice Payment Confirmation',
+                  message: 'Dear ' + statement.tenant.first_name + ' ' + statement.tenant.last_name + ', this is a kind reminder that your invoice no. ' + this.refNo + ' which was generated on ' + this.format_date(this.createdAt) + ' is due on ' + this.dueDate + '. To service this invoice, pay via M-Pesa paybill number: ' + this.paybillNo + ' account number: ' + this.accountNo + ' amount: ' + this.dueAmount, 
+                });
 
                 toast.fire(
                     'To: ' + statement.tenant.email_address,
@@ -1956,30 +1971,24 @@
             }
         },
         formatNumber(value) {
-            // Check if the value is not a number
-            if (isNaN(value)) {
-                return value; // Return as it is
+            // Check if the value is a valid number
+            if (isNaN(parseFloat(value))) {
+                return value; // Return as it is if not a number
             }
-            
-            // Convert the value to a string
-            let stringValue = value.toString();
+
+            // Convert the value to a float and ensure two decimal places
+            let floatValue = parseFloat(value).toFixed(2);
 
             // Split the string into integer and decimal parts
-            let parts = stringValue.split('.');
+            let parts = floatValue.split('.');
 
             // Format the integer part with commas
             parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-            // If there's a decimal part, limit it to 2 decimal places
-            if (parts.length > 1) {
-                parts[1] = parts[1].substring(0, 2);
-            } else {
-                parts.push('00'); // If no decimal part exists, append '00'
-            }
-
-            // Join the parts back together with a decimal point
+            // Join the parts back together
             return parts.join('.');
         },
+
 
         format_date(value){
           if(value){
@@ -2557,6 +2566,24 @@
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+
+    /* Styles for spinner overlay */
+    .spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999; /* Ensures the spinner is on top */
+    }
+
+    .spinner-container {
+      text-align: center;
     }
 
 </style>

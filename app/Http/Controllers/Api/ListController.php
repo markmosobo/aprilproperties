@@ -29,6 +29,8 @@ use App\Models\PmsStatement;
 use App\Models\Invoice;
 use App\Models\Permission;
 use App\Models\Payment;
+use App\Models\EmailReceipt;
+use App\Models\WhatsappReceipt;
 use Carbon\Carbon;
 
 class ListController extends Controller
@@ -36,6 +38,8 @@ class ListController extends Controller
     public function index()
     {
         $users = User::latest()->with('role')->get();
+        $whatsappreceipts = WhatsappReceipt::latest()->with('statement', 'tenant')->get();
+        $emailreceipts = EmailReceipt::latest()->with('statement', 'tenant')->get();
         $properties = Property::latest()->with('type','images')->get();
         $pmsproperties = PmsProperty::latest()->with('landlord','images','units')->get();
         $saleproperties = Property::latest()->with('type','images')->where('property_status','sale')->where('status',1)->get();
@@ -119,6 +123,8 @@ class ListController extends Controller
         return response()->json([
             "lists" => [
                 'users' => $users,
+                'whatsappreceipts' => $whatsappreceipts,
+                'emailreceipts' => $emailreceipts,
                 'properties' => $properties,
                 'roles' => $roles,
                 'categories' => $categories,

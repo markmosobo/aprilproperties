@@ -31,6 +31,8 @@ use App\Http\Controllers\Api\PmsExpenseController;
 use App\Http\Controllers\Api\PmsYearController;
 use App\Http\Controllers\Api\PmsStatementController;
 use App\Http\Controllers\Api\PmsInvoiceController;
+use App\Http\Controllers\Api\ReceiptController;
+use App\Http\Controllers\Api\ReminderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -166,6 +168,20 @@ Route::get('propertyquartersettledinvoices/{id}', [PmsInvoiceController::class, 
 Route::get('propertylastyearsettledinvoices/{id}', [PmsInvoiceController::class, 'propLastYearSettledInvoices']);
 Route::get('propertyallsettledinvoices/{id}', [PmsInvoiceController::class, 'propAllSettledInvoices']);
 
+//get receipts
+Route::get('whatsappreceipts/{id}', [ReceiptController::class, 'whatsappReceipts']);
+Route::get('emailreceipts/{id}', [ReceiptController::class, 'emailReceipts']);
+//delete receipts
+Route::delete('/delete-whatsapp-receipt/{id}', [ReceiptController::class, 'deleteWhatsappReceipt']);
+Route::delete('/delete-email-receipt/{id}', [ReceiptController::class, 'deleteEmailReceipt']);
+
+//get reminders
+Route::get('whatsappreminders/{id}', [ReminderController::class, 'whatsappReminders']);
+Route::get('emailreminders/{id}', [ReminderController::class, 'emailReminders']);
+//delete reminders
+Route::delete('/delete-whatsapp-reminder/{id}', [ReminderController::class, 'deleteWhatsappReminder']);
+Route::delete('/delete-email-reminder/{id}', [ReminderController::class, 'deleteEmailReminder']);
+
 Route::put('property/{id}', [PropertyController::class, 'update']);
 Route::put('category/{id}', [CategoryController::class, 'update']);
 Route::put('blogcategory/{id}', [BlogCategoryController::class, 'update']);
@@ -279,6 +295,7 @@ Route::post('/update-sms-count', [PmsStatementController::class, 'updateSmsCount
 
 Route::post('/update-email-receipt-count', [PmsStatementController::class, 'updateEmailReceiptCount']);
 Route::post('/update-whatsapp-receipt-count', [PmsStatementController::class, 'updateWhatsappReceiptCount']);
+
 
 //generate invoices
 Route::post('/generate-monthly-statements', [PmsStatementController::class, 'generateMonthlyStatements']);

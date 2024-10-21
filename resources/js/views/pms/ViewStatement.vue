@@ -76,9 +76,9 @@
                             <div v-if="emailCount > 0" class="row mb-3">
                               <div class="col-lg-12">
                                 <div class="d-flex justify-content-between">
-                                  <div>
+                                  <div @click="viewEmailReminders" style="cursor: pointer;">
                                     <i class="fas fa-envelope"></i> <!-- FontAwesome Email Icon -->
-                                    View Email Reminder(s)
+                                    View Email Reminder(s) 
                                   </div>
                                   <div><strong>{{emailCount}}</strong></div>
                                 </div>
@@ -89,10 +89,10 @@
                             <div v-if="whatsappCount > 0" class="row mb-3">
                               <div class="col-lg-12">
                                 <div class="d-flex justify-content-between">
-                                  <div>
-                                    <i class="fab fa-whatsapp"></i> <!-- FontAwesome WhatsApp Icon -->
-                                    View WhatsApp Reminder(s)
-                                  </div>
+                                  <div @click="viewWhatsAppReminders" style="cursor: pointer;">
+                                        <i class="fab fa-whatsapp"></i> <!-- FontAwesome WhatsApp Icon -->
+                                        View WhatsApp Reminder(s) 
+                                      </div>
                                   <div><strong>{{whatsappCount}}</strong></div>
                                 </div>
                               </div>
@@ -282,13 +282,25 @@ export default {
             // Logic to view email receipts, e.g., open a modal or redirect to a new page
             console.log("Viewing email receipts");
             // You can use router navigation or show a modal here
-            this.$router.push('/email-receipts'); // Example of navigation
+            this.$router.push('/viewemailreceipts/' + this.statement.id); // Example of navigation
           },
           viewWhatsAppReceipts() {
             // Logic to view WhatsApp receipts, e.g., open a modal or redirect to a new page
             console.log("Viewing WhatsApp receipts");
             // You can use router navigation or show a modal here
-            this.$router.push('/whatsapp-receipts'); // Example of navigation
+            this.$router.push('/viewwhatsappreceipts/'+ this.statement.id); // Example of navigation
+          },
+          viewEmailReminders() {
+            // Logic to view email reminders, e.g., open a modal or redirect to a new page
+            console.log("Viewing email reminders");
+            // You can use router navigation or show a modal here
+            this.$router.push('/viewemailreminders/' + this.statement.id); // Example of navigation
+          },
+          viewWhatsAppReminders() {
+            // Logic to view WhatsApp reminders, e.g., open a modal or redirect to a new page
+            console.log("Viewing WhatsApp reminders");
+            // You can use router navigation or show a modal here
+            this.$router.push('/viewwhatsappreminders/'+ this.statement.id); // Example of navigation
           },
         getStatement() {
             axios.get('/api/pmsstatement/' + this.$route.params.id).then((response) => {
@@ -348,7 +360,7 @@ export default {
           })
         },
         getUserPermissions(id) {
-          axios.get('api/userpermissions/' + id)
+          axios.get('/api/userpermissions/' + id)
             .then((response) => {
               this.permissions = response.data.permissions;
               console.log(this.permissions)

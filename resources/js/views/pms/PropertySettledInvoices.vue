@@ -169,7 +169,8 @@
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>                                            
+                                  <a @click="navigateTo('/viewstatement/'+statement.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>
+                                  <a @click="editInvoice(statement)" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit Invoice</a>                                           
                                   <a @click="printReceipt(statement)" class="dropdown-item" href="#"><i class="ri-printer-line mr-2"></i>Print Receipt</a>
                   
                                   </div>
@@ -185,6 +186,53 @@
                         Bal: {{ formatNumber(calculateTotal('balance')) }}
                       </strong>
                       </div>     
+                    </div>
+
+                    <!--Edit Invoice Modal -->
+                    <div class="modal fade" id="EditInvoiceModal" tabindex="-1" aria-labelledby="EditInvoiceModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="EditInvoiceModalLabel">Edit Invoice</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <p>#{{selectedStatement.ref_no}}</p>
+                            <p>{{ tenant}}</p>
+                            <p v-if="selectedStatement">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Amount Due(Inclusive of Water Bill):</strong> 
+                                 <input type="text" name="total" v-model="form.total" class="form-control">
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Amount Paid:</strong>
+                                 <input type="text" name="paid" v-model="form.paid" class="form-control">
+                                </div>
+                              </div>   
+                            </p>
+                            <p v-if="selectedStatement">
+                              <div class="row">
+                                <div class="col-sm-6">
+                                  <strong>Balance:</strong> 
+                                 <input type="text" name="balance" v-model="form.balance" class="form-control">
+                                </div>
+                                <div class="col-sm-6">
+                                 <strong>Water Bill:</strong>
+                                 <input type="text" name="water_bill" v-model="form.water_bill" class="form-control">
+                                </div>
+                              </div>   
+                            </p>
+
+                            
+
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-primary" @click.prevent="confirmEditInvoice">Save changes</button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
     
                   </div>
@@ -243,6 +291,7 @@
             unitSecurityFee: '',
             unitGarbageFee: '',
             unitName: '',
+            selectedStatement: {}, // Initialize as an empty object            
             payment: '',
             date: new Date(), // Current date,
             currentTime: '',
@@ -256,7 +305,14 @@
             landlordAddress: '',
             logoBase64: '',
             propertyId: '',
-            currentTime: ''
+            currentTime: '',
+            editInvoicePermission: '',
+            form: {
+              total: '',
+              paid: '',
+              water_bill: '',
+              balance: '',
+            },
 
 
         }
@@ -289,6 +345,60 @@
               } 
             });
 
+        },
+        editInvoice(statement)
+        {
+          this.selectedStatement = statement;
+          this.form.paid = this.selectedStatement.paid;
+          this.form.balance = this.selectedStatement.balance;
+          this.form.total = this.selectedStatement.total;
+          this.form.water_bill = this.selectedStatement.water_bill;
+          this.firstName = this.selectedStatement.tenant.first_name;
+          this.lastName = this.selectedStatement.tenant.last_name;
+          this.tenant = this.firstName + " " + this.lastName;
+          // Show the modal after fetching data
+            const modal = new bootstrap.Modal(document.getElementById('EditInvoiceModal'));
+            modal.show();
+        },
+        async confirmEditInvoice() {
+          if (this.selectedStatement && this.selectedStatement.id) {
+            // Implement your logic to invoice the tenant here
+            console.log("Editing invoice with statement ID:", this.selectedStatement.id);
+            await this.saveEditInvoice();
+
+            // Close the modal after invoicing
+            const modal = bootstrap.Modal.getInstance(document.getElementById('EditInvoiceModal'));
+            modal.hide();
+            this.getInvoices();
+          }
+        },
+        saveEditInvoice() {
+            return new Promise((resolve, reject) => {
+                let payload; // Define payload variable outside the if-else blocks
+
+                  payload = {
+                      total: this.form.total,
+                      paid: this.form.paid,
+                      balance: this.form.balance,
+                      water_bill: this.form.water_bill,
+                  };
+               
+
+                axios.put("/api/edit-statement/" + this.selectedStatement.id, payload)
+                    .then(response => {
+                        console.log(response);
+                         toast.fire(
+                              'Success!',
+                              'Invoice updated!',
+                              'success'
+                          );
+                        resolve(); // Resolve the promise when settleTenant completes successfully
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        reject(error); // Reject the promise if there's an error
+                    });
+            });
         },
         capitalizeFirstLetter(str) {
           return str.charAt(0).toUpperCase() + str.slice(1);
@@ -578,7 +688,7 @@
                     <tr>
                       <th>Total:</th>
                       <th></th>
-                      <td>KES ${this.formatNumber(this.residentialPropertyAmount + this.commercialPropertyAmount + this.totalAmountPaid)}</td>
+                      <td>KES ${this.formatNumber(this.totalDueForPayment)}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -688,7 +798,7 @@
 
             const roundedCommission = Math.round(this.property.commission * 100);
             const commissionTotal = this.propertyCommission / 100 * this.totalRent;
-            const netRemissionTotal = Math.round(this.totalRent - (this.totalAmountPaid + commissionTotal));
+            const netRemissionTotal = Math.round(this.totalRent - (this.totalAmountPaid + this.totalCommission));
 
             // Add content headers
             doc.setFontSize(14);
@@ -700,7 +810,7 @@
 
             let textY = imageY + imageHeight + 20; // Initial y-coordinate for the first text
 
-            doc.text('Total Rent Less Commission: ' + 'KES ' + this.formatNumber(this.rentLessCommission), 20, textY);
+            doc.text('Total Rent Less ' + this.propertyCommission + ' Commission: ' + 'KES ' + this.formatNumber(this.rentLessCommission), 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
             doc.text('Total Due Remitted: ' + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
@@ -981,7 +1091,7 @@
 
             let textY = imageY + imageHeight + 20; // Initial y-coordinate for the first text
 
-            doc.text('Total Rent Less Commission: ' + 'KES ' + this.formatNumber(this.rentLessCommission), 20, textY);
+            doc.text('Total Rent Less' + this.propertyCommission +' Commission: ' + 'KES ' + this.formatNumber(this.rentLessCommission), 20, textY);
             textY += 10; // Increment y-coordinate for the next text
 
             doc.text('Total Due Remitted: ' + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
@@ -1428,12 +1538,15 @@
                     console.error("Error fetching unit:", error);
                 });
         },
-        getProperty()
-        {
-          axios.get('/api/pmsproperty/'+ this.$route.params.id).then((response) => {
+        getProperty() {
+          axios.get('/api/pmsproperty/' + this.$route.params.id).then((response) => {
             this.property = response.data.property;
-            this.commission = this.property.landlord.commission;
-            this.fixedCommission = this.property.landlord.fixed_commission;
+
+            // Convert commission values to numbers
+            this.commission = Number(this.property.landlord.commission) || 0;
+            this.fixedCommission = Number(this.property.landlord.fixed_commission) || 0;
+
+            // Landlord details
             this.fName = this.property.landlord.first_name;
             this.lName = this.property.landlord.last_name;
             this.landlord = this.fName + " " + this.lName;
@@ -1441,35 +1554,43 @@
             this.landlordAddress = this.property.landlord.address;
             this.landlordEmail = this.property.landlord.email;
             this.unitsNo = this.property.units_no;
-            if(this.commission !== null)
-            {
+
+            // Ensure invoices and rent are numbers
+            this.commercialpropertymonthinvoices = Number(this.commercialpropertymonthinvoices) || 0;
+            this.residentialpropertymonthinvoices = Number(this.residentialpropertymonthinvoices) || 0;
+            this.totalRent = Number(this.totalRent) || 0;
+
+            // If commission is valid (greater than 0), use it
+            if (this.commission > 0) {
               this.propertyCommission = this.commission + ' %';
-              this.commercialPropertyAmount = ((this.commission/100) * this.commercialpropertymonthinvoices);
-              this.residentialPropertyAmount = ((this.commission/100) * this.residentialpropertymonthinvoices);
-              this.totalCommission = ((this.commission/100) * this.totalRent);
+              this.commercialPropertyAmount = (this.commission / 100) * this.commercialpropertymonthinvoices;
+              this.residentialPropertyAmount = (this.commission / 100) * this.residentialpropertymonthinvoices;
+              this.totalCommission = (this.commission / 100) * this.totalRent;
               this.rentLessCommission = this.totalRent - this.totalCommission;
-            }
-            else
-            {
+              this.totalDueForPayment = this.residentialPropertyAmount + this.commercialPropertyAmount + this.totalAmountPaid;
+            } else {
+              // Use fixed commission
               this.propertyCommission = this.fixedCommission;
               this.commercialPropertyAmount = this.commercialpropertymonthinvoices - this.propertyCommission;
               this.residentialPropertyAmount = this.residentialpropertymonthinvoices - this.propertyCommission;
               this.totalCommission = this.propertyCommission;
               this.rentLessCommission = this.totalRent - this.totalCommission;
+              this.totalDueForPayment = this.propertyCommission;
             }
           }).catch((error) => {
-              console.log('error', error)
-          })
+            console.log('error', error);
+          });
         },
+
         getPropertyExpenses()
         {
           axios.get('/api/pmspropertyexpenses/'+ this.$route.params.id).then((response) => {
             this.expenses = response.data.pmspropertyexpenses;
             // this.commission = this.property.landlord.commission;
             // this.fixedCommission = this.property.landlord.fixed_commission;
-            this.totalAmountPaid = this.calculateTotalAmountPaid();
+            // this.totalAmountPaid = this.calculateTotalAmountPaid();
             this.netRemmission = this.rentLessCommission - (this.totalAmountPaid);            
-            // console.log("2", this.totalAmountPaid)
+            console.log("pussified", this.totalRent)
             // console.log("ruto", this.expenses)
           }).catch((error) => {
               console.log('error', error)
@@ -1494,14 +1615,19 @@
           this.currentTime = now.toLocaleTimeString();
         },
         formatPhoneNumber(number) {
-          // Convert number to string and prepend '0'
-          const str = '0' + number.toString();
-          
-          // Use a regular expression to format the number
-          const formatted = str.replace(/^(\d{5})(\d{4})$/, '$1-$2');
-          
-          return formatted;
-        }
+            // Ensure number is a string
+            number = number.toString();
+            
+            // Clean the phone number and ensure it has the 254 prefix
+            if (number.startsWith('0')) {
+                // Remove the leading zero and add the 254 prefix
+                number = '254' + number.substring(1);
+            } else if (!number.startsWith('254')) {
+                // If the number is not already prefixed with 254, add it
+                number = '+254' + number;
+            }
+            return number;
+        },
 
       },
       components : {
@@ -1531,6 +1657,8 @@
         this.getInvoices();
         this.getProperty();
         this.getPropertyExpenses();
+        this.totalRent = this.calculateTotalRent();
+        this.totalAmountPaid = this.calculateTotalAmountPaid();
         this.loadLogo();
         this.propertyId = this.$route.params.id;
         this.currentDate = this.getCurrentDate(); // Set the initial date
@@ -1542,7 +1670,6 @@
         this.updateTime();
         // Update the time every second
         setInterval(this.updateTime, 1000);
-        this.totalRent = this.calculateTotalRent();
       }
     }
     </script>

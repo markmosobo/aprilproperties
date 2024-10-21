@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\PmsStatement;
 use App\Models\PmsTenant;
 
-class WhatsappReceipt extends Model
+class EmailReminder extends Model
 {
     use HasFactory;
 

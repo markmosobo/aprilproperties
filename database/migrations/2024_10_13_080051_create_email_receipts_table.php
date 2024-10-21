@@ -25,6 +25,7 @@ return new class extends Migration
             ->references('id')
             ->on('pms_tenants')
             ->onDelete('cascade');
+            $table->string('subject')->nullable();
             $table->longText('message')->nullable();
             $table->timestamps();
         });

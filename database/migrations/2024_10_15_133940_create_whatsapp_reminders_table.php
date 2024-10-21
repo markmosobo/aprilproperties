@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('whatsapp_receipts', function (Blueprint $table) {
+        Schema::create('whatsapp_reminders', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('statement_id')->unsigned();
             $table->foreign('statement_id')
@@ -26,7 +26,7 @@ return new class extends Migration
             ->on('pms_tenants')
             ->onDelete('cascade');
             $table->string('subject')->nullable();
-            $table->longText('message')->nullable();           
+            $table->longText('message')->nullable(); 
             $table->timestamps();
         });
     }
@@ -38,6 +38,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('whatsapp_receipts');
+        Schema::dropIfExists('whatsapp_reminders');
     }
 };

@@ -11,6 +11,8 @@ use App\Models\Invoice;
 use App\Models\Landlord;
 use App\Models\WhatsappReceipt;
 use App\Models\EmailReceipt;
+use App\Models\WhatsappReminder;
+use App\Models\EmailReminder;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Artisan;
 
@@ -639,6 +641,15 @@ class PmsStatementController extends Controller
         $statement = PmsStatement::find($request->id);
         $statement->increment('email_count');
 
+        //save message
+        $emailreminder = EmailReminder::create([
+            'statement_id' => $request->id,
+            'pms_tenant_id' => $request->tenantId,
+            'subject' => $request->subject,
+            'message' => $request->message,
+        ]);
+        $emailreminder->save();
+
         return response()->json(['message' => 'Email count updated successfully']);
     }
 
@@ -652,6 +663,15 @@ class PmsStatementController extends Controller
         // Find the statement by ID and increment the email_count
         $statement = PmsStatement::find($request->id);
         $statement->increment('whatsapp_count');
+
+        //save message
+        $whatsappreminder = WhatsappReminder::create([
+            'statement_id' => $request->id,
+            'pms_tenant_id' => $request->tenantId,
+            'subject' => $request->subject,
+            'message' => $request->message,
+        ]);
+        $whatsappreminder->save();
 
         return response()->json(['message' => 'Whatsapp count updated successfully']);
     }
@@ -685,6 +705,7 @@ class PmsStatementController extends Controller
         $emailreceipt = EmailReceipt::create([
             'statement_id' => $request->id,
             'pms_tenant_id' => $request->tenantId,
+            'subject' => $request->subject,
             'message' => $request->message,
         ]);
         $emailreceipt->save();
@@ -707,6 +728,7 @@ class PmsStatementController extends Controller
         $whatsappreceipt = WhatsappReceipt::create([
             'statement_id' => $request->id,
             'pms_tenant_id' => $request->tenantId,
+            'subject' => $request->subject,
             'message' => $request->message,
         ]);
         $whatsappreceipt->save();

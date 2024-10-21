@@ -14,6 +14,7 @@ class EmailReceipt extends Model
      protected $fillable = [
         'statement_id',
         'pms_tenant_id',
+        'subject',
         'message'
     ];
 
