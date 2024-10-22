@@ -81,6 +81,8 @@ import PmsRentingTenants from '../views/pms/PmsRentingTenants.vue'
 import PmsVacatedTenants from '../views/pms/PmsVacatedTenants.vue'
 import PmsExpenses from '../views/pms/PmsExpenses.vue'
 import PmsUnits from '../views/pms/PmsUnits.vue'
+import VacantUnits from '../views/pms/VacantUnits.vue'
+import RentedUnits from '../views/pms/RentedUnits.vue'
 import AddPmsUnit from '../views/pms/AddPmsUnit.vue'
 import EditPmsUnit from '../views/pms/EditPmsUnit.vue'
 import ViewPmsUnit from '../views/pms/ViewPmsUnit.vue'
@@ -558,6 +560,18 @@ const routes = [
         path:'/pmsunits/:id',
         name: 'pmsunits',
         component: PmsUnits,
+        beforeEnter : guardMyroute,
+    }, 
+    {
+        path:'/vacantunits',
+        name: 'vacantunits',
+        component: VacantUnits,
+        beforeEnter : guardMyroute,
+    }, 
+    {
+        path:'/rentedunits',
+        name: 'rentedunits',
+        component: RentedUnits,
         beforeEnter : guardMyroute,
     }, 
     {

@@ -6,7 +6,7 @@
           <div class="row">
 
             <!-- Properties Card -->
-            <div @click="goProperties" class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goProperties" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card sales-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-success">All Properties <span>| All Time</span></h5>
@@ -23,7 +23,7 @@
             </div><!-- End Properties Card -->
 
             <!-- Rented Units Card -->
-            <div class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goRentedUnits" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-warning">Rented Units <span>| All Time</span></h5>
@@ -40,7 +40,7 @@
             </div><!-- End Rented Units Card -->
 
             <!-- Vacant Units Card -->
-            <div class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goVacantUnits" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-danger">Vacant Units <span>| All Time</span></h5>
@@ -57,7 +57,7 @@
             </div><!-- End Vacant Units Card -->
 
             <!-- Users Card -->
-            <div @click="goUsers" class="col-xxl-4 col-xl-4 mb-4">
+            <div @click="goUsers" class="col-xxl-3 col-xl-4 mb-4">
               <div class="card info-card customers-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-primary">Users <span>| All System Users</span></h5>
@@ -74,7 +74,7 @@
             </div><!-- End Users Card -->
 
             <!-- Landlords Card -->
-            <div @click="goLandlords" class="col-xxl-4 col-xl-4 mb-4">
+            <div @click="goLandlords" class="col-xxl-3 col-xl-4 mb-4">
               <div class="card info-card customers-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-info">Landlords <span>| All Landlords</span></h5>
@@ -91,7 +91,7 @@
             </div><!-- End Landlords Card -->
 
             <!-- Tenants Card -->
-            <div @click="goTenants" class="col-xxl-4 col-xl-4 mb-4">
+            <div @click="goTenants" class="col-xxl-3 col-xl-4 mb-4">
               <div class="card info-card customers-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-secondary">Tenants <span>| All Tenants</span></h5>
@@ -118,7 +118,7 @@
           <div class="row">
 
             <!-- Awaiting Invoicing Card -->
-            <div @click="goAwaitingInvoicing" class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goAwaitingInvoicing" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card sales-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-success">Awaiting Invoicing <span>| All Time</span></h5>
@@ -136,7 +136,7 @@
             <!-- End Awaiting Invoicing Card -->
 
             <!-- Awaiting Settling Card -->
-            <div @click="goAwaitingSettling" class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goAwaitingSettling" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-warning" style="color: darkorange;">Awaiting Settling <span>| All Time</span></h5>
@@ -155,7 +155,7 @@
             <!-- End Awaiting Settling Card -->
 
             <!-- Settled Invoices Card -->
-            <div @click="goSettledInvoices" class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goSettledInvoices" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-danger">Settled Invoices <span>| All Time</span></h5>
@@ -173,7 +173,7 @@
             <!-- End Settled Invoices Card -->
 
             <!-- All Properties Card -->
-            <div @click="goProperties" class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goProperties" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card sales-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-success">All Properties <span>| All Time</span></h5>
@@ -190,7 +190,7 @@
             </div><!-- End All Properties Card -->
 
             <!-- Rented Units Card -->
-            <div class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goRentedUnits" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-warning">Rented Units <span>| All Time</span></h5>
@@ -207,7 +207,7 @@
             </div><!-- End Rented Units Card -->
 
             <!-- Vacant Units Card -->
-            <div class="col-xxl-4 col-md-4 mb-4">
+            <div @click="goVacantUnits" class="col-xxl-3 col-md-4 mb-4">
               <div class="card info-card revenue-card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title text-danger">Vacant Units <span>| All Time</span></h5>
@@ -222,6 +222,40 @@
                 </div>
               </div>
             </div><!-- End Vacant Units Card -->
+
+            <!-- Landlords Card -->
+            <div @click="goLandlords" class="col-xxl-3 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-danger">All Landlords <span>| All Time</span></h5>
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-house" style="color: red;"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{ landlordscount }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- End Landlords Card -->
+
+            <!-- Tenants Card -->
+            <div @click="goTenants" class="col-xxl-3 col-md-4 mb-4">
+              <div class="card info-card revenue-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-danger">All Tenants <span>| All Time</span></h5>
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-house" style="color: red;"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{ tenantscount }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- End Tenants Card -->
 
           </div>
         </div><!-- End Left side columns -->
@@ -298,6 +332,14 @@ export default {
     goTenants()
     {
       this.$router.push('/pmstenants')
+    },
+    goRentedUnits()
+    {
+      this.$router.push('/rentedunits')
+    },
+    goVacantUnits()
+    {
+      this.$router.push('/vacantunits')
     },
     loadLists() {
       axios.get('api/lists').then(response => {

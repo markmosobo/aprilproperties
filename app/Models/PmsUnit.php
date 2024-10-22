@@ -11,7 +11,7 @@ class PmsUnit extends Model
     use HasFactory;
 
     protected $fillable = [
-        'property_id',
+        'pms_property_id',
         'unit_number',
         'type',
         'deposit',
@@ -29,7 +29,7 @@ class PmsUnit extends Model
 
     public function property()
     {
-        return $this->belongsTo(PmsProperty::class);
+        return $this->belongsTo(PmsProperty::class,'pms_property_id');
     }
 
 }

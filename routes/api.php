@@ -271,7 +271,7 @@ Route::put('deactivatesocial/{id}',[SocialLinkController::class,'deactivate']);
 Route::get('myproperties/{id}', [PropertyController::class,'myProperty']);
 Route::put('profile/{id}',[ProfileController::class, 'update']);
 Route::put('changepassword/{id}',[ProfileController::class, 'changePassword']);
-Route::put('/resetpassword',[ProfileController::class, 'resetPassword']);
+Route::put('/resetpassword/{id}',[ProfileController::class, 'resetPassword']);
 
 Route::put('activateuser/{id}',[UserController::class,'activate']);
 Route::put('deactivateuser/{id}',[UserController::class,'deactivate']);

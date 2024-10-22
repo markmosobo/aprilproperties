@@ -18,7 +18,7 @@
             </div>
 
             <div class="card-body pb-0">
-              <h5 class="card-title">All Users <span>| Today</span></h5>
+              <h5 class="card-title">System Users <span>| All Users</span></h5>
               <p class="card-text">
                 <router-link to="/add-user" custom v-slot="{ href, navigate, isActive }">
                   <a

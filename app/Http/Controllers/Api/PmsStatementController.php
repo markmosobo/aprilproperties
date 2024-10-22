@@ -360,13 +360,19 @@ class PmsStatementController extends Controller
 
     public function tenantLastMonthStatements(Request $request, $id)
     {
-        $pmslastmonthtenantstatements = PmsStatement::with('tenant','property','unit')->where('pms_tenant_id', $id)->whereBetween('created_at',
-        [Carbon::now()->subMonth()->startOfMonth(), Carbon::now()->subMonth()->endOfMonth()])->get();
+        // Get last month in the format 'F Y' (e.g., 'August 2024')
+        $lastMonth = Carbon::now()->subMonth()->format('F Y');
+
+        $pmslastmonthtenantstatement = PmsStatement::with('tenant', 'property', 'unit')
+        ->where('pms_tenant_id', $id)
+        ->latest() // orders by created_at by default
+        ->first(); // gets the most recent record
+
 
         return response()->json([
             'status' => true,
             'message' => "retrieved",
-            'pmslastmonthtenantstatements' => $pmslastmonthtenantstatements
+            'pmslastmonthtenantstatement' => $pmslastmonthtenantstatement
         ], 200);
     } 
 
@@ -452,6 +458,8 @@ class PmsStatementController extends Controller
 
         if($lastMonthStatement){
             $lastMonthStatement->balance = 0;
+            $lastMonthStatement->prev_arrears = 0;
+            $lastMonthStatement->overpayment = 0;
             $lastMonthStatement->save();
             
             return response()->json([
@@ -583,7 +591,9 @@ class PmsStatementController extends Controller
         $orgDate = now();
         $date = str_replace('-"', '/', $orgDate);
         $newDate = date("YmdHis", strtotime($date));
-        $monthlyTotal = $tenant->unit->monthly_rent + $tenant->unit->garbage_fee + $tenant->unit->security_fee;
+        $prevArrears = $request->prev_arrears;
+        $overPayment = $request->overpayment;
+        $monthlyTotal = $tenant->unit->monthly_rent + $tenant->unit->garbage_fee + $tenant->unit->security_fee + $overPayment + $prevArrears;
         $refno = "INV" . $newDate . $tenant->id;
 
         // Debug: Print variables to check data
@@ -626,7 +636,7 @@ class PmsStatementController extends Controller
             'status' => true,
             'message' => "Invoice created successfully.",
             'tenant' => $tenant,
-            'unit' => $unit,
+            'data' => $data,
         ], 200);
     }
 

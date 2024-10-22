@@ -2,7 +2,7 @@
     <!-- ======= Footer ======= -->
     <footer id="footer" class="footer">
       <div class="copyright">
-        &copy; Copyright <strong><span style="color: darkgreen;">April Properties</span></strong>. All Rights Reserved
+        &copy; Copyright <strong><span style="color: darkgreen;">April Properties {{currentYear}}</span></strong>. All Rights Reserved
       </div>
       <div class="credits">
         <!-- All the links in the footer should remain intact. -->
@@ -17,6 +17,16 @@
   <script>
   export default {
     name: 'TheFooter',
+    data(){
+      return {
+        currentYear: ''
+      }
+    },
+    mounted()
+    {
+      const date = new Date();
+      this.currentYear = date.getFullYear();
+    }
     
   }
   </script>

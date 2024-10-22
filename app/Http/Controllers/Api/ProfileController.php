@@ -39,14 +39,10 @@ class ProfileController extends Controller
         }
     }
 
-   public function resetPassword(Request $request) {
-        // Validate the request
-        $request->validate([
-            'email' => 'required|email',
-        ]);
+   public function resetPassword(Request $request, $id) {
 
         // Find the user by email
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('id', $id)->first();
 
         // Check if the user exists
         if (!$user) {

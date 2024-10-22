@@ -787,7 +787,7 @@
 
             // Add title
             const titleText = (this.property.name + " " + this.currentMonth + ' Rent Statement').toUpperCase();
-            const titleFontSize = 16;
+            const titleFontSize = 12;
             const titleWidth = doc.getStringUnitWidth(titleText) * titleFontSize / doc.internal.scaleFactor;
             const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
             const titleY = imageY + imageHeight + 10;
@@ -796,44 +796,22 @@
             doc.setTextColor(44, 62, 80); // Set text color to a dark shade
             doc.text(titleText, titleX, titleY);
 
-            const roundedCommission = Math.round(this.property.commission * 100);
-            const commissionTotal = this.propertyCommission / 100 * this.totalRent;
-            const netRemissionTotal = Math.round(this.totalRent - (this.totalAmountPaid + this.totalCommission));
-
-            // Add content headers
-            doc.setFontSize(14);
-            doc.setTextColor(44, 62, 80);
-            doc.text('Total Expenses: ' + 'KES ' + this.formatNumber(this.totalAmountPaid), 20, imageY + imageHeight + 35);
-
-            doc.setFontSize(14);
-            doc.setTextColor(52, 73, 94); // Set text color to a slightly lighter shade
-
-            let textY = imageY + imageHeight + 20; // Initial y-coordinate for the first text
-
-            doc.text('Total Rent Less ' + this.propertyCommission + ' Commission: ' + 'KES ' + this.formatNumber(this.rentLessCommission), 20, textY);
-            textY += 10; // Increment y-coordinate for the next text
-
-            doc.text('Total Due Remitted: ' + 'KES ' + this.formatNumber(this.totalPaid), 20, textY);
-            textY += 10; // Increment y-coordinate for the next text
-
-            doc.text('Net Remission: ' + 'KES ' + this.formatNumber(this.netRemmission), 20, textY);
-            textY += 10; // Increment y-coordinate for the next text
-
-            // Set font size for the table headers and data
+            // Table rendering starts here
             const tableFontSize = 8;
             doc.setFontSize(tableFontSize);
             doc.setTextColor(0);
 
-            let headerYPos = imageY + imageHeight + 45;
+            let headerYPos = titleY + 15;
             let cellHeight = 10;
             let cellPadding = 2;
             let lineHeight = 5;
             let columnWidths = [20, 50, 20, 20, 20, 20, 20, 20, 30]; // Adjusted column widths for 9 columns
-            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BALANCE', 'DATE PAID']; // Example headers
+            let columnHeaders = ['H/S NO.', 'TENANT NAME', 'DUE', 'RENT', 'GARBAGE', 'WATER', 'PAID', 'BALANCE', 'DATE PAID'];
 
             let xPos = 20;
             doc.setDrawColor(0);
 
+            // Draw the table headers
             for (let i = 0; i < columnWidths.length; i++) {
                 doc.rect(xPos, headerYPos, columnWidths[i], cellHeight);
                 doc.setTextColor(0); // Set text color to black
@@ -848,6 +826,7 @@
             // Initialize totals
             let totals = Array(columnHeaders.length).fill(0);
 
+            // Table rows
             this.allstatements.forEach((statement, index) => {
                 if (currentRow >= maxRowsPerPage) {
                     doc.addPage();
@@ -856,6 +835,7 @@
                     currentPage++;
                     maxRowsPerPage = subsequentPagesMaxRows; // Set max rows for subsequent pages
 
+                    // Repeat table headers for each new page
                     xPos = 20;
                     for (let i = 0; i < columnWidths.length; i++) {
                         doc.rect(xPos, headerYPos, columnWidths[i], cellHeight, 'F');
@@ -866,6 +846,7 @@
                     headerYPos += cellHeight;
                 }
 
+                // Draw each table row
                 let yPos = headerYPos + (currentRow + 1) * lineHeight;
                 xPos = 20;
                 for (let i = 0; i < columnWidths.length; i++) {
@@ -921,7 +902,7 @@
                 currentRow++;
             });
 
-            // Add totals row
+            // Add totals row after the last table row
             let totalsYPos = headerYPos + (currentRow + 1) * lineHeight;
             xPos = 20;
             doc.setDrawColor(0);
@@ -933,6 +914,32 @@
                 xPos += columnWidths[i];
             }
 
+            // Now, add the content headers at the bottom of the last page
+            let finalYPos = totalsYPos + cellHeight + 15; // Adjust Y-position after the table
+
+            // Add content headers below the table
+            doc.setFontSize(12);
+            doc.setTextColor(44, 62, 80);
+            doc.text('Total Rent Collected: ' + 'KES ' + this.formatNumber(this.totalRent), 20, finalYPos);
+
+            finalYPos += 5; // Reduced Y-position increment for less space between lines
+            doc.text('Less ' + this.propertyCommission + ' Commission: ' + 'KES ' + this.formatNumber(this.totalCommission), 20, finalYPos);
+
+            finalYPos += 5; // Reduced Y-position increment for less space between lines
+            doc.text('Total Rent Less ' + this.propertyCommission + ': KES ' + this.formatNumber(this.rentLessCommission), 20, finalYPos);
+
+            finalYPos += 5; // Reduced Y-position increment for less space between lines
+            doc.text('Total Expenses: ' + 'KES ' + this.formatNumber(this.totalAmountPaid), 20, finalYPos);
+
+            finalYPos += 5; // Reduced Y-position increment for less space between lines
+            doc.text('Total Bills: ' + 'KES ' + this.formatNumber(this.totalWater + this.totalGarbage), 20, finalYPos);
+
+            finalYPos += 5; // Reduced Y-position increment for less space between lines
+            doc.text('Total Collected Inclusive Bills: ' + 'KES ' + this.formatNumber(this.rentLessCommission + this.totalWater + this.totalGarbage), 20, finalYPos);
+
+            finalYPos += 5; // Reduced Y-position increment for less space between lines
+            doc.text('Renumerated Amount: ' + 'KES ' + this.formatNumber(this.rentLessCommission + this.totalWater + this.totalGarbage), 20, finalYPos);
+
             // Add footer
             doc.setFontSize(10);
             doc.text('Generated on: ' + new Date().toLocaleString(), 20, doc.internal.pageSize.height - 10);
@@ -941,6 +948,7 @@
             let fileName = this.property.name + " " + this.formatMonth(new Date()) + ' Rent Statement' + '_Total_Pages_' + currentPage + '.pdf';
             doc.save(fileName);
         },
+
 
         // Function to add expenses to the PDF with pagination
         addExpensesToPDF(expenses, doc) {
@@ -1514,6 +1522,11 @@
              this.commercialpropertymonthinvoices = response.data.commercialpropertymonthinvoices;
              this.residentialpropertymonthinvoices = response.data.residentialpropertymonthinvoices;
              console.log("kisumu",this.residentialpropertymonthinvoices);
+             this.totalRent = this.calculateTotalRent();
+             this.totalGarbage = this.calculateTotalGarbageFees();
+             this.totalWater = this.calculateTotal('water_bill');
+              // this.totalRent = Number(this.totalRent);
+              console.log("urea", this.totalGarbage);
              
              // Calculate the total amount paid
              setTimeout(() => {
@@ -1558,15 +1571,16 @@
             // Ensure invoices and rent are numbers
             this.commercialpropertymonthinvoices = Number(this.commercialpropertymonthinvoices) || 0;
             this.residentialpropertymonthinvoices = Number(this.residentialpropertymonthinvoices) || 0;
-            this.totalRent = Number(this.totalRent) || 0;
+            // this.totalRent = Number(this.totalRent) || 0;
 
             // If commission is valid (greater than 0), use it
             if (this.commission > 0) {
-              this.propertyCommission = this.commission + ' %';
-              this.commercialPropertyAmount = (this.commission / 100) * this.commercialpropertymonthinvoices;
-              this.residentialPropertyAmount = (this.commission / 100) * this.residentialpropertymonthinvoices;
-              this.totalCommission = (this.commission / 100) * this.totalRent;
+              this.propertyCommission = this.commission + '%';
+              this.commercialPropertyAmount = (this.commission/100) * this.commercialpropertymonthinvoices;
+              this.residentialPropertyAmount = (this.commission/100) * this.residentialpropertymonthinvoices;
+              this.totalCommission = (this.commission/100) * this.totalRent;
               this.rentLessCommission = this.totalRent - this.totalCommission;
+              // console.log("kenchic", this.totalCommission);
               this.totalDueForPayment = this.residentialPropertyAmount + this.commercialPropertyAmount + this.totalAmountPaid;
             } else {
               // Use fixed commission
@@ -1590,7 +1604,7 @@
             // this.fixedCommission = this.property.landlord.fixed_commission;
             // this.totalAmountPaid = this.calculateTotalAmountPaid();
             this.netRemmission = this.rentLessCommission - (this.totalAmountPaid);            
-            console.log("pussified", this.totalRent)
+            // console.log("pussified", this.totalRent)
             // console.log("ruto", this.expenses)
           }).catch((error) => {
               console.log('error', error)
@@ -1609,6 +1623,12 @@
 
           return this.allstatements.reduce((total, statement) => total + (statement[property] || 0), 0);
         },
+        calculateTotalGarbageFees() {
+          return this.allstatements.reduce((total, invoice) => {
+            return total + (invoice.unit.garbage_fee || 0);
+          }, 0);
+        },
+
          updateTime() {
           const now = new Date();
           // Formatting the time to a readable format, e.g. HH:MM:SS
@@ -1647,18 +1667,18 @@
         totalBalance() {
           return this.calculateTotal('balance');
         },
-        totalRent()
-        {
-          return this.calculateTotal('rent');          
-        }
+        // totalRent()
+        // {
+        //   return this.calculateTotal('rent');          
+        // }
       },      
       mounted(){
         this.loadLists();
         this.getInvoices();
         this.getProperty();
         this.getPropertyExpenses();
-        this.totalRent = this.calculateTotalRent();
         this.totalAmountPaid = this.calculateTotalAmountPaid();
+        this.totalAmountPaid = Number(this.totalAmountPaid);
         this.loadLogo();
         this.propertyId = this.$route.params.id;
         this.currentDate = this.getCurrentDate(); // Set the initial date

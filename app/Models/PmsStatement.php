@@ -30,7 +30,10 @@ class PmsStatement extends Model
         'mpesa_code',
         'sms_status',
         'rent_month',
-        'paid_at'
+        'paid_at',
+        'deposit',
+        'prev_arrears',
+        'overpayment'
     ];
 
     public function tenant()

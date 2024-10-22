@@ -8,7 +8,7 @@
                   <div class="card top-selling overflow-auto">
     
                     <div class="filter">
-                    <!--                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                      <!--                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <li class="dropdown-header text-start">
                           <h6>Filter</h6>
@@ -21,23 +21,18 @@
                     </div>
     
                     <div class="card-body pb-0">
-                      <h5 class="card-title">All Landlords <span>| Landlords with agreements at April Properties</span></h5>
-                      <p class="card-text">
-                        <div class="row">
-                          <div class="col d-flex">
-                   
-                   
-                            <router-link v-if="addLandlordPermission" to="/add-pmslandlord" custom v-slot="{ href, navigate, isActive }">
-                                <a
-                                  :href="href"
-                                  :class="{ active: isActive }"
-                                  class="btn btn-sm btn-primary rounded-pill"
-                                  style="background-color: darkgreen; border-color: darkgreen;"
-                                  @click="navigate"
-                                >
-                                  Add Landlord
-                                </a>
-                            </router-link>
+                      <h5 class="card-title">Vacant Units <span>| Vacant units</span></h5>
+                      <p class="card-text"> 
+                      <div class="row">
+                          <div class="col d-flex">                
+                          <a
+                            class="btn btn-sm btn-primary rounded-pill active"
+                            v-if="addUnitPermission"
+                            style="background-color: darkgreen; border-color: darkgreen;"
+                            @click="navigateTo('/add-pmsunit/'+unit.id )"
+                          >
+                            Add Unit
+                          </a>
                           </div>
                           <div class="col-auto d-flex justify-content-end">
                           <div class="btn-group" role="group">
@@ -46,45 +41,47 @@
                               </button>
                               <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                      <a @click="navigateTo('/managedproperties' )" class="dropdown-item" href="#"><i class="ri-building-fill mr-2"></i>Properties</a>
+                                     <a @click="navigateTo('/pmstenants' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Tenants</a>
                                     <a @click="navigateTo('/pmslandlords' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Landlords</a>
-                                    <a @click="navigateTo('/pmstenants' )" class="dropdown-item" href="#"><i class="ri-user-fill mr-2"></i>Tenants</a>
                                 </div>
                               </div>
                             </div>
-                        </div>   
+                        </div>
             
                       </p>
     
-                      <table id="AlllandlordsTable" class="table table-borderless">
+                      <table id="AllPropertiesTable" class="table table-borderless">
                         <thead>
                           <tr>
-                            <th scope="col">Full Name</th>
-                            <th scope="col">Email Address</th>
-                            <th scope="col">Phone No.</th>
-                            <th scope="col">Commission</th>
+                            <!--<th scope="col">Preview</th>-->
+                            <th scope="col">Unit Number</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Deposit</th>
+                            <th scope="col">Rent(monthly)</th>
+                            <th scope="col">Property</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="landlord in landlords" :key="landlord.id">
-                            <td>{{landlord.first_name}} {{landlord.last_name}}</td>
-                            <td>{{landlord.email ?? "N/A"}}</td>
-                            <td>{{landlord.phone_no ?? "N/A"}}</td>
-                            <td>
-                              {{landlord.commission ?? landlord.fixed_commission ?? 'N/A' }}
-                            </td>
-
+                          <tr v-for="unit in vacantunits" :key="unit.id">
+                            <!--<th scope="row"><a href="#">
+                              <img :src="getPhoto() + property.images[0].name" />
+                            </a></th>-->
+                            <!-- <td>{{property["images"][0]["name"]}}</td> -->
+                            <td>{{unit.unit_number ?? 'N/A'}}</td>
+                            <td>{{unit.type ?? 'N/A'}}</td>
+                            <td>{{unit.deposit ?? 'N/A'}}</td>
+                            <td>{{unit.monthly_rent ?? 'N/A'}}</td>
+                            <td>{{unit.property.name ?? 'N/A'}}</td>
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Action
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
-                                  <!-- <a @click="navigateTo('/pmslandlord /'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a>  -->
-                                  <a @click="navigateTo('/pmslandlordproperties/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Property</a>
-                                   <!-- <a @click="navigateTo('/pmslandlordstatements/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View Invoices</a>                                            -->
-                                  <a v-if="editLandlordPermission" @click="navigateTo('/edit-pmslandlord/'+landlord.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>
-                                  <a v-if="deleteLandlordPermission" @click="deleteLandlord(landlord.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
+                                  <a @click="navigateTo('/view-pmsunit/'+unit.id )" class="dropdown-item" href="#"><i class="ri-eye-fill mr-2"></i>View</a> 
+                                  <a v-if="editUnitPermission" @click="navigateTo('/edit-pmsunit/'+unit.id )" class="dropdown-item" href="#"><i class="ri-pencil-fill mr-2"></i>Edit</a>                                           
+                                  <a v-if="deleteUnitPermission" @click="deleteUnit(unit.id)" class="dropdown-item" href="#"><i class="ri-delete-bin-line mr-2"></i>Delete</a>
                                   </div>
                               </div>
                             </td>
@@ -123,24 +120,69 @@
     export default {
       data(){
         return {
-          landlords: [],
+          vacantunits: [],
           categories: [],
-          landlordtypes: [],
+          propertytypes: [],
           user: [],
-          addLandlordPermission: '',
-          editLandlordPermission: '',
-          deleteLandlordPermission: '',
+          unit: [],
+          addUnitPermission: '',
+          editUnitPermission: '',
+          deleteUnitPermission: ''
         }
       },
       methods: {
         getPhoto()
         {
-            return "/storage/landlords/";
+            return "/storage/properties/";
         },
         navigateTo(location){
             this.$router.push(location)
         },
-        deleteLandlord(id){
+        featureProperty(id){
+          axios.put('api/featureproperty/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Property has been featured',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
+        },
+        unfeatureProperty(id){
+          axios.put('api/unfeatureproperty/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Property has been unfeatured',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
+        },
+        closeProperty(id){
+          axios.put('api/closeproperty/'+ id).then(() => {
+            toast.fire(
+              'Successful',
+              'Property has been closed',
+              'success'
+            ); 
+            this.loadLists();                    
+          }).catch(() => {
+              console.log('error')
+          })
+        },
+        getProperty() {
+             axios.get('/api/pmsproperty/'+this.$route.params.id).then((response) => {
+     
+             this.unit = response.data.property;
+             console.log("props", this.unit)
+    
+             });
+        },
+        deleteUnit(id){
                 Swal.fire({
                   title: 'Are you sure?',
                   text: "You won't be able to revert this!",
@@ -152,10 +194,10 @@
                 }).then((result) => {
                   if (result.isConfirmed) { 
                   //send request to the server
-                  axios.delete('/api/landlord/'+id).then(() => {
+                  axios.delete('/api/pmsunit/'+id).then(() => {
                   toast.fire(
                     'Deleted!',
-                    'Landlord has been deleted.',
+                    'Unit has been deleted.',
                     'success'
                   )
                   this.loadLists();
@@ -173,15 +215,15 @@
                 })
         },
         getUserPermissions(id) {
-          axios.get('api/userpermissions/' + id)
+          axios.get('/api/userpermissions/' + id)
             .then((response) => {
               this.permissions = response.data.permissions;
-              console.log(this.permissions)
+              console.log("vee", this.permissions)
 
               // Define the permission id you want to check for
-              const requiredAddPermissionId = 10;
-              const requiredEditPermissionId = 11;
-              const requiredDeletePermissionId = 12;
+              const requiredAddPermissionId = 19;
+              const requiredEditPermissionId = 20;
+              const requiredDeletePermissionId = 21;
               const requiredStatus = 1;
 
               // Check if the user has the required permissions
@@ -196,45 +238,45 @@
 
               if (hasAddPermission) {
                 // User has the required permission, allow them to view things
-                this.addLandlordPermission = true;
-                console.log(`User has permission: ${this.addLandlordPermission}`);
+                this.addUnitPermission = true;
+                console.log(`User has permission: ${this.addUnitPermission}`);
               } else {
                 // User does not have the required permission
-                this.addLandlordPermission = false;
+                this.addUnitPermission = false;
                 console.log('User does not have the required permission');
               }
 
               if (hasEditPermission) {
                 // User has the required permission, allow them to view things
-                this.editLandlordPermission = true;
-                console.log(`User has permission: ${this.editLandlordPermission}`);
+                this.editUnitPermission = true;
+                console.log(`User has permission: ${this.editUnitPermission}`);
               } else {
                 // User does not have the required permission
-                this.editLandlordPermission = false;
+                this.editUnitPermission = false;
                 console.log('User does not have the required permission');
               }
 
               if (hasDeletePermission) {
                 // User has the required permission, allow them to view things
-                this.deleteLandlordPermission = true;
-                console.log(`User has permission: ${this.deleteLandlordPermission}`);
+                this.deleteUnitPermission = true;
+                console.log(`User has permission: ${this.deleteUnitPermission}`);
               } else {
                 // User does not have the required permission
-                this.deleteLandlordPermission = false;
+                this.deleteUnitPermission = false;
                 console.log('User does not have the required permission');
               }
               })
               .catch(error => {
                 console.error('Error fetching permissions:', error);
-                this.deleteLandlordPermission = false;
               });
         },
         loadLists() {
-             axios.get('api/lists').then((response) => {
-             this.landlords = response.data.lists.landlords;
+             axios.get('/api/lists').then((response) => {
+     
+             this.vacantunits = response.data.lists.vacantunits;
              console.log("props", response)
              setTimeout(() => {
-                  $("#AlllandlordsTable").DataTable();
+                  $("#AllPropertiesTable").DataTable();
               }, 10);
     
              });
@@ -245,6 +287,7 @@
       },
       mounted(){
         this.loadLists();
+        // this.getProperty();
         this.user = localStorage.getItem('user');
         this.user = JSON.parse(this.user);
         this.userId = this.user.id;

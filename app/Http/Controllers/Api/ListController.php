@@ -65,6 +65,8 @@ class ListController extends Controller
         $landlords = Landlord::all();
         $smslandlords = Landlord::whereNotNull('phone_no')->get();
         $units = PmsUnit::all();
+        $rentedunits = PmsUnit::where('status', 1)->with('property')->get();
+        $vacantunits = PmsUnit::where('status', 0)->with('property')->get();
         $permissions = Permission::all();
         $statements = PmsStatement::with('property', 'tenant','unit')->latest()->get();
         $pmsinvoices = Invoice::with('property', 'tenant')->latest()->get();
@@ -159,6 +161,8 @@ class ListController extends Controller
                 'smslandlords' => $smslandlords,
                 'pmsproperties' => $pmsproperties,
                 'units' => $units,
+                'rentedunits' => $rentedunits,
+                'vacantunits' => $vacantunits,
                 'permissions' => $permissions,
                 'pmstenants' => $pmstenants,
                 'pmsrentingtenants' => $pmsrentingtenants,

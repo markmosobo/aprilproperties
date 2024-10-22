@@ -130,7 +130,7 @@
          this.$router.push('/edit-pmsunit/'+this.$route.params.id)
        },
        back(){
-         this.$router.push('/pmsunits/'+this.form.pms_property_id)
+         this.$router.go(-1);
        }
  
     },

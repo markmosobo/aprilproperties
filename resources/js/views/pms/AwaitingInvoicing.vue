@@ -307,7 +307,7 @@
                                   type="text"
                                   v-model="searchQuery"
                                   @input="filterTenants"
-                                  placeholder="Search tenants..."
+                                  placeholder="Search tenant..."
                                   class="form-control"
                                 />
                                 <select v-model="form.pms_tenant_id" class="form-control" size="5">
@@ -325,11 +325,13 @@
                                <!-- Display selected tenant details -->
                               <div v-if="selectedTenant">
                                 <p><strong>Selected Tenant:</strong></p>
-                                <p><strong></strong> {{ selectedTenant.first_name }} {{ selectedTenant.last_name }}</p>
-                                <p><strong></strong> {{ selectedTenant.phone_number }}</p>
-                                <p><strong></strong> {{ selectedTenant.property.name }}</p>
-                                <p><strong></strong> {{ selectedTenant.unit.unit_number }}</p>
+                                <p><strong></strong> {{ selectedTenant.first_name }} {{ selectedTenant.last_name }} - {{ selectedTenant.phone_number }}</p>
+                                <p><strong></strong> {{ selectedTenant.property.name }} - {{ selectedTenant.unit.unit_number }}</p>
                                 <!-- Display other details as needed -->
+                                <div class="mb-3">
+                                    <label v-if="lastmonthBalance < 0" for="emailSubject" style="color: green;" class="form-label">Overpayment ({{lastMonth}}): KES. {{  -lastmonthBalance }}</label>
+                                    <label v-if="prevArrears > 0" for="emailSubject" class="form-label" style="color: red;">Previous arrears {{ prevArrears }}</label>
+                                </div>
                               </div>
                               <p>
                                 <strong>Rent Month:*</strong>
@@ -447,15 +449,70 @@
           invoicing: false,
           generating: false,
           addInvoicePermission: '',
-          invoiceTenantPermission: ''
+          invoiceTenantPermission: '',
+          lastmonthBalance: '',
+          lastMonth: '',
+          prevArrears: ''
+        }
+      },
+       watch: {
+        // Watch the tenant ID field for changes
+        'form.pms_tenant_id'(newVal) {
+          if (newVal) {
+            // Fetch last month's statement asynchronously
+            // console.log(newVal)
+            this.checkLastMonthStatement(newVal);          }
         }
       },
       methods: {
         navigateTo(location){
             this.$router.push(location)
         },
-        createInvoice()
-        {
+        async checkLastMonthStatement(id) {
+          try {
+            const response = await axios.get('/api/pmslastmonthtenantstatements/' + id);
+            // console.log("OverPayment", response);
+            
+            // Access the last month tenant statement directly
+            if (response.data.pmslastmonthtenantstatement) {
+              this.lastmonthstatement = response.data.pmslastmonthtenantstatement;
+              this.lastMonth = this.lastmonthstatement.rent_month;
+              //check for overpayment if bal < 0 or arrears if bal > 0 last month
+              this.lastmonthBalance = this.lastmonthstatement.balance;
+              if(this.lastmonthBalance > 0)
+              {
+                this.form.overpayment = 0;
+                this.form.prev_arrears = this.lastmonthBalance;
+              }
+              else if(this.lastmonthBalance < 0)
+              {
+                this.form.prev_arrears = 0;
+                this.form.overpayment = this.lastmonthBalance;
+              }
+              //check for other previous months
+              this.form.prev_arrears = this.lastmonthstatement.prev_arrears + this.form.prev_arrears;
+            } else {
+              console.log("No last month statement found for the tenant.");
+            }
+          } catch (error) {
+            console.error("Error fetching last month tenant statements:", error);
+            throw error; // Propagate the error upwards
+          }
+        },
+
+        async updateLastMonthStatement(id) {
+          try {
+            const response = await axios.put('/api/pmslastmonthtenantstatement/' + id);
+            console.log("UpdateLast", response);
+            
+            
+          } catch (error) {
+            console.error("Error fetching last month tenant statements:", error);
+            throw error; // Propagate the error upwards
+          }
+        },
+
+        async createInvoice() {
           // Validate tenant
           if (!this.form.pms_tenant_id) {
             this.errors.tenant = 'Tenant name is required.';
@@ -467,42 +524,43 @@
             this.errors.rentmonth = 'Rent month is required.';
             return;
           }
-          console.log(this.form)
-          axios.post("/api/pmsinvoicestatement", this.form)
-              .then(response => {
-                this.successMessage = 'Tenant invoice created!';
-                toast.fire(
-                  'Success!',
-                  'Invoice created!',
-                  'success'
-                );
-              })
-              .catch(error => {
-                console.log(error);
-                // Handle the error appropriately
-                toast.fire(
-                  'Error!',
-                  error.response.data.message,
-                  'error'
-                );
-              })
-              .finally(() => {
-                // Hide loading spinner
-                this.loading = false;
 
-                // Close the modal after invoicing
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addInvoiceModal'));
-                modal.hide();
+          try {
 
-                // Reset form
-                this.form.pms_tenant_id = '';
-                this.form.rentMonth = '';
-                this.form.water_bill = '';
-                this.loadLists();
+            // Proceed to create the invoice
+            const response = await axios.post("/api/pmsinvoicestatement", this.form);
+            console.log("samantha", response);
+            await this.updateLastMonthStatement(response.data.data.pms_tenant_id);
+            this.successMessage = 'Tenant invoice created!';
+            toast.fire(
+              'Success!',
+              'Invoice created!',
+              'success'
+            );
+          } catch (error) {
+            console.log(error);
+            // Handle the error appropriately
+            Swal.fire(
+              'Error!',
+              error.response?.data?.message || 'An error occurred',
+              'error'
+            );
+          } finally {
+            // Hide loading spinner
+            this.loading = false;
 
-              });
+            // Close the modal after invoicing
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addInvoiceModal'));
+            modal.hide();
 
+            // Reset form
+            this.form.pms_tenant_id = '';
+            this.form.rentMonth = '';
+            this.form.water_bill = '';
+            this.loadLists();
+          }
         },
+
         editInvoice(statement)
         {
           this.selectedStatement = statement;
