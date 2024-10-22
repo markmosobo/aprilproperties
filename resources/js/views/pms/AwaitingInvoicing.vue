@@ -276,11 +276,11 @@
                               <span v-if="invoicing">
                                 <i class="fa fa-spinner fa-spin"></i> Invoicing...
                               </span>
-                              <span v-else-if="mailing">
+                     <!--          <span v-else-if="mailing">
                                 <i class="fa fa-spinner fa-spin"></i> Mailing...
-                              </span>
+                              </span> -->
                               <span v-else>
-                                Invoice & Mail
+                                Invoice
                               </span>
                             </button>
                           </div>
@@ -659,7 +659,7 @@
                 // this.sendSms(this.invoiceStatement);
 
                 // Share invoice via email
-                this.sendMail(this.invoiceStatement);
+                // this.sendMail(this.invoiceStatement);
 
                 console.log("Invoiced statement:", this.invoiceStatement);
 
@@ -683,11 +683,11 @@
               })
               .finally(() => {
                 // Hide loading spinner
-                // this.invoicing = false;
+                this.invoicing = false;
 
                 // // Close the modal after invoicing
-                // const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
-                // modal.hide();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceTenantModal'));
+                modal.hide();
 
                 // Reset form fields
                 this.form.water_bill = '';
