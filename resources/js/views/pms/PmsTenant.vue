@@ -85,7 +85,12 @@
                     <div class="col-lg-3 col-md-4 label">Current Status</div>
                     <div v-if="user.status == '1'" class="col-lg-9 col-md-8">Renting</div>
                     <div v-else class="col-lg-9 col-md-8">Vacated</div>
-                  </div>
+                   </div>
+
+                   <div v-if="user.status == '0'" class="row">
+                    <div class="col-lg-3 col-md-4 label">Vacated On</div>
+                    <div class="col-lg-9 col-md-8">{{format_date(user.vacated_at) ?? "N/A"}}</div>
+                   </div>
 
                   <div class="row">
                     <!-- <div class="col-lg-3 col-md-4 label">Role</div> -->

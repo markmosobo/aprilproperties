@@ -105,7 +105,44 @@
                   </div>
                 </div>
               </div>
-            </div><!-- End Tenants Card -->
+            </div>
+            <!-- End Tenants Card -->
+
+            <!-- Renting Tenants Card -->
+            <div @click="goRentingTenants" class="col-xxl-3 col-xl-4 mb-4">
+              <div class="card info-card customers-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-secondary">Renting Tenants <span>| Renting Tenants</span></h5>
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-person-badge" style="color: darkslategray;"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{ rentingTenantscount }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Tenants Card -->
+
+            <!-- Vacated Tenants Card -->
+            <div @click="goVacatedTenants" class="col-xxl-3 col-xl-4 mb-4">
+              <div class="card info-card customers-card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-secondary">Vacated Tenants <span>| Vacated Tenants</span></h5>
+                  <div class="d-flex align-items-center">
+                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-light">
+                      <i class="bi bi-person-badge" style="color: darkslategray;"></i>
+                    </div>
+                    <div class="ps-3">
+                      <h6>{{ vacatedTenantscount }}</h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- End Tenants Card -->
 
           </div>
         </div><!-- End Left side columns -->
@@ -296,6 +333,8 @@ export default {
       userscount: 0,
       landlordscount: 0,
       tenantscount: 0,
+      rentingTenantscount: 0,
+      vacatedTenantscount: 0,
       awaitingInvoicingCount: 0, // New data property for awaiting invoicing
       awaitingSettlingCount: 0, // New data property for awaiting settling
       settledInvoicesCount: 0, // New data property for settled invoices
@@ -333,6 +372,14 @@ export default {
     {
       this.$router.push('/pmstenants')
     },
+    goRentingTenants()
+    {
+      this.$router.push('/pmsrentingtenants')
+    },
+    goVacatedTenants()
+    {
+      this.$router.push('/pmsvacatedtenants')
+    },
     goRentedUnits()
     {
       this.$router.push('/rentedunits')
@@ -354,6 +401,8 @@ export default {
         this.userscount = data.userscount;
         this.landlordscount = data.landlordscount;
         this.tenantscount = data.tenantscount;
+        this.vacatedTenantscount = data.vacatedtenantscount;
+        this.rentingTenantscount = data.rentingtenantscount;
         this.awaitingInvoicingCount = data.allawaitinginvoicing.length; // Fetch new data
         this.awaitingSettlingCount = data.invoicestosettle.length; // Fetch new data
         this.settledInvoicesCount = data.settledinvoices.length; // Fetch new data

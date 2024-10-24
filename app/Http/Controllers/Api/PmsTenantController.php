@@ -77,7 +77,11 @@ class PmsTenantController extends Controller
     {
         $tenant=PmsTenant::findOrFail($id);
         if($tenant){
-            $tenant->update(array('status' => 0));
+            $tenant->update(array(
+                'status' => 0 ,
+                'vacated_at' => now()
+                )
+            );
             $tenant->save();
         }
 

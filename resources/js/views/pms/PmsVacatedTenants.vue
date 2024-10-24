@@ -72,7 +72,7 @@
                             <th scope="col">Full Name</th>
                             <th scope="col">Property</th>
                             <th scope="col">Unit No</th>
-                            <th scope="col">Status</th>
+                            <th scope="col">Vacated On</th>
                             <th scope="col">Action</th>
                           </tr>
                         </thead>
@@ -81,12 +81,7 @@
                             <td>{{tenant.first_name}} {{tenant.last_name}}</td>
                             <td>{{tenant.property.name}}</td>
                             <td>{{tenant.unit.unit_number}}</td>
-                            <td>
-                              <span v-if="tenant.status == 0" class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Vacated</span>   
-                              <span v-else-if="tenant.status == 1" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Renting</span>
-                              <span v-else class="badge bg-light text-dark"><i class="bi bi-star me-1"></i> Closed</span>
-
-                            </td>
+                            <td>{{format_date(tenant.vacated_at) ?? "N/A"}}</td>  
                             <td>
                               <div class="btn-group" role="group">
                                   <button id="btnGroupDrop1" type="button" style="background-color: darkgreen; border-color: darkgreen;" class="btn btn-sm btn-primary rounded-pill dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -126,7 +121,8 @@
     import "datatables.net-dt/js/dataTables.dataTables";
     import "datatables.net-dt/css/jquery.dataTables.min.css";
     import $ from "jquery";
-    
+    import moment from 'moment';
+
     const toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -155,6 +151,12 @@
         },
         navigateTo(location){
             this.$router.push(location)
+        },
+        format_date(value) {
+          if (value) {
+            return moment(String(value)).format('DD/MM/YYYY')
+            
+          }
         },
         vacateTenant(id){
           axios.put('api/vacatetenant/'+ id).then(() => {

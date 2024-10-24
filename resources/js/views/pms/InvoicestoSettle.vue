@@ -60,7 +60,7 @@
                          <!--    <button v-if="invoicestosettlesmsnotsent.length !== 0" class="me-2" @click="sendSms">Send Bulk SMS ({{invoicestosettlesmsnotsent.length}} Pending)
                             </button> -->
                      
-                            <router-link to="#" custom v-slot="{ href, navigate, isActive }">
+                            <!-- <router-link to="#" custom v-slot="{ href, navigate, isActive }">
                                 <a
                                   :href="href"
                                   :class="{ active: isActive }"
@@ -79,7 +79,7 @@
                               >
                               Sent SMS ({{invoicestosettlesmssent.length}}/{{statements.length + awaitinginvoicing.length}})
                               </a>
-                            </router-link>                        
+                            </router-link> -->                        
                           <!-- <button v-if="statements.length !== 0" @click="generatePDF">Generate PDF</button> -->
                           </div>
                           <div class="col-auto d-flex justify-content-end">
@@ -189,12 +189,12 @@
                                       <i class="ri-mail-send-line mr-2"></i>Custom Mail
                                   </a>   
                                   <!-- WhatsApp Share -->
-                                  <a href="#" @click="whatsappReceipt(statement, $event)" target="_blank" class="dropdown-item">
+                                  <a href="#" v-if="statement.paid > 0" @click="whatsappReceipt(statement, $event)" target="_blank" class="dropdown-item">
                                     <i class="ri-whatsapp-fill mr-2"></i>WhatsApp Receipt
                                   </a>
 
                                   <!-- Email Share -->
-                                  <a href="#" @click.prevent = "emailReceipt(statement)" class="dropdown-item">
+                                  <a href="#" v-if="statement.paid > 0" @click.prevent = "emailReceipt(statement)" class="dropdown-item">
                                     <i class="ri-mail-fill mr-2"></i>Email Receipt
                                   </a>                         
                                   </div>

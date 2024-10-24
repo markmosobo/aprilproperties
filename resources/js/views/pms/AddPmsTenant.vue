@@ -35,18 +35,17 @@
                       </div>
                    </div>
                    <div class="col-sm-6">
-                      <label for="inputPassword" class="form-label">Last Name*</label>
+                      <label for="inputPassword" class="form-label">Middle Name</label>
                       <div class="col-sm-10">
                         <input
                             type="text"
-                            placeholder="Last Name"
-                            id="last_name"
-                            name="last_name"
-                            v-model="form.last_name"
+                            placeholder="Middle Name"
+                            id="middle_name"
+                            name="middle_name"
+                            v-model="form.middle_name"
                             class="form-control"
                             required=""
                         />
-                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
                       </div>
                    </div>
  
@@ -61,6 +60,21 @@
                       class="form-control"
                    />
                    <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Last Name*</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="Last Name"
+                            id="last_name"
+                            name="last_name"
+                            v-model="form.last_name"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback" v-if="!form.last_name">Please enter last name!</div>
+                      </div>
+                   </div>
+                   <div class="col-sm-6">
                       <label for="inputPassword" class="form-label">ID Number*</label>
                       <div class="col-sm-10">
                         <input
@@ -73,6 +87,32 @@
                             required=""
                         />
                         <div class="invalid-feedback">Please enter ID number!</div>
+                      </div>
+                   </div>
+ 
+                </div>
+                <div class="row mb-3"></div>
+                <div class="form-group row">
+                   <input
+                      type="hidden"
+                      id="user_id"
+                      name="user_id"
+                      value="1"
+                      class="form-control"
+                   />
+                   <div class="col-sm-6">
+                      <label for="inputPassword" class="form-label">Email Address*</label>
+                      <div class="col-sm-10">
+                        <input
+                            type="text"
+                            placeholder="Email Address"
+                            id="email_address"
+                            name="email_address"
+                            v-model="form.email_address"
+                            class="form-control"
+                            required=""
+                        />
+                        <div class="invalid-feedback">Please enter email address!</div>
                       </div>
                    </div>
                    <div class="col-sm-6">
@@ -143,9 +183,48 @@
           <fieldset v-if="step == 2">
                    <h5 class="card-title">Settle Invoice</h5>
                   <div class="row">
-                    <div class="col-lg-12 col-md-4 label ">Rent & Deposit:<strong>KES {{formatNumber(depositRent)}}</strong></div>
-                    <!-- <div class="col-lg-9 col-md-8">{{form.first_name}} {{form.last_name}}</div> -->
-                  </div>                
+                    <div class="col-12">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Amount (KES)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Deposit</td>
+                                    <td><strong>{{ formatNumber(deposit) }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Rent</td>
+                                    <td><strong>{{ formatNumber(monthRent) }}</strong></td>
+                                </tr>
+                                <tr v-if="garbageFee > 0">
+                                    <td>Garbage Fee</td>
+                                    <td><strong>{{ formatNumber(garbageFee) }}</strong></td>
+                                </tr>
+                                <tr v-if="securityFee > 0">
+                                    <td>Security Fee</td>
+                                    <td><strong>{{ formatNumber(securityFee) }}</strong></td>
+                                </tr>
+                                <tr v-if="electricityDeposit > 0">
+                                    <td>Electricity Deposit</td>
+                                    <td><strong>{{ formatNumber(electricityDeposit) }}</strong></td>
+                                </tr>
+                                <tr v-if="waterDeposit > 0">
+                                    <td>Water Deposit</td>
+                                    <td><strong>{{ formatNumber(waterDeposit) }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td><strong>{{ formatNumber(depositRent) }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+              
                     <form
                     class="row g-3 needs-validation"
                     novalidate=""
@@ -238,7 +317,7 @@
 
  import axios from "axios";
  import Swal from 'sweetalert2';
-
+ import aprilLogo from '@/assets/img/apex-logo.png';
  
  const toast = Swal.mixin({
      toast: true,
@@ -270,12 +349,16 @@
           propunits: [],
           properties: [],
           depositRent: [],
+          electricityDeposit: '',
+          waterDeposit: '',
+          monthRent: '',
+          garbageFee: '',
+          securityFee: '',
           unitNumber: '',
           unitId: '',
           tenantId: null, // Initialize tenantId
           user: [],
           deposit: '',
-          monthly_rent: '',
           refNo: '',
           propertyName: ''
 
@@ -292,6 +375,21 @@
           this.submit(); 
         }           
        },
+       loadLogo() {
+          fetch(aprilLogo)
+            .then(response => response.blob())
+            .then(blob => {
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                this.logoBase64 = reader.result;
+                // console.log(this.logoBase64)
+              };
+            })
+            .catch(error => {
+              console.error('Error converting image to base64:', error);
+            });
+        },
        validateForm() {
           let isValid = true;
           if (!this.form.first_name) {
@@ -403,12 +501,12 @@
           <div class="container">
               <div class="header">
                   <h1>April Properties</h1>
-                  <img src="./apex-logo.png" alt="April Properties Logo" class="logo">
+                  <img src="@/assets/img/apex-logo.png" alt="Company Logo" style="display: block; margin: 0 auto; max-width: 100%;">
                   <p>Kakamega-Webuye Rd, ACK Building</p>
                   <p>Phone: (0720) 020-401 | Email: propertapril@gmail.com</p>
               </div>
               <div class="info">
-                  <p><strong>Invoice Number:</strong> ${this.refNo}</p>
+                  <p><strong>Invoice Number:</strong> #${this.refNo}</p>
                   <p><strong>Receipt Date:</strong> ${new Date().toLocaleString()}</p>
                   <p><strong>For:</strong> ${this.details}</p>
                   <p><strong>Payment Mode:</strong> ${this.form.payment_method}</p>
@@ -523,12 +621,19 @@
             axios.get('/api/pmsunit/'+this.form.pms_unit_id).then((response) => {
      
              this.unitinfo = response.data.unit;
-               this.deposit = parseInt(this.unitinfo.deposit);
-               this.monthly_rent = parseInt(this.unitinfo.monthly_rent);
-               this.garbage_fee = parseInt(this.unitinfo.garbage_fee);
-               this.security_fee = parseInt(this.unitinfo.security_fee);
-               this.water_deposit = parseInt(this.unitinfo.water_deposit);
-               this.electricity_deposit = parseInt(this.unitinfo.electricity_deposit);
+             this.deposit = parseInt(this.unitinfo.deposit);
+             this.monthly_rent = parseInt(this.unitinfo.monthly_rent);
+             this.garbage_fee = parseInt(this.unitinfo.garbage_fee);
+             this.security_fee = parseInt(this.unitinfo.security_fee);
+             this.water_deposit = parseInt(this.unitinfo.water_deposit);
+             this.electricity_deposit = parseInt(this.unitinfo.electricity_deposit);
+             this.depositAmount = this.unitinfo.deposit;
+             this.monthRent = this.unitinfo.monthly_rent;
+             this.garbageFee = this.unitinfo.garbage_fee;
+             this.securityFee = this.unitinfo.security_fee;
+             this.waterDeposit = this.unitinfo.water_deposit;
+             this.electricityDeposit = this.unitinfo.electricity_deposit;
+             this.waterDeposit = this.unitinfo.water_deposit;
              this.depositRent = this.deposit + this.monthly_rent + this.garbage_fee + this.security_fee + this.water_deposit + this.electricity_deposit;
              this.unitNumber = this.unitinfo.unit_number;
              this.unitId = this.unitinfo.id;
@@ -582,7 +687,8 @@
               pms_property_id: this.form.pms_property_id,
               unit_number: this.unitNumber,
               pms_tenant_id: this.tenantId,
-              pms_unit_id: this.unitId
+              pms_unit_id: this.unitId,
+              deposit: this.deposit
             };
 
             const response = await axios.post("api/pmsstatements", payload);
@@ -615,7 +721,7 @@
           try {
             const response = await axios.get('/api/pmsproperty/' + parseInt(this.propertyId));
             console.log("propertiit", response);
-            this.property = response.data.property[0];
+            this.property = response.data.property;
             this.name = this.property.name;
             // Further processing of the response data if needed
           } catch (error) {
@@ -649,13 +755,36 @@
           const printWindow = window.open("", "_blank");
 
           // Build the content for printing
-          const receiptContent = this.buildReceiptContent(statement);
+            const invoiceContent = this.buildReceiptContent();
 
-          // Write the content to the new window
-          printWindow.document.write(receiptContent);
+            // Write the content to the new window
+            printWindow.document.write(invoiceContent);
 
-          // Close the document stream
-          printWindow.document.close();
+            // Close the document stream
+            printWindow.document.close();
+
+            // Wait for the content to be fully loaded
+            printWindow.onload = function() {
+                // Find the logo image element
+                const logoImage = printWindow.document.querySelector('img');
+
+                if (logoImage) {
+                    // Ensure the image is loaded
+                    logoImage.onload = function() {
+                        // Trigger the print dialog after the image has loaded
+                        printWindow.print();
+                    };
+
+                    // Handle case where the image might already be cached
+                    if (logoImage.complete) {
+                        logoImage.onload();  // Manually trigger onload if image is already loaded
+                    }
+                } else {
+                    // If there's no image, just print immediately
+                    printWindow.print();
+                }
+            };
+
 
           // Trigger the print dialog
           printWindow.print();
@@ -697,6 +826,7 @@
     },
     mounted() {
        this.loadLists();
+       this.loadLogo();                        
        this.user = JSON.parse(localStorage.getItem('user'));
     },
     computed: {

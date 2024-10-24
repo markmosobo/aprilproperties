@@ -21,7 +21,8 @@ class PmsTenant extends Model
         'phone_number',
         'pms_unit_id',
         'pms_property_id',
-        'status'
+        'status',
+        'vacated_at'
     ];
 
     public function unit()

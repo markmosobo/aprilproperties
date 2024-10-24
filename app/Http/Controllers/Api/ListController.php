@@ -120,6 +120,8 @@ class ListController extends Controller
         $pmsRentedPropertyCount = PmsUnit::where('status', 1)->count();
         $usersCount = User::all()->count();
         $tenantsCount = PmsTenant::all()->count();
+        $rentingTenantsCount = PmsTenant::where('status', 1)->count();
+        $vacatedTenantsCount = PmsTenant::where('status', 0)->count();
         $landlordsCount = Landlord::all()->count();
 
         return response()->json([
@@ -187,7 +189,9 @@ class ListController extends Controller
                 'pmsrentedpropertycount' => $pmsRentedPropertyCount,
                 'userscount' => $usersCount,
                 'landlordscount' => $landlordsCount,
-                'tenantscount' => $tenantsCount
+                'tenantscount' => $tenantsCount,
+                'rentingtenantscount' => $rentingTenantsCount,
+                'vacatedtenantscount' => $vacatedTenantsCount,
 
                 
             ]
